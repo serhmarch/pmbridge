@@ -1,0 +1,259 @@
+/*
+ * memory - realizes functions for management
+ * of daemon internal memory
+ */
+#ifndef MB_MEMORY_H
+#define MB_MEMORY_H
+
+#include "mb_core.h"
+
+class mbMemory : public ModbusInterface
+{
+public:
+    class Block
+    {
+    public:
+        Block();
+
+    public:
+        inline int size() const { return m_data.size(); }
+        inline int sizeBits() const { return m_sizeBits; }
+        inline int sizeBytes() const { return size(); }
+        inline int sizeRegs() const { return m_data.size() / MB_REGE_SZ_BYTES; }
+        void resize(int bytes);
+        void resizeBits(int bits);
+        inline void resizeBytes(int bytes) { resize(bytes); }
+        inline void resizeRegs(int regs) { resize(regs*MB_REGE_SZ_BYTES); }
+
+    public:
+        inline uint changeCounter() const { return m_changeCounter; }
+        void zerroAll();
+        Modbus::StatusCode read(uint offset, uint count, void *values, uint *fact = nullptr) const;
+        Modbus::StatusCode write(uint offset, uint count, const void *values, uint *fact = nullptr);
+        Modbus::StatusCode readBits(uint bitOffset, uint bitCount, void *values, uint *fact = nullptr) const;
+        Modbus::StatusCode writeBits(uint bitOffset, uint bitCount, const void *values, uint *fact = nullptr);
+        Modbus::StatusCode readRegs(uint regOffset, uint regCount, uint16_t *values, uint *fact = nullptr) const;
+        Modbus::StatusCode writeRegs(uint regOffset, uint regCount, const uint16_t *values, uint *fact = nullptr);
+
+    private:
+        mb::ByteArray m_data;
+        uint m_sizeBits;
+        uint m_changeCounter;
+    };
+
+public:
+    mbMemory();
+    ~mbMemory();
+
+public:
+
+public: // 'Modbus'-like Interface
+    Modbus::StatusCode readCoils(uint16_t offset, uint16_t count, void *values);
+    Modbus::StatusCode readDiscreteInputs(uint16_t offset, uint16_t count, void *values);
+    Modbus::StatusCode readHoldingRegisters(uint16_t offset, uint16_t count, uint16_t *values);
+    Modbus::StatusCode readInputRegisters(uint16_t offset, uint16_t count, uint16_t *values);
+    Modbus::StatusCode writeSingleCoil(uint16_t offset, bool value);
+    Modbus::StatusCode writeSingleRegister(uint16_t offset, uint16_t value);
+    Modbus::StatusCode readExceptionStatus(uint8_t *status);
+    Modbus::StatusCode writeMultipleCoils(uint16_t offset, uint16_t count, const void *values);
+    Modbus::StatusCode writeMultipleRegisters(uint16_t offset, uint16_t count, const uint16_t *values);
+    Modbus::StatusCode reportServerID(uint8_t *count, uint8_t *data);
+    Modbus::StatusCode maskWriteRegister(uint16_t offset, uint16_t andMask, uint16_t orMask);
+    Modbus::StatusCode readWriteMultipleRegisters(uint16_t readOffset, uint16_t readCount, uint16_t *readValues, uint16_t writeOffset, uint16_t writeCount, const uint16_t *writeValues);
+
+public: // memory-0x management functions
+    void realloc_0x(int count);
+    inline uint changeCounter_0x() const { return m_mem_0x.changeCounter(); }
+    inline int count_0x() const { return m_mem_0x.sizeBits(); }
+    inline int count_0x_bites() const { return m_mem_0x.sizeBits(); }
+    inline int count_0x_bytes() const { return m_mem_0x.sizeBytes(); }
+    inline int count_0x_reges() const { return m_mem_0x.sizeRegs(); }
+    inline void zerroAll_0x() { m_mem_0x.zerroAll(); }
+    inline Modbus::StatusCode read_0x (uint bitOffset, uint bitCount, void* bites, uint *fact = nullptr) const { return m_mem_0x.readBits (bitOffset, bitCount, bites, fact); }
+    inline Modbus::StatusCode write_0x(uint bitOffset, uint bitCount, const void* bites, uint *fact = nullptr) { return m_mem_0x.writeBits(bitOffset, bitCount, bites, fact); }
+    inline Modbus::StatusCode read_0x_bit(uint bitOffset, uint bitCount, void* bites, uint *fact = nullptr) const  { return read_0x(bitOffset, bitCount, bites, fact); }
+    inline Modbus::StatusCode write_0x_bit(uint bitOffset, uint bitCount, const void* bites, uint *fact = nullptr) { return write_0x(bitOffset, bitCount, bites, fact); }
+    inline Modbus::StatusCode read_0x_reg(uint bitOffset, uint regCount, void* buff, uint *fact = nullptr) const  { return read_0x(bitOffset, regCount*MB_REGE_SZ_BITES, buff, fact); if (fact) *fact /= MB_REGE_SZ_BITES; }
+    inline Modbus::StatusCode write_0x_reg(uint bitOffset, uint regCount, const void* buff, uint *fact = nullptr) { return write_0x(bitOffset, regCount*MB_REGE_SZ_BITES, buff, fact); if (fact) *fact /= MB_REGE_SZ_BITES; }
+    inline bool bool_0x(uint bitOffset) const               { bool v = false; m_mem_0x.readBits(bitOffset, 1, &v); return v; }
+    inline void setBool_0x(uint bitOffset, bool v)          { m_mem_0x.writeBits(bitOffset, 1, &v); }
+    inline int8_t int8_0x(uint bitOffset) const             { int8_t v = 0; m_mem_0x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setInt8_0x(uint bitOffset, int8_t v)        { m_mem_0x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline uint8_t uint8_0x(uint bitOffset) const           { uint8_t v = 0; m_mem_0x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setUInt8_0x(uint bitOffset, uint8_t v)      { m_mem_0x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline int16_t int16_0x(uint bitOffset) const           { int16_t v = 0; m_mem_0x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setInt16_0x(uint bitOffset, int16_t v)      { m_mem_0x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline uint16_t uint16_0x(uint bitOffset) const         { uint16_t v = 0; m_mem_0x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setUInt16_0x(uint bitOffset, uint16_t v)    { m_mem_0x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline int32_t int32_0x(uint bitOffset) const           { int32_t v = 0; m_mem_0x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setInt32_0x(uint bitOffset, int32_t v)      { m_mem_0x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline uint32_t uint32_0x(uint bitOffset) const         { uint32_t v = 0; m_mem_0x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setUInt32_0x(uint bitOffset, uint32_t v)    { m_mem_0x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline int64_t int64_0x(uint bitOffset) const           { int64_t v = 0; m_mem_0x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setInt64_0x(uint bitOffset, int64_t v)      { m_mem_0x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline uint64_t uint64_0x(uint bitOffset) const         { uint64_t v = 0; m_mem_0x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setUInt64_0x(uint bitOffset, uint64_t v)    { m_mem_0x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline int int_0x(uint bitOffset) const                 { int v = 0; m_mem_0x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setInt_0x(uint bitOffset, int v)            { m_mem_0x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline unsigned int uint_0x(uint bitOffset) const       { unsigned int v = 0; m_mem_0x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setUInt_0x(uint bitOffset, unsigned int v)  { m_mem_0x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline float float_0x(uint bitOffset) const             { float v = 0; m_mem_0x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setFloat_0x(uint bitOffset, float v)        { m_mem_0x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline double double_0x(uint bitOffset) const           { double v = 0; m_mem_0x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setDouble_0x(uint bitOffset, double v)      { m_mem_0x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+
+    Block &memBlockRef_0x() { return m_mem_0x; }
+
+public: // memory-1x management functions
+    void realloc_1x(int count);
+    inline uint changeCounter_1x() const { return m_mem_1x.changeCounter(); }
+    inline int count_1x() const { return m_mem_1x.sizeBits(); }
+    inline int count_1x_bites() const { return m_mem_1x.sizeBits(); }
+    inline int count_1x_bytes() const { return m_mem_1x.sizeBytes(); }
+    inline int count_1x_reges() const { return m_mem_1x.sizeRegs(); }
+    inline void zerroAll_1x() { m_mem_1x.zerroAll(); }
+    inline Modbus::StatusCode read_1x (uint bitOffset, uint bitCount, void* bites, uint *fact = nullptr) const { return m_mem_1x.readBits (bitOffset, bitCount, bites, fact); }
+    inline Modbus::StatusCode write_1x(uint bitOffset, uint bitCount, const void* bites, uint *fact = nullptr) { return m_mem_1x.writeBits(bitOffset, bitCount, bites, fact); }
+    inline Modbus::StatusCode read_1x_bit (uint bitOffset, uint bitCount, void* bites, uint *fact = nullptr) const { return read_1x (bitOffset, bitCount, bites, fact); }
+    inline Modbus::StatusCode write_1x_bit(uint bitOffset, uint bitCount, const void* bites, uint *fact = nullptr) { return write_1x(bitOffset, bitCount, bites, fact); }
+    inline Modbus::StatusCode read_1x_reg(uint bitOffset, uint regCount, void* buff, uint *fact = nullptr) const  { return read_1x(bitOffset, regCount*MB_REGE_SZ_BITES, buff, fact); if (fact) *fact /= MB_REGE_SZ_BITES; }
+    inline Modbus::StatusCode write_1x_reg(uint bitOffset, uint regCount, const void* buff, uint *fact = nullptr) { return write_1x(bitOffset, regCount*MB_REGE_SZ_BITES, buff, fact); if (fact) *fact /= MB_REGE_SZ_BITES; }
+    inline bool bool_1x(uint bitOffset) const               { bool v = false; m_mem_1x.readBits(bitOffset, 1, &v); return v; }
+    inline void setBool_1x(uint bitOffset, bool v)          { m_mem_1x.writeBits(bitOffset, 1, &v); }
+    inline int8_t int8_1x(uint bitOffset) const             { int8_t v = 0; m_mem_1x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setInt8_1x(uint bitOffset, int8_t v)        { m_mem_1x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline uint8_t uint8_1x(uint bitOffset) const           { uint8_t v = 0; m_mem_1x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setUInt8_1x(uint bitOffset, uint8_t v)      { m_mem_1x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline int16_t int16_1x(uint bitOffset) const           { int16_t v = 0; m_mem_1x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setInt16_1x(uint bitOffset, int16_t v)      { m_mem_1x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline uint16_t uint16_1x(uint bitOffset) const         { uint16_t v = 0; m_mem_1x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setUInt16_1x(uint bitOffset, uint16_t v)    { m_mem_1x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline int32_t int32_1x(uint bitOffset) const           { int32_t v = 0; m_mem_1x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setInt32_1x(uint bitOffset, int32_t v)      { m_mem_1x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline uint32_t uint32_1x(uint bitOffset) const         { uint32_t v = 0; m_mem_1x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setUInt32_1x(uint bitOffset, uint32_t v)    { m_mem_1x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline int64_t int64_1x(uint bitOffset) const           { int64_t v = 0; m_mem_1x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setInt64_1x(uint bitOffset, int64_t v)      { m_mem_1x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline uint64_t uint64_1x(uint bitOffset) const         { uint64_t v = 0; m_mem_1x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setUInt64_1x(uint bitOffset, uint64_t v)    { m_mem_1x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline int int_1x(uint bitOffset) const                 { int v = 0; m_mem_1x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setInt_1x(uint bitOffset, int v)            { m_mem_1x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline unsigned int uint_1x(uint bitOffset) const       { unsigned int v = 0; m_mem_1x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setUInt_1x(uint bitOffset, unsigned int v)  { m_mem_1x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline float float_1x(uint bitOffset) const             { float v = 0; m_mem_1x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setFloat_1x(uint bitOffset, float v)        { m_mem_1x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+    inline double double_1x(uint bitOffset) const           { double v = 0; m_mem_1x.readBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); return v; }
+    inline void setDouble_1x(uint bitOffset, double v)      { m_mem_1x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
+
+    inline Block &memBlockRef_1x() { return m_mem_1x; }
+
+public: // memory-3x management functions
+    void realloc_3x(int count);
+    inline uint changeCounter_3x() const { return m_mem_3x.changeCounter(); }
+    inline int count_3x() const { return m_mem_3x.sizeRegs(); }
+    inline int count_3x_bites() const { return m_mem_3x.sizeBits(); }
+    inline int count_3x_bytes() const { return m_mem_3x.sizeBytes(); }
+    inline int count_3x_reges() const { return m_mem_3x.sizeRegs(); }
+    inline void zerroAll_3x() { m_mem_3x.zerroAll(); }
+    inline Modbus::StatusCode read_3x (uint offset, uint regCount, void* values, uint *fact = nullptr) const { return m_mem_3x.readRegs (offset, regCount, reinterpret_cast<uint16_t*>(values), fact); }
+    inline Modbus::StatusCode write_3x(uint offset, uint regCount, const void* values, uint *fact = nullptr) { return m_mem_3x.writeRegs(offset, regCount, reinterpret_cast<const uint16_t*>(values), fact); }
+    inline Modbus::StatusCode read_3x_bit (uint bitOffset, uint bitCount, void* bites, uint *fact = nullptr) const { return m_mem_3x.readBits (bitOffset, bitCount, bites, fact); }
+    inline Modbus::StatusCode write_3x_bit(uint bitOffset, uint bitCount, const void* bites, uint *fact = nullptr) { return m_mem_3x.writeBits(bitOffset, bitCount, bites, fact); }
+    inline bool bool_3x(uint bitOffset) const              { bool v = false; m_mem_3x.readBits(bitOffset, 1, &v); return v; }
+    inline void setBool_3x(uint bitOffset, bool v)         { m_mem_3x.writeBits(bitOffset, 1, &v); }
+    inline int8_t int8_3x(uint32_t byteOffset) const       { int8_t v = 0; m_mem_3x.read(byteOffset, sizeof(v), &v); return v; }
+    inline void setInt8_3x(uint32_t byteOffset, int8_t v)  { m_mem_3x.write(byteOffset, sizeof(v), &v); }
+    inline uint8_t uint8_3x(uint32_t byteOffset) const     { uint8_t v = 0; m_mem_3x.read(byteOffset, sizeof(v), &v); return v; }
+    inline void setUInt8_3x(uint32_t byteOffset, uint8_t v){ m_mem_3x.write(byteOffset, sizeof(v), &v); }
+    inline int16_t int16_3x(uint regOffset) const          { int16_t v = 0; m_mem_3x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setInt16_3x(uint regOffset, int16_t v)     { m_mem_3x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline uint16_t uint16_3x(uint regOffset) const        { uint16_t v = 0; m_mem_3x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setUInt16_3x(uint regOffset, uint16_t v)   { m_mem_3x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline int32_t int32_3x(uint regOffset) const          { int32_t v = 0; m_mem_3x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setInt32_3x(uint regOffset, int32_t v)     { m_mem_3x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline uint32_t uint32_3x(uint regOffset) const        { uint32_t v = 0; m_mem_3x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setUInt32_3x(uint regOffset, uint32_t v)   { m_mem_3x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline int64_t int64_3x(uint regOffset) const          { int64_t v = 0; m_mem_3x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setInt64_3x(uint regOffset, int64_t v)     { m_mem_3x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline uint64_t uint64_3x(uint regOffset) const        { uint64_t v = 0; m_mem_3x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setUInt64_3x(uint regOffset, uint64_t v)   { m_mem_3x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline int int_3x(uint regOffset) const                { int v = 0; m_mem_3x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setInt_3x(uint regOffset, int v)           { m_mem_3x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline unsigned int uint_3x(uint regOffset) const      { unsigned int v = 0; m_mem_3x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setUInt_3x(uint regOffset, unsigned int v) { m_mem_3x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline float float_3x(uint regOffset) const            { float v = 0; m_mem_3x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setFloat_3x(uint regOffset, float v)       { m_mem_3x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline double double_3x(uint regOffset) const          { double v = 0; m_mem_3x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setDouble_3x(uint regOffset, double v)     { m_mem_3x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+
+    inline Block &memBlockRef_3x() { return m_mem_3x; }
+
+public: // memory-4x management functions
+    void realloc_4x(int count);
+    inline uint changeCounter_4x() const { return m_mem_4x.changeCounter(); }
+    inline int count_4x() const { return m_mem_4x.sizeRegs(); }
+    inline int count_4x_bites() const { return m_mem_4x.sizeBits(); }
+    inline int count_4x_bytes() const { return m_mem_4x.sizeBytes(); }
+    inline int count_4x_reges() const { return m_mem_4x.sizeRegs(); }
+    inline void zerroAll_4x() { m_mem_4x.zerroAll(); }
+    inline Modbus::StatusCode read_4x (uint offset, uint regCount, void* values, uint *fact = nullptr) const { return m_mem_4x.readRegs (offset, regCount, reinterpret_cast<uint16_t*>(values), fact); }
+    inline Modbus::StatusCode write_4x(uint offset, uint regCount, const void* values, uint *fact = nullptr) { return m_mem_4x.writeRegs(offset, regCount, reinterpret_cast<const uint16_t*>(values), fact); }
+    inline Modbus::StatusCode read_4x_bit (uint bitOffset, uint bitCount, void* bites, uint *fact = nullptr) const { return m_mem_4x.readBits (bitOffset, bitCount, bites, fact); }
+    inline Modbus::StatusCode write_4x_bit(uint bitOffset, uint bitCount, const void* bites, uint *fact = nullptr) { return m_mem_4x.writeBits(bitOffset, bitCount, bites, fact); }
+    inline bool bool_4x(uint bitOffset) const              { bool v = false; m_mem_4x.readBits(bitOffset, 1, &v); return v; }
+    inline void setBool_4x(uint bitOffset, bool v)         { m_mem_4x.writeBits(bitOffset, 1, &v); }
+    inline int8_t int8_4x(uint32_t byteOffset) const       { int8_t v = 0; m_mem_4x.read(byteOffset, sizeof(v), &v); return v; }
+    inline void setInt8_4x(uint32_t byteOffset, int8_t v)  { m_mem_4x.write(byteOffset, sizeof(v), &v); }
+    inline uint8_t uint8_4x(uint32_t byteOffset) const     { uint8_t v = 0; m_mem_4x.read(byteOffset, sizeof(v), &v); return v; }
+    inline void setUInt8_4x(uint32_t byteOffset, uint8_t v){ m_mem_4x.write(byteOffset, sizeof(v), &v); }
+    inline int16_t int16_4x(uint regOffset) const          { int16_t v = 0; m_mem_4x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setInt16_4x(uint regOffset, int16_t v)     { m_mem_4x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline uint16_t uint16_4x(uint regOffset) const        { uint16_t v = 0; m_mem_4x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setUInt16_4x(uint regOffset, uint16_t v)   { m_mem_4x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline int32_t int32_4x(uint regOffset) const          { int32_t v = 0; m_mem_4x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setInt32_4x(uint regOffset, int32_t v)     { m_mem_4x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline uint32_t uint32_4x(uint regOffset) const        { uint32_t v = 0; m_mem_4x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setUInt32_4x(uint regOffset, uint32_t v)   { m_mem_4x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline int64_t int64_4x(uint regOffset) const          { int64_t v = 0; m_mem_4x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setInt64_4x(uint regOffset, int64_t v)     { m_mem_4x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline uint64_t uint64_4x(uint regOffset) const        { uint64_t v = 0; m_mem_4x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setUInt64_4x(uint regOffset, uint64_t v)   { m_mem_4x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline int int_4x(uint regOffset) const                { int v = 0; m_mem_4x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setInt_4x(uint regOffset, int v)           { m_mem_4x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline unsigned int uint_4x(uint regOffset) const      { unsigned int v = 0; m_mem_4x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setUInt_4x(uint regOffset, unsigned int v) { m_mem_4x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline float float_4x(uint regOffset) const            { float v = 0; m_mem_4x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setFloat_4x(uint regOffset, float v)       { m_mem_4x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+    inline double double_4x(uint regOffset) const          { double v = 0; m_mem_4x.read(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); return v; }
+    inline void setDouble_4x(uint regOffset, double v)     { m_mem_4x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
+
+    inline Block &memBlockRef_4x() { return m_mem_4x; }
+
+public:
+    Modbus::StatusCode read_bits (mb::Address address, uint bitCount, void* buff, uint *fact = nullptr) const;
+    Modbus::StatusCode write_bits(mb::Address address, uint bitCount, const void* buff, uint *fact = nullptr);
+
+    Modbus::StatusCode read_regs (mb::Address address, uint regCount, void* buff, uint *fact = nullptr) const;
+    Modbus::StatusCode write_regs(mb::Address address, uint regCount, const void* buff, uint *fact = nullptr);
+
+    uint16_t getUInt16(mb::Address address) const;
+    void setUInt16(mb::Address address, uint16_t value);
+    
+public: // Exception Status
+    inline mb::Address exceptionStatusAddress() const { return m_exceptionStatusAddress; }
+    inline void setExceptionStatusAddress(mb::Address exceptionStatusAddress) { m_exceptionStatusAddress = exceptionStatusAddress; }
+    uint8_t exceptionStatus() const;
+
+public:
+    Modbus::StatusCode copy(mb::Address src, mb::Address dst, uint count);
+    Modbus::StatusCode dump(mb::Address adr, mb::Format fmt, uint count);
+
+private:
+    Block m_mem_0x;
+    Block m_mem_1x;
+    Block m_mem_3x;
+    Block m_mem_4x;
+    mb::Address m_exceptionStatusAddress;
+};
+
+#endif //MB_MEMORY_H

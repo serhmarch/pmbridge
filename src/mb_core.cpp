@@ -69,6 +69,31 @@ Format toFormat(const String &s)
     return Format_Unknown;
 }
 
+const Char* toConstCharPtr(Format fmt)
+{
+    switch (fmt)
+    {
+    case Format_Bin16 : return mbSTR("Bin16" );
+    case Format_Oct16 : return mbSTR("Oct16" );
+    case Format_Dec16 : return mbSTR("Dec16" );
+    case Format_UDec16: return mbSTR("UDec16");
+    case Format_Hex16 : return mbSTR("Hex16" );
+    case Format_Bin32 : return mbSTR("Bin32" );
+    case Format_Oct32 : return mbSTR("Oct32" );
+    case Format_Dec32 : return mbSTR("Dec32" );
+    case Format_UDec32: return mbSTR("UDec32");
+    case Format_Hex32 : return mbSTR("Hex32" );
+    case Format_Bin64 : return mbSTR("Bin64" );
+    case Format_Oct64 : return mbSTR("Oct64" );
+    case Format_Dec64 : return mbSTR("Dec64" );
+    case Format_UDec64: return mbSTR("UDec64");
+    case Format_Hex64 : return mbSTR("Hex64" );
+    case Format_Float : return mbSTR("Float" );
+    case Format_Double: return mbSTR("Double");
+    }
+    return nullptr;
+}
+
 const Char *sIEC61131Prefix0x  = mbSTR("%Q") ;
 const Char *sIEC61131Prefix1x  = mbSTR("%I") ;
 const Char *sIEC61131Prefix3x  = mbSTR("%IW");

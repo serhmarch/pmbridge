@@ -48,19 +48,19 @@ public:
 
 public:
 
-public: // 'Modbus'-like Interface
-    Modbus::StatusCode readCoils(uint16_t offset, uint16_t count, void *values);
-    Modbus::StatusCode readDiscreteInputs(uint16_t offset, uint16_t count, void *values);
-    Modbus::StatusCode readHoldingRegisters(uint16_t offset, uint16_t count, uint16_t *values);
-    Modbus::StatusCode readInputRegisters(uint16_t offset, uint16_t count, uint16_t *values);
-    Modbus::StatusCode writeSingleCoil(uint16_t offset, bool value);
-    Modbus::StatusCode writeSingleRegister(uint16_t offset, uint16_t value);
-    Modbus::StatusCode readExceptionStatus(uint8_t *status);
-    Modbus::StatusCode writeMultipleCoils(uint16_t offset, uint16_t count, const void *values);
-    Modbus::StatusCode writeMultipleRegisters(uint16_t offset, uint16_t count, const uint16_t *values);
-    Modbus::StatusCode reportServerID(uint8_t *count, uint8_t *data);
-    Modbus::StatusCode maskWriteRegister(uint16_t offset, uint16_t andMask, uint16_t orMask);
-    Modbus::StatusCode readWriteMultipleRegisters(uint16_t readOffset, uint16_t readCount, uint16_t *readValues, uint16_t writeOffset, uint16_t writeCount, const uint16_t *writeValues);
+public: // 'ModbusInterface'
+    Modbus::StatusCode readCoils                 (uint8_t unit, uint16_t offset, uint16_t count, void *values) override;
+    Modbus::StatusCode readDiscreteInputs        (uint8_t unit, uint16_t offset, uint16_t count, void *values) override;
+    Modbus::StatusCode readHoldingRegisters      (uint8_t unit, uint16_t offset, uint16_t count, uint16_t *values) override;
+    Modbus::StatusCode readInputRegisters        (uint8_t unit, uint16_t offset, uint16_t count, uint16_t *values) override;
+    Modbus::StatusCode writeSingleCoil           (uint8_t unit, uint16_t offset, bool value) override;
+    Modbus::StatusCode writeSingleRegister       (uint8_t unit, uint16_t offset, uint16_t value) override;
+    Modbus::StatusCode readExceptionStatus       (uint8_t unit, uint8_t *status) override;
+    Modbus::StatusCode writeMultipleCoils        (uint8_t unit, uint16_t offset, uint16_t count, const void *values) override;
+    Modbus::StatusCode writeMultipleRegisters    (uint8_t unit, uint16_t offset, uint16_t count, const uint16_t *values) override;
+    Modbus::StatusCode reportServerID            (uint8_t unit, uint8_t *count, uint8_t *data) override;
+    Modbus::StatusCode maskWriteRegister         (uint8_t unit, uint16_t offset, uint16_t andMask, uint16_t orMask) override;
+    Modbus::StatusCode readWriteMultipleRegisters(uint8_t unit, uint16_t readOffset, uint16_t readCount, uint16_t *readValues, uint16_t writeOffset, uint16_t writeCount, const uint16_t *writeValues) override;
 
 public: // memory-0x management functions
     void realloc_0x(int count);

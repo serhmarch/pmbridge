@@ -214,6 +214,7 @@ protected:
 
     typedef void (mbCommandDump::*pprintmethod)();
     pprintmethod m_printmethod;
+    std::string m_prefix;
 };
 
 

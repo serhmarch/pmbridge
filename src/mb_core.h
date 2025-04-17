@@ -66,6 +66,7 @@ Modbus::ProtocolType toProtocolType(const String &stype, bool *ok = nullptr);
 size_t sizeofFormat(Format fmt);
 
 Format toFormat(const String &s);
+const Char* toConstCharPtr(Format fmt);
 
 class Address
 {
@@ -111,6 +112,20 @@ private:
     uint16_t m_type;
     uint16_t m_offset;
 };
+
+template<class T>
+String toBinString(T value)
+{
+    size_t c = sizeof(value) * MB_BYTE_SZ_BITES;
+    String res(c, '0');
+    while (value)
+    {
+        res[c-1] = '0' + static_cast<char>(value & 1);
+        value >>= 1;
+        c--;
+    }
+    return res;
+}
 
 } // namespace mb
 

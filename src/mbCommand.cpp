@@ -38,7 +38,7 @@ bool mbCommandQuery::run()
         Modbus::StatusCode status = beginQuery();
         if (Modbus::StatusIsBad(status))
         {
-            m_memory->setUInt16(m_errcAdr, m_memory->getUInt16(m_succAdr) + 1);
+            m_memory->setUInt16(m_errcAdr, m_memory->getUInt16(m_errcAdr) + 1);
             m_memory->setUInt16(m_errvAdr, static_cast<uint16_t>(status));
             return true;
         }
@@ -53,7 +53,7 @@ bool mbCommandQuery::run()
     }
     else
     {
-        m_memory->setUInt16(m_errcAdr, m_memory->getUInt16(m_succAdr) + 1);
+        m_memory->setUInt16(m_errcAdr, m_memory->getUInt16(m_errcAdr) + 1);
         m_memory->setUInt16(m_errvAdr, static_cast<uint16_t>(status));
     }
     m_isBegin = true;
@@ -258,7 +258,7 @@ void mbCommandCopy::calcreadbits()
     if (m_readOffset > m_readblock->sizeBits())
         m_readCount = 0;
     else if (m_readOffset+m_readCount > m_readblock->sizeBits())
-        m_readCount = m_readblock->sizeBits() - m_readOffset;
+        m_readCount = static_cast<uint16_t>(m_readblock->sizeBits() - m_readOffset);
     size_t bytecount = (m_readCount + 7) / 8;
     if (bytecount > m_buff.size())
         m_buff.resize(bytecount);
@@ -282,7 +282,7 @@ void mbCommandCopy::calcreadbytes()
     if (m_readOffset > m_readblock->sizeBytes())
         m_readCount = 0;
     else if (m_readOffset+m_readCount > m_readblock->sizeBytes())
-        m_readCount = m_readblock->sizeBytes() - m_readOffset;
+        m_readCount = static_cast<uint16_t>(m_readblock->sizeBytes() - m_readOffset);
     size_t bytecount = m_readCount;
     if (bytecount > m_buff.size())
         m_buff.resize(bytecount);
@@ -309,7 +309,7 @@ void mbCommandCopy::calcwritebits(bool countIsBits)
     if (m_writeOffset > m_writeblock->sizeBits())
         m_writeCount = 0;
     else if (m_writeOffset+m_writeCount > m_writeblock->sizeBits())
-        m_writeCount = m_writeblock->sizeBits() - m_writeOffset;
+        m_writeCount = static_cast<uint16_t>(m_writeblock->sizeBits() - m_writeOffset);
     size_t bytecount = (m_writeCount + 7) / 8;
     if (bytecount > m_buff.size())
         m_buff.resize(bytecount);
@@ -335,7 +335,7 @@ void mbCommandCopy::calcwritebytes(bool countIsBits)
     if (m_writeOffset > m_writeblock->sizeBytes())
         m_writeCount = 0;
     else if (m_writeOffset+m_writeCount > m_writeblock->sizeBytes())
-        m_writeCount = m_writeblock->sizeBytes() - m_writeOffset;
+        m_writeCount = static_cast<uint16_t>(m_writeblock->sizeBytes() - m_writeOffset);
     size_t bytecount = m_writeCount;
     if (bytecount > m_buff.size())
         m_buff.resize(bytecount);
@@ -391,7 +391,7 @@ static void printformat(mb::Format fmt, const void *mem, uint16_t count)
     case mb::Format_Bin16:
         for (uint16_t i = 0; i < count; ++i)
         {
-            printf("%016b ", *reinterpret_cast<const uint16_t *>(bytePtr));
+            printf("%s ", mb::toBinString(*reinterpret_cast<const uint16_t *>(bytePtr)).data());
             bytePtr += sizeof(uint16_t);
         }
         break;
@@ -426,7 +426,7 @@ static void printformat(mb::Format fmt, const void *mem, uint16_t count)
     case mb::Format_Bin32:
         for (uint16_t i = 0; i < count; ++i)
         {
-            printf("%032b ", *reinterpret_cast<const uint32_t *>(bytePtr));
+            printf("%s ", mb::toBinString(*reinterpret_cast<const uint32_t *>(bytePtr)).data());
             bytePtr += sizeof(uint32_t);
         }
         break;
@@ -461,14 +461,14 @@ static void printformat(mb::Format fmt, const void *mem, uint16_t count)
     case mb::Format_Bin64:
         for (uint16_t i = 0; i < count; ++i)
         {
-            printf("%064b ", *reinterpret_cast<const uint64_t *>(bytePtr));
+            printf("%s ", mb::toBinString(*reinterpret_cast<const uint64_t *>(bytePtr)).data());
             bytePtr += sizeof(uint64_t);
         }
         break;
     case mb::Format_Oct64:
         for (uint16_t i = 0; i < count; ++i)
         {
-            printf("%022o ", *reinterpret_cast<const uint64_t *>(bytePtr));
+            printf("%022llo ", *reinterpret_cast<const uint64_t *>(bytePtr));
             bytePtr += sizeof(uint64_t);
         }
         break;
@@ -511,7 +511,6 @@ static void printformat(mb::Format fmt, const void *mem, uint16_t count)
         printf("Unknown format ");
         break;
     }
-    std::cout << std::endl;
 }
 
 void mbCommandDump::setParams(mb::Address memAddress, mb::Format fmt, uint16_t count)
@@ -541,11 +540,20 @@ void mbCommandDump::setParams(mb::Address memAddress, mb::Format fmt, uint16_t c
         m_count = 0;
         m_elemCount = 0;
     }
+    char buff[32];
+    std::snprintf(buff, sizeof(buff), "%i%05hu:%i%05hu (%s): ", m_memAdr.type(), 
+                                                                m_memAdr.offset()+1,
+                                                                m_memAdr.type(),
+                                                                m_memAdr.offset()+m_elemCount,
+                                                                mb::toConstCharPtr(m_format));
+    m_prefix = buff;
 }
 
 bool mbCommandDump::run()
 {
+    std::cout << m_prefix;
     (this->*m_printmethod)();
+    std::cout << std::endl;
     return true;
 }
 
@@ -627,267 +635,3 @@ bool mbCommandDelay::run()
     }
     return false;
 }
-
-/*
-#include <stdio.h>
-#include <stdlib.h>
-#include "bridged.h"
-#include "memory.h"
-#include "modbus.h"
-
-void cmd_query_exec(cmd_t* cmd)
-{
-    const int max_ds = 2000;
-    const int max_rs = 100;
-    int cmd_en, mbr;
-    unsigned short sc, fc, fact;
-    mbdev_t* dev;
-    cmdquery_t* query;
-    char d_buff[max_ds];
-    unsigned short r_buff[max_rs];
-
-    query = cmd->c.query;
-    dev = query->dev;
-    cmd_en = (query->ic == 0) || (query->ic == 1) || (query->cycle % query->ic == 0);
-    query->cycle++;
-    if (cmd_en)
-    {
-        memory_read3x(query->sc_adr, 1, &sc);
-        memory_read3x(query->fc_adr, 1, &fc);
-        
-        if (!mb_is_connected(dev))
-        {
-            mbr = mb_connect(dev);
-            if (mbr != MBR_OK)
-            {
-                fc++;
-                memory_write3x(query->fc_adr, 1, &fc);
-                memory_write3x(query->err_adr, 1, (unsigned short*)&mbr);
-                return;
-            }
-        }
-        mbr = MBR_OK;
-        switch (query->func)
-        {
-        case MBF_READ_COIL_STATUS:
-            mbr = mb_read_coil_status(dev, query->slave, query->from_adr, query->count, d_buff, &fact);
-            break;
-        case MBF_READ_INPUT_STATUS:
-            mbr = mb_read_input_status(dev, query->slave, query->from_adr, query->count, d_buff, &fact);
-            break;
-        case MBF_READ_HOLDING_REGISTERS:
-            mbr = mb_read_holding_registers(dev, query->slave, query->from_adr, query->count, r_buff, &fact);
-            break;
-        case MBF_READ_INPUT_REGISTERS:
-            mbr = mb_read_input_registers(dev, query->slave, query->from_adr, query->count, r_buff, &fact);
-            break;
-        case MBF_FORCE_MULTIPLE_COILS:
-            fact = (unsigned short)memory_read0x(query->from_adr, query->count, d_buff);
-            break;
-        case MBF_FORCE_MULTIPLE_REGISTERS:
-            fact = (unsigned short)memory_read4x(query->from_adr, query->count, r_buff);
-            break;
-        }        
-        if (mbr != MBR_OK)
-        {
-            fc++;
-            memory_write3x(query->fc_adr, 1, &fc);
-            memory_write3x(query->err_adr, 1, (unsigned short*)&mbr);
-            return;
-        }
-
-        switch (query->func)
-        {
-        case MBF_READ_COIL_STATUS:
-            memory_write0x(query->to_adr, fact, d_buff);
-            break;
-        case MBF_READ_INPUT_STATUS:
-            memory_write1x(query->to_adr, fact, d_buff);
-            break;
-        case MBF_READ_HOLDING_REGISTERS:
-            memory_write4x(query->to_adr, fact, r_buff);
-            break;
-        case MBF_READ_INPUT_REGISTERS:
-            memory_write3x(query->to_adr, fact, r_buff);
-            break;
-        case MBF_FORCE_MULTIPLE_COILS:
-            mbr = mb_force_multiple_coils(dev, query->slave, query->to_adr, fact, d_buff, NULL);
-            break;
-        case MBF_FORCE_MULTIPLE_REGISTERS:
-            mbr = mb_force_multiple_registers(dev, query->slave, query->to_adr, fact, r_buff, NULL);
-            break;
-        }
-        if (mbr != MBR_OK)
-        {
-            fc++;
-            memory_write3x(query->fc_adr, 1, &fc);
-            memory_write3x(query->err_adr, 1, (unsigned short*)&mbr);
-            return;
-        }
-        sc++;
-        memory_write3x(query->sc_adr, 1, &sc);
-    }
-}
-
-void cmd_copy_exec(cmd_t* cmd)
-{
-    cmdcopy_t* copy = cmd->c.copy;
-    memory_copy(copy->from_type, copy->from_adr, copy->count, copy->to_type, copy->to_adr);
-}
-
-void cmd_delay_exec(cmd_t* cmd)
-{
-    cmddelay_t* delay = cmd->c.delay;
-    usleep(delay->msec*1000);
-}
-
-void cmd_dump_exec(cmd_t* cmd)
-{
-    const int max_sz = 0xFFFF;
-    int i, j, c, n;
-    unsigned short r_buff[max_sz];
-    char d_buff[max_sz], t_buff[max_sz];
-    cmddump_t* dump = cmd->c.dump;
-    switch (dump->type)
-    {
-    case MEMORY_0X:
-        c = memory_read0x(dump->adr, dump->count, d_buff);
-        break;
-    case MEMORY_1X:
-        c = memory_read1x(dump->adr, dump->count, d_buff);
-        break;
-    case MEMORY_3X:
-        c = memory_read3x(dump->adr, dump->count, r_buff);
-        break;
-    case MEMORY_4X:
-        c = memory_read4x(dump->adr, dump->count, r_buff);
-        break;
-    default:
-        return;
-    }
-    t_buff[0] = 0;
-    for (i = 0, j = 0; i < c; i++)
-    {
-        if (dump->type == MEMORY_0X || dump->type == MEMORY_1X)
-            n = sprintf(&t_buff[j], "%hhu ", d_buff[i]);
-        else if (dump->numsys == 8)
-            n = sprintf(&t_buff[j], "%06ho ", r_buff[i]);
-        else if (dump->numsys == 16)
-            n = sprintf(&t_buff[j], "%04hX ", r_buff[i]);
-        else
-            n = sprintf(&t_buff[j], "%hu ", r_buff[i]);
-        j += n;
-    }
-    bridged_info(t_buff);
-}
-
-void cmd_exec(cmd_t* cmd)
-{
-    switch (cmd->type)
-    {
-    case CMD_QUERY: cmd_query_exec(cmd); break;
-    case CMD_COPY:  cmd_copy_exec(cmd);  break;
-    case CMD_DELAY: cmd_delay_exec(cmd); break;
-    case CMD_DUMP:  cmd_dump_exec(cmd);  break;
-    }
-}
-
-cmd_t* new_cmd_query(mbdev_t* dev, unsigned char slave, unsigned char func, unsigned short from_adr, unsigned short count, 
-                     unsigned short to_adr,unsigned short ic, unsigned short  sc_adr, unsigned short  fc_adr, unsigned short  err_adr)
-{
-    cmdquery_t* query = (cmdquery_t*)malloc(sizeof(cmdquery_t));
-    cmd_t* cmd = (cmd_t*)malloc(sizeof(cmd_t));
-
-    query->dev      = dev;
-    query->slave    = slave;
-    query->func     = func;
-    query->from_adr = from_adr;
-    query->count    = count;
-    query->to_adr   = to_adr;
-    query->ic       = ic;
-    query->sc_adr   = sc_adr;
-    query->fc_adr   = fc_adr;
-    query->err_adr  = err_adr;
-    query->cycle    = 0;
-    cmd->type = CMD_QUERY;
-    cmd->c.query = query;
-    return cmd;
-}
-
-cmd_t* new_cmd_copy(char from_type, unsigned short from_adr, unsigned short count, char to_type, unsigned short to_adr)
-{
-    cmdcopy_t* copy = (cmdcopy_t*)malloc(sizeof(cmdcopy_t));
-    cmd_t* cmd = (cmd_t*)malloc(sizeof(cmd_t));
-
-    copy->from_type = from_type;
-    copy->from_adr  = from_adr;
-    copy->count     = count;
-    copy->to_type   = to_type;
-    copy->to_adr    = to_adr;
-    cmd->type = CMD_COPY;
-    cmd->c.copy = copy;
-    return cmd;
-}
-
-cmd_t* new_cmd_delay(unsigned long msec)
-{
-    cmddelay_t* delay = (cmddelay_t*)malloc(sizeof(cmddelay_t));
-    cmd_t* cmd = (cmd_t*)malloc(sizeof(cmd_t));
-
-    delay->msec = msec;
-    cmd->type = CMD_DELAY;
-    cmd->c.delay = delay;
-    return cmd;
-}
-
-cmd_t* new_cmd_dump(char type, unsigned short adr, unsigned short count, char numsys)
-{
-    cmddump_t* dump = (cmddump_t*)malloc(sizeof(cmddump_t));
-    cmd_t* cmd = (cmd_t*)malloc(sizeof(cmd_t));
-
-    dump->type  = type;
-    dump->adr   = adr;
-    dump->count = count;
-    dump->numsys = numsys;
-    cmd->type = CMD_DUMP;
-    cmd->c.dump = dump;
-    return cmd;
-}
-
-void delete_cmd(cmd_t* cmd)
-{
-    switch (cmd->type)
-    {
-    case CMD_QUERY:
-        free(cmd->c.query);
-        break;
-    case CMD_COPY:
-        free(cmd->c.copy);
-        break;
-    case CMD_DELAY:
-        free(cmd->c.delay);
-        break;
-    case CMD_DUMP:
-        free(cmd->c.dump);
-        break;
-    }
-    free(cmd);
-}
-
-const char* str_cmd_type(char type)
-{
-    switch (type)
-    {
-    case CMD_QUERY:
-        return "QUERY";
-    case CMD_COPY:
-        return "COPY";
-    case CMD_DELAY:
-        return "DELAY";
-    case CMD_DUMP:
-        return "DUMP";
-    }
-    return "UNKNOWN";
-}
-*/
-

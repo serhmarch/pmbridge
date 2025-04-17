@@ -105,55 +105,55 @@ mbMemory::~mbMemory()
 {
 }
 
-Modbus::StatusCode mbMemory::readCoils(uint16_t offset, uint16_t count, void *values)
+Modbus::StatusCode mbMemory::readCoils(uint8_t /*unit*/, uint16_t offset, uint16_t count, void *values)
 {
     return this->read_0x(offset, count, values);
 }
 
-Modbus::StatusCode mbMemory::readDiscreteInputs(uint16_t offset, uint16_t count, void *values)
+Modbus::StatusCode mbMemory::readDiscreteInputs(uint8_t /*unit*/, uint16_t offset, uint16_t count, void *values)
 {
     return this->read_1x(offset, count, values);
 }
 
-Modbus::StatusCode mbMemory::readHoldingRegisters(uint16_t offset, uint16_t count, uint16_t *values)
+Modbus::StatusCode mbMemory::readHoldingRegisters(uint8_t /*unit*/, uint16_t offset, uint16_t count, uint16_t *values)
 {
     return this->read_4x(offset, count, values);
 }
 
-Modbus::StatusCode mbMemory::readInputRegisters(uint16_t offset, uint16_t count, uint16_t *values)
+Modbus::StatusCode mbMemory::readInputRegisters(uint8_t /*unit*/, uint16_t offset, uint16_t count, uint16_t *values)
 {
     return this->read_3x(offset, count, values);
 }
 
-Modbus::StatusCode mbMemory::writeSingleCoil(uint16_t offset, bool value)
+Modbus::StatusCode mbMemory::writeSingleCoil(uint8_t /*unit*/, uint16_t offset, bool value)
 {
     this->setBool_0x(offset, value);
     return Modbus::Status_Good;
 }
 
-Modbus::StatusCode mbMemory::writeSingleRegister(uint16_t offset, uint16_t value)
+Modbus::StatusCode mbMemory::writeSingleRegister(uint8_t /*unit*/, uint16_t offset, uint16_t value)
 {
     this->setUInt16_4x(offset, value);
     return Modbus::Status_Good;
 }
 
-Modbus::StatusCode mbMemory::readExceptionStatus(uint8_t *status)
+Modbus::StatusCode mbMemory::readExceptionStatus(uint8_t /*unit*/, uint8_t *status)
 {
     *status = this->exceptionStatus();
     return Modbus::Status_Good;
 }
 
-Modbus::StatusCode mbMemory::writeMultipleCoils(uint16_t offset, uint16_t count, const void *values)
+Modbus::StatusCode mbMemory::writeMultipleCoils(uint8_t /*unit*/, uint16_t offset, uint16_t count, const void *values)
 {
     return this->write_0x(offset, count, values);
 }
 
-Modbus::StatusCode mbMemory::writeMultipleRegisters(uint16_t offset, uint16_t count, const uint16_t *values)
+Modbus::StatusCode mbMemory::writeMultipleRegisters(uint8_t /*unit*/, uint16_t offset, uint16_t count, const uint16_t *values)
 {
     return this->write_4x(offset, count, values);
 }
 
-Modbus::StatusCode mbMemory::reportServerID(uint8_t *count, uint8_t *data)
+Modbus::StatusCode mbMemory::reportServerID(uint8_t /*unit*/, uint8_t *count, uint8_t *data)
 {
     mb::String utf8 = mbSTR("mbridge");
     if (utf8.size() > MB_MAX_BYTES)
@@ -165,7 +165,7 @@ Modbus::StatusCode mbMemory::reportServerID(uint8_t *count, uint8_t *data)
 }
 
 
-Modbus::StatusCode mbMemory::maskWriteRegister(uint16_t offset, uint16_t andMask, uint16_t orMask)
+Modbus::StatusCode mbMemory::maskWriteRegister(uint8_t /*unit*/, uint16_t offset, uint16_t andMask, uint16_t orMask)
 {
     uint16_t c = this->uint16_4x(offset);
     uint16_t r = (c & andMask) | (orMask & ~andMask);
@@ -173,7 +173,7 @@ Modbus::StatusCode mbMemory::maskWriteRegister(uint16_t offset, uint16_t andMask
     return Modbus::Status_Good;
 }
 
-Modbus::StatusCode mbMemory::readWriteMultipleRegisters(uint16_t readOffset, uint16_t readCount, uint16_t *readValues, uint16_t writeOffset, uint16_t writeCount, const uint16_t *writeValues)
+Modbus::StatusCode mbMemory::readWriteMultipleRegisters(uint8_t /*unit*/, uint16_t readOffset, uint16_t readCount, uint16_t *readValues, uint16_t writeOffset, uint16_t writeCount, const uint16_t *writeValues)
 {
     Modbus::StatusCode s = this->write_4x(writeOffset, writeCount, writeValues);
     if (!Modbus::StatusIsGood(s))

@@ -9,6 +9,42 @@
 
 volatile bool fRun = true;
 
+struct Options
+{
+    mb::String file{"mbridge.conf"};
+};
+
+Options options;
+
+void parseOptions(int argc, char **argv)
+{
+    for (int i = 1; i < argc; i++)
+    {
+        char *opt = argv[i];
+        if (!strcmp(opt, "--version") || !strcmp(opt, "-v"))
+        {
+            puts("mpbridge : " MBRIDGE_VERSION_STR "\n"
+                 "ModbusLib: " MODBUSLIB_VERSION_STR);
+            exit(0);
+        }
+        if (!strcmp(opt, "--help") || !strcmp(opt, "-?"))
+        {
+            //puts(help_options);
+            exit(0);
+        }
+        if (!std::strcmp(opt, "--file") || !std::strcmp(opt, "-f"))
+        {
+            if (++i >= argc)
+            {
+                //printHelp();
+                std::exit(1);
+            }
+            options.file = argv[i];
+            continue;
+        }
+    }
+}
+
 void signal_handler(int /*signal*/)
 {
     fRun = false;
@@ -17,10 +53,11 @@ void signal_handler(int /*signal*/)
 int main(int argc, char **argv)
 {
     std::cout << "mbridge starts ..." << std::endl;
+    parseOptions(argc, argv);
     mbProject *project;
     {
         mbBuilder builder;
-        project = builder.load("mbridge.conf");
+        project = builder.load(options.file);
         if (builder.hasError())
         {
             std::cerr << "Error: " << builder.lastError() << std::endl;

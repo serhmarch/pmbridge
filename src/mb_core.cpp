@@ -2,6 +2,51 @@
 
 namespace mb {
 
+Modbus::ProtocolType toProtocolType(const String &stype, bool *ok)
+{
+    bool okInner = true;
+    Modbus::ProtocolType res = static_cast<Modbus::ProtocolType>(-1);
+    if      (stype == mbSTR("RTU")) res = Modbus::RTU;
+    else if (stype == mbSTR("ASC")) res = Modbus::ASC;
+    else if (stype == mbSTR("TCP")) res = Modbus::TCP;
+    else
+        okInner = false;
+    if (ok)
+        *ok = okInner;
+    return res;
+}
+
+size_t sizeofFormat(Format fmt)
+{
+    switch (fmt)
+    {
+    case Format_Bin16:
+    case Format_Oct16:
+    case Format_Dec16:
+    case Format_UDec16:
+    case Format_Hex16:
+        return sizeof(uint16_t);
+    case Format_Bin32:
+    case Format_Oct32:
+    case Format_Dec32:
+    case Format_UDec32:
+    case Format_Hex32:
+        return sizeof(uint32_t);
+    case Format_Bin64:
+    case Format_Oct64:
+    case Format_Dec64:
+    case Format_UDec64:
+    case Format_Hex64:
+        return sizeof(uint64_t);
+    case Format_Float:
+        return sizeof(float);
+    case Format_Double:
+        return sizeof(double);
+    default:
+        return 0; // Unknown format
+    }
+}
+
 Format toFormat(const String &s)
 {
     if (s == mbSTR("Bin16" )) return Format_Bin16 ;
@@ -35,7 +80,7 @@ Address Address::fromString(const String &s)
     if (s.size() && s.at(0) == '%')
     {
         Address adr;
-        int i;
+        size_t i;
         // Note: 3x (%IW) handled before 1x (%I)
         if (s.find(sIEC61131Prefix3x, 0) == 0) // Check if string starts with sIEC61131Prefix3x
         {
@@ -63,15 +108,16 @@ Address Address::fromString(const String &s)
         Char suffix = s.back();
         if (suffix == cIEC61131SuffixHex)
         {
-            adr.m_offset = static_cast<uint16_t>(std::stoi(s.substr(i, s.size() - i - 1), nullptr, 16));
+            char* end = nullptr;
+            adr.m_offset = static_cast<uint16_t>(std::strtol(s.substr(i, s.size() - i - 1).data(), &end, 16));
         }
         else
         {
-            adr.m_offset = static_cast<uint16_t>(std::stoi(s.substr(i)));
+            adr.m_offset = static_cast<uint16_t>(std::atoi(s.substr(i).data()));
         }
         return adr;
     }
-    return Address(std::stoi(s));
+    return Address(std::atoi(s.data()));
 }
 
 Address::Address()

@@ -26,7 +26,7 @@ private:
     bool readNext();
     int nextChar();
     void passSpace();
-    void passLine();
+    bool passLine();
     bool parseString(std::string &buffer, const char *endchars = nullptr, bool multiline = false);
     bool parseArgs(std::list<std::string> &args);
     inline bool isComment() const { return m_ch == mbCHR('#') || m_ch == mbCHR(';'); }
@@ -37,11 +37,13 @@ private:
     // Helper methods for parsing specific commands    // Parses the configuration file and builds the mbProject
     mbCommand *parseCommand(const std::string &command, const std::list<std::string> &args);
     mbCommand *parseMemory(const std::list<std::string> &args);
-    mbCommand *parsePort(const std::list<std::string> &args);
+    mbCommand *parseServer(const std::list<std::string> &args);
+    mbCommand *parseClient(const std::list<std::string> &args);
     mbCommand *parseQuery(const std::list<std::string> &args);
     mbCommand *parseCopy(const std::list<std::string> &args);
     mbCommand *parseDelay(const std::list<std::string> &args);
     mbCommand *parseDump(const std::list<std::string> &args);
+    bool parseSerialSettings(std::list<std::string>::const_iterator &it, const std::list<std::string>::const_iterator &end, Modbus::SerialSettings &settings);
 
 private:
     std::ifstream m_file;

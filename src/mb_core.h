@@ -61,6 +61,10 @@ enum Format
     Format_Double
 };
 
+Modbus::ProtocolType toProtocolType(const String &stype, bool *ok = nullptr);
+
+size_t sizeofFormat(Format fmt);
+
 Format toFormat(const String &s);
 
 class Address

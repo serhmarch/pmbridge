@@ -63,12 +63,12 @@ Modbus::StatusCode mbMemory::Block::write(uint offset, uint count, const void *b
 
 Modbus::StatusCode mbMemory::Block::readBits(uint bitOffset, uint bitCount, void *buff, uint *fact) const
 {
-    return Modbus::readMemBits(bitOffset, bitCount, buff, m_data.data(), m_data.size(), fact);
+    return Modbus::readMemBits(bitOffset, bitCount, buff, m_data.data(), static_cast<uint32_t>(m_data.size()), fact);
 }
 
 Modbus::StatusCode mbMemory::Block::writeBits(uint bitOffset, uint bitCount, const void *buff, uint *fact)
 {
-    return Modbus::writeMemBits(bitOffset, bitCount, buff, m_data.data(), m_data.size(), fact);
+    return Modbus::writeMemBits(bitOffset, bitCount, buff, m_data.data(), static_cast<uint32_t>(m_data.size()), fact);
 }
 
 Modbus::StatusCode mbMemory::Block::readRegs(uint regOffset, uint regCount, uint16_t *buff, uint *fact) const
@@ -213,40 +213,30 @@ void mbMemory::realloc_4x(int count)
     }
 }
 
-Modbus::StatusCode mbMemory::read_bits(mb::Address address, uint bitCount, void *buff, uint *fact) const
+Modbus::StatusCode mbMemory::read(mb::Address address, uint count, void *buff, uint *fact) const
 {
     switch (address.type())
     {
-    case Modbus::Memory_0x: return this->read_0x(address.offset(), bitCount, buff, fact);
-    case Modbus::Memory_1x: return this->read_1x(address.offset(), bitCount, buff, fact);
-    case Modbus::Memory_3x: return this->read_3x(address.offset(), bitCount, buff, fact);
-    case Modbus::Memory_4x: return this->read_4x(address.offset(), bitCount, buff, fact);
+    case Modbus::Memory_0x: return this->read_0x(address.offset(), count, buff, fact);
+    case Modbus::Memory_1x: return this->read_1x(address.offset(), count, buff, fact);
+    case Modbus::Memory_3x: return this->read_3x(address.offset(), count, buff, fact);
+    case Modbus::Memory_4x: return this->read_4x(address.offset(), count, buff, fact);
     default:
         return Modbus::Status_BadIllegalDataAddress;
     }
 }
 
-Modbus::StatusCode mbMemory::write_bits(mb::Address address, uint bitCount, const void *buff, uint *fact)
+Modbus::StatusCode mbMemory::write(mb::Address address, uint count, const void *buff, uint *fact)
 {
     switch (address.type())
     {
-    case Modbus::Memory_0x: return this->write_0x(address.offset(), bitCount, buff, fact);
-    case Modbus::Memory_1x: return this->write_1x(address.offset(), bitCount, buff, fact);
-    case Modbus::Memory_3x: return this->write_3x(address.offset(), bitCount, buff, fact);
-    case Modbus::Memory_4x: return this->write_4x(address.offset(), bitCount, buff, fact);
+    case Modbus::Memory_0x: return this->write_0x(address.offset(), count, buff, fact);
+    case Modbus::Memory_1x: return this->write_1x(address.offset(), count, buff, fact);
+    case Modbus::Memory_3x: return this->write_3x(address.offset(), count, buff, fact);
+    case Modbus::Memory_4x: return this->write_4x(address.offset(), count, buff, fact);
     default:
         return Modbus::Status_BadIllegalDataAddress;
     }
-}
-
-Modbus::StatusCode mbMemory::read_regs(mb::Address address, uint regCount, void *buff, uint *fact) const
-{
-    return Modbus::StatusCode();
-}
-
-Modbus::StatusCode mbMemory::write_regs(mb::Address address, uint regCount, const void *buff, uint *fact)
-{
-    return Modbus::StatusCode();
 }
 
 uint16_t mbMemory::getUInt16(mb::Address address) const
@@ -287,14 +277,4 @@ uint8_t mbMemory::exceptionStatus() const
         break;
     }
     return 0;
-}
-
-Modbus::StatusCode mbMemory::copy(mb::Address src, mb::Address dst, uint count)
-{
-    return Modbus::Status_Good;
-}
-
-Modbus::StatusCode mbMemory::dump(mb::Address adr, mb::Format fmt, uint count)
-{
-    return Modbus::Status_Good;
 }

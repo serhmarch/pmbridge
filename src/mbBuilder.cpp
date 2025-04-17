@@ -4,6 +4,9 @@
 #include <sstream>
 #include <iostream>
 
+#include <ModbusSerialPort.h>
+#include <ModbusTcpPort.h>
+
 #include "mbProject.h"
 #include "mbMemory.h"
 #include "mbClient.h"
@@ -39,6 +42,7 @@ mbProject *mbBuilder::load(const mb::String &filePath)
     }
     m_project = new mbProject();
     mbProject *res = nullptr;
+    nextChar();
     while (readNext())
         ;
     if (hasError())
@@ -59,14 +63,12 @@ bool mbBuilder::readNext()
     else if (isComment())
     {
         // Comment line, skip it
-        passLine();
-        return readNext(); // Recursively read the next line
+        return passLine();
     }
     else if (isEndOfLine())
     {
         // Empty line, skip it
-        passLine();
-        return readNext(); // Recursively read the next line
+        return passLine();
     }
     else
     {
@@ -78,6 +80,8 @@ bool mbBuilder::readNext()
         }
         std::string command;
         command.swap(buffer);
+        if (m_ch == '=')
+            nextChar();
         passSpace();
         std::list<std::string> args;
         if (!parseArgs(args))
@@ -118,7 +122,7 @@ void mbBuilder::passSpace()
 }
 
 // Helper to skip the rest of the line (used for comments or after parsing a line)
-void mbBuilder::passLine()
+bool mbBuilder::passLine()
 {
     while (m_ch != CHAIN_CONFREADER_EOF)
     {  
@@ -135,6 +139,7 @@ void mbBuilder::passLine()
         }
         nextChar();
     }
+    return !isEOF();
 }
 
 bool mbBuilder::parseString(std::string &buffer, const char *endchars, bool multiline)
@@ -150,12 +155,22 @@ bool mbBuilder::parseString(std::string &buffer, const char *endchars, bool mult
             m_lastError = mbSTR("Error: Not finished quotes '\"'");
             return false;
         }
+        nextChar();
         passSpace();
+        if (multiline)
+        {
+            while (isEndOfLine() || isComment())
+            {
+                passLine();
+                passSpace();
+            }
+        }
+        if (endchars && containsChar(endchars, m_ch))
+            notfound = false;
     }
     else
     {
-        buffer += m_ch;
-        while (nextChar() != CHAIN_CONFREADER_EOF)
+        while (m_ch != CHAIN_CONFREADER_EOF)
         {
             if (isEndOfLine())
             {
@@ -176,19 +191,19 @@ bool mbBuilder::parseString(std::string &buffer, const char *endchars, bool mult
             {
                 // Comment line, skip it
                 passSpace();
-                break;
+                if (multiline)
+                {
+                    passLine();
+                    continue;
+                }
+                else
+                    break;
             }
             buffer += m_ch;
+            nextChar();
         }
     }
-    if (endchars) 
-    {
-        if (notfound)
-            return false;
-        else
-            nextChar();
-    }
-    return true;
+    return !(endchars && notfound);  
 }
 
 bool mbBuilder::parseArgs(std::list<std::string> &args)
@@ -200,7 +215,8 @@ bool mbBuilder::parseArgs(std::list<std::string> &args)
     }
     if (m_ch == '{')
     {
-        while (nextChar() != '}')
+        nextChar();
+        while (m_ch != '}')
         {
             std::string arg;
             if (!parseString(arg, ",}", true))
@@ -208,7 +224,7 @@ bool mbBuilder::parseArgs(std::list<std::string> &args)
                 m_lastError = mbSTR("Error: Parsing argument string");
                 return false;
             }
-            args.push_back(arg);
+            args.push_back(std::move(arg));
             if (isEOF())
             {
                 m_lastError = mbSTR("Error: Ending '}' not found");
@@ -219,13 +235,13 @@ bool mbBuilder::parseArgs(std::list<std::string> &args)
                 nextChar();
                 //passSpace();
             }
-            else // if (m_ch == '}')
-                break;
         }
+        nextChar();
+        passSpace();
     }
     else
     {
-        while (!isEndOfLine())
+        while (!isEndOfLine() && !isEOF())
         {
             std::string arg;
             if (!parseString(arg, ",\r\n"))
@@ -233,14 +249,12 @@ bool mbBuilder::parseArgs(std::list<std::string> &args)
                 m_lastError = mbSTR("Error: Parsing argument string");
                 return false;
             }
-            args.push_back(arg);
+            args.push_back(std::move(arg));
             if (m_ch == ',')
             {
                 nextChar();
                 //passSpace();
             }
-            if (isEOF())
-                break;
         }
     }
     return true;
@@ -252,9 +266,13 @@ mbCommand* mbBuilder::parseCommand(const std::string &command, const std::list<s
     {
         return parseMemory(args);
     }
-    else if (command == "PORT")
+    else if (command == "SERVER")
     {
-        return parsePort(args);
+        return parseServer(args);
+    }
+    else if (command == "CLIENT")
+    {
+        return parseClient(args);
     }
     else if (command == "QUERY")
     {
@@ -284,10 +302,10 @@ mbCommand* mbBuilder::parseMemory(const std::list<std::string> &args)
     }
 
     auto it = args.begin();
-    int sz0x = std::stoi(*it); ++it;
-    int sz1x = std::stoi(*it); ++it;
-    int sz3x = std::stoi(*it); ++it;
-    int sz4x = std::stoi(*it);
+    int sz0x = std::atoi((*it).data()); ++it;
+    int sz1x = std::atoi((*it).data()); ++it;
+    int sz3x = std::atoi((*it).data()); ++it;
+    int sz4x = std::atoi((*it).data());
 
     auto memory = m_project->memory();
     memory->realloc_0x(sz0x);
@@ -298,89 +316,142 @@ mbCommand* mbBuilder::parseMemory(const std::list<std::string> &args)
     return nullptr;
 }
 
-mbCommand* mbBuilder::parsePort(const std::list<std::string> &args)
+mbCommand *mbBuilder::parseServer(const std::list<std::string> &args)
 {
-    if (args.size() < 3)
+    if (args.size() < 2)
     {
-        m_lastError = "PORT-command must have at least 3 params";
+        m_lastError = "SERVER-command must have at least 2 params";
         return nullptr;
     }
 
     auto it = args.begin();
-    const std::string &name = *it; ++it;
-    const std::string &side = *it; ++it;
-    const std::string &stype = *it; ++it;
+    auto end = args.end();
 
-    mbServer *server = nullptr;
-    mbClient *client = nullptr;
-    if (side == "SERVER")
+    bool ok;
+    const std::string &stype = *it;
+    ++it;
+    Modbus::ProtocolType type = mb::toProtocolType(stype, &ok);
+    if (!ok)
     {
-        if (m_project->server(name))
-        {
-            m_lastError = "Server with this name already exists: " + name;
-            return nullptr;
-        }
-        server = new mbServer(m_project->memory());
-        server->setName(name);
-        m_project->addServer(server);
-    }
-    else if (side == "CLIENT")
-    {
-        if (m_project->client(name))
-        {
-            m_lastError = "Client with this name already exists: " + name;
-            return nullptr;
-        }
-        client = new mbClient();
-        client->setName(name);
-        m_project->addClient(client);
-    }
-    else
-    {
-        m_lastError = "PORT-command must have SERVER or CLIENT as second param";
+        m_lastError = "Unknown port type for SERVER-port: " + stype;
         return nullptr;
     }
 
-    if (server && stype == "TCP")
+    // TODO: check name correctness (not empty, etc)
+    const std::string &name  = *it;
+    ++it;
+    if (m_project->server(name))
     {
-        Modbus::TcpSettings settings;        
-        settings.port    = static_cast<uint16_t>(std::stoi(*it)); ++it;
-        settings.timeout = static_cast<uint16_t>(std::stoi(*it)); ++it;
-        uint16_t maxconn = static_cast<uint16_t>(std::stoi(*it)); ++it; // TODO:
-        server->setSettings(Modbus::TCP, &settings);
+        m_lastError = "Server with this name already exists: " + name;
+        return nullptr;
     }
-    else if (stype == "TCP")
+    mbServer *server = new mbServer(m_project->memory());
+    server->setName(name);
+    m_project->addServer(server);
+
+    switch (type)
     {
+    case Modbus::RTU:
+    case Modbus::ASC:
+    {
+        if (args.size() < 3)
+        {
+            m_lastError = "SERVER-command for RTU and ASCII must have at least 3 params";
+            return nullptr;
+        }
+        Modbus::SerialSettings settings;
+        if (parseSerialSettings(it, end, settings))
+            server->setSettings(type, &settings);
+    }
+        break;
+    default:
+    {
+        const ModbusTcpPort::Defaults &d = ModbusTcpPort::Defaults::instance();
         Modbus::TcpSettings settings;
+        settings.port    = d.port;
+        settings.timeout = d.timeout;
+        uint16_t maxconn = 10;
+        if (it != end)
+        {     
+            settings.port = static_cast<uint16_t>(std::atoi((*it).data()));
+            ++it;
+            if (it != end)
+            {
+                settings.timeout = static_cast<uint16_t>(std::atoi((*it).data()));
+                ++it;
+                if (it != end)
+                    maxconn = static_cast<uint16_t>(std::atoi((*it).data())); // TODO:
+            }
+        }
+        server->setSettings(type, &settings);
+    }
+        break;
+    }
+    return nullptr;
+}
+
+mbCommand *mbBuilder::parseClient(const std::list<std::string> &args)
+{
+    if (args.size() < 3)
+    {
+        m_lastError = "CLIENT-command must have at least 3 params";
+        return nullptr;
+    }
+
+    auto it = args.begin();
+    auto end = args.end();
+
+    bool ok;
+    const std::string &stype = *it;
+    ++it;
+    Modbus::ProtocolType type = mb::toProtocolType(stype, &ok);
+    if (!ok)
+    {
+        m_lastError = "Unknown port type for CLIENT-port: " + stype;
+        return nullptr;
+    }
+
+    // TODO: check name correctness (not empty, etc)
+    const std::string &name  = *it;
+    ++it;
+    if (m_project->client(name))
+    {
+        m_lastError = "Client with this name already exists: " + name;
+        return nullptr;
+    }
+    mbClient *client = new mbClient();
+    client->setName(name);
+    m_project->addClient(client);
+
+    switch (type)
+    {
+    case Modbus::RTU:
+    case Modbus::ASC:
+    {
+        Modbus::SerialSettings settings;
+        if (parseSerialSettings(it, end, settings))
+            client->setSettings(type, &settings);
+    }
+        break;
+    default:
+    {
+        const ModbusTcpPort::Defaults &d = ModbusTcpPort::Defaults::instance();
+        Modbus::TcpSettings settings;
+        settings.host    = (*it).data();
+        settings.port    = d.port;
+        settings.timeout = d.timeout;
         
-        std::string host = *it;
-        settings.host    = host.data();                           ++it;
-        settings.port    = static_cast<uint16_t>(std::stoi(*it)); ++it;
-        settings.timeout = static_cast<uint16_t>(std::stoi(*it)); ++it;
+        ++it;
+        if (it != end)
+        {     
+            settings.port = static_cast<uint16_t>(std::atoi((*it).data()));
+            ++it;
+            if (it != end)
+                settings.timeout = static_cast<uint16_t>(std::atoi((*it).data()));
+        }
         client->setSettings(Modbus::TCP, &settings);
     }
-    else if (stype == "RTU" || stype == "ASC")
-    {
-        Modbus::ProtocolType type = (stype == "RTU") ? Modbus::RTU : Modbus::ASC;
-        Modbus::SerialSettings settings;
-        std::string portName = *it;
-        settings.portName         = portName.data();                                  ++it;
-        settings.baudRate         = static_cast<uint32_t>           (std::stoi(*it)); ++it;
-        settings.dataBits         = static_cast<uint8_t>            (std::stoi(*it)); ++it;
-        settings.parity           = static_cast<Modbus::Parity>     (std::stoi(*it)); ++it;
-        settings.stopBits         = static_cast<Modbus::StopBits>   (std::stoi(*it)); ++it;
-        settings.flowControl      = static_cast<Modbus::FlowControl>(std::stoi(*it)); ++it;
-        settings.timeoutFirstByte = static_cast<uint32_t>           (std::stoi(*it)); ++it;
-        settings.timeoutInterByte = static_cast<uint32_t>           (std::stoi(*it)); ++it;
-        if (server)
-            server->setSettings(Modbus::RTU, &settings);
-        else
-            client->setSettings(Modbus::RTU, &settings);
-    }
-    else
-    {
-        m_lastError = "Unknown port type: " + stype;
-        return nullptr;
+        break;
     }
     return nullptr;
 }
@@ -405,14 +476,14 @@ mbCommand* mbBuilder::parseQuery(const std::list<std::string> &args)
         return nullptr;
     }
 
-    uint8_t unit = static_cast<uint8_t>(std::stoi(*it));           ++it;
-    const std::string &func = *it;                                 ++it;                       
-    mb::Address devAdr   = mb::Address::fromString(*it);         ++it;
-    uint16_t     count    = static_cast<uint16_t>(std::stoi(*it)); ++it;
-    mb::Address memAdr   = mb::Address::fromString(*it);         ++it;
-    uint16_t     execPatt = static_cast<uint16_t>(std::stoi(*it)); ++it;
-    mb::Address succAdr  = mb::Address::fromString(*it);         ++it;
-    mb::Address errcAdr  = mb::Address::fromString(*it);         ++it;
+    uint8_t unit = static_cast<uint8_t>(std::atoi((*it).data()));           ++it;
+    const std::string &func = *it;                                          ++it;                       
+    mb::Address devAdr   = mb::Address::fromString(*it);                    ++it;
+    uint16_t     count    = static_cast<uint16_t>(std::atoi((*it).data())); ++it;
+    mb::Address memAdr   = mb::Address::fromString(*it);                    ++it;
+    uint16_t     execPatt = static_cast<uint16_t>(std::atoi((*it).data())); ++it;
+    mb::Address succAdr  = mb::Address::fromString(*it);                    ++it;
+    mb::Address errcAdr  = mb::Address::fromString(*it);                    ++it;
     mb::Address errvAdr  = mb::Address::fromString(*it);          
 
     mbCommandQueryBase *cmd = nullptr;
@@ -478,13 +549,11 @@ mbCommand* mbBuilder::parseCopy(const std::list<std::string> &args)
 
     auto it = args.begin();
     mb::Address srcAdr  = mb::Address::fromString(*it);         ++it;
-    uint16_t     count   = static_cast<uint16_t>(std::stoi(*it)); ++it;
+    uint16_t     count   = static_cast<uint16_t>(std::atoi((*it).data())); ++it;
     mb::Address destAdr = mb::Address::fromString(*it);
 
     mbCommandCopy *cmd = new mbCommandCopy(m_project->memory());
-    cmd->setSrcAddress(srcAdr);
-    cmd->setDstAddress(destAdr);
-    cmd->setCount(count);
+    cmd->setParams(srcAdr, destAdr, count);
     return cmd;
 }
 
@@ -497,7 +566,7 @@ mbCommand* mbBuilder::parseDelay(const std::list<std::string> &args)
     }
 
     auto it = args.begin();
-    uint32_t msec = static_cast<uint32_t>(std::stoi(*it));
+    uint32_t msec = static_cast<uint32_t>(std::atoi((*it).data()));
 
     mbCommandDelay *cmd = new mbCommandDelay();
     cmd->setMilliseconds(msec);
@@ -508,13 +577,13 @@ mbCommand* mbBuilder::parseDump(const std::list<std::string> &args)
 {
     if (args.size() != 3)
     {
-        m_lastError = "COPY-command must have 3 params";
+        m_lastError = "DUMP-command must have 3 params";
         return nullptr;
     }
 
     auto it = args.begin();
     mb::Address srcAdr  = mb::Address::fromString(*it);         ++it;
-    uint16_t count       = static_cast<uint16_t>(std::stoi(*it)); ++it;
+    uint16_t count       = static_cast<uint16_t>(std::atoi((*it).data())); ++it;
     mb::Format format   = mb::toFormat(*it);
 
     if (format == mb::Format_Unknown)
@@ -524,9 +593,56 @@ mbCommand* mbBuilder::parseDump(const std::list<std::string> &args)
     }
 
     mbCommandDump *cmd = new mbCommandDump(m_project->memory());
-    cmd->setMemAddress(srcAdr);
-    cmd->setFormat(format);
-    cmd->setCount(count);  
+    cmd->setParams(srcAdr, format, count);  
     return cmd;
 }
 
+bool mbBuilder::parseSerialSettings(std::list<std::string>::const_iterator &it, const std::list<std::string>::const_iterator &end, Modbus::SerialSettings &settings)
+{
+    const ModbusSerialPort::Defaults &d = ModbusSerialPort::Defaults::instance();
+
+    settings.baudRate         = d.baudRate        ;
+    settings.dataBits         = d.dataBits        ;
+    settings.parity           = d.parity          ;
+    settings.stopBits         = d.stopBits        ;
+    settings.flowControl      = d.flowControl     ;
+    settings.timeoutFirstByte = d.timeoutFirstByte;
+    settings.timeoutInterByte = d.timeoutInterByte;
+
+    std::string portName = *it;
+    settings.portName = portName.data();
+    ++it;
+    if (it != end)
+    {
+        settings.baudRate = static_cast<uint32_t>(std::atoi((*it).data())); 
+        ++it;
+        if (it != end)
+        {
+            settings.dataBits = static_cast<uint8_t>(std::atoi((*it).data()));
+            ++it;
+            if (it != end)
+            {
+                settings.parity = static_cast<Modbus::Parity>(std::atoi((*it).data()));
+                ++it;
+                if (it != end)
+                {
+                    settings.stopBits = static_cast<Modbus::StopBits>(std::atoi((*it).data()));
+                    ++it;
+                    if (it != end)
+                    {
+                        settings.flowControl = static_cast<Modbus::FlowControl>(std::atoi((*it).data()));
+                        ++it;
+                        if (it != end)
+                        {
+                            settings.timeoutFirstByte = static_cast<uint32_t>(std::atoi((*it).data()));
+                            ++it;
+                            if (it != end)
+                                settings.timeoutInterByte = static_cast<uint32_t>(std::atoi((*it).data()));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}

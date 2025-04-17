@@ -16,14 +16,15 @@ public:
         Block();
 
     public:
-        inline int size() const { return m_data.size(); }
-        inline int sizeBits() const { return m_sizeBits; }
-        inline int sizeBytes() const { return size(); }
-        inline int sizeRegs() const { return m_data.size() / MB_REGE_SZ_BYTES; }
+        inline size_t size() const { return m_data.size(); }
+        inline size_t sizeBits() const { return m_sizeBits; }
+        inline size_t sizeBytes() const { return size(); }
+        inline size_t sizeRegs() const { return m_data.size() / MB_REGE_SZ_BYTES; }
         void resize(int bytes);
         void resizeBits(int bits);
         inline void resizeBytes(int bytes) { resize(bytes); }
         inline void resizeRegs(int regs) { resize(regs*MB_REGE_SZ_BYTES); }
+        inline const void *data() const { return m_data.data(); }
 
     public:
         inline uint changeCounter() const { return m_changeCounter; }
@@ -37,7 +38,7 @@ public:
 
     private:
         mb::ByteArray m_data;
-        uint m_sizeBits;
+        size_t m_sizeBits;
         uint m_changeCounter;
     };
 
@@ -64,10 +65,10 @@ public: // 'Modbus'-like Interface
 public: // memory-0x management functions
     void realloc_0x(int count);
     inline uint changeCounter_0x() const { return m_mem_0x.changeCounter(); }
-    inline int count_0x() const { return m_mem_0x.sizeBits(); }
-    inline int count_0x_bites() const { return m_mem_0x.sizeBits(); }
-    inline int count_0x_bytes() const { return m_mem_0x.sizeBytes(); }
-    inline int count_0x_reges() const { return m_mem_0x.sizeRegs(); }
+    inline size_t count_0x() const { return m_mem_0x.sizeBits(); }
+    inline size_t count_0x_bites() const { return m_mem_0x.sizeBits(); }
+    inline size_t count_0x_bytes() const { return m_mem_0x.sizeBytes(); }
+    inline size_t count_0x_reges() const { return m_mem_0x.sizeRegs(); }
     inline void zerroAll_0x() { m_mem_0x.zerroAll(); }
     inline Modbus::StatusCode read_0x (uint bitOffset, uint bitCount, void* bites, uint *fact = nullptr) const { return m_mem_0x.readBits (bitOffset, bitCount, bites, fact); }
     inline Modbus::StatusCode write_0x(uint bitOffset, uint bitCount, const void* bites, uint *fact = nullptr) { return m_mem_0x.writeBits(bitOffset, bitCount, bites, fact); }
@@ -103,14 +104,15 @@ public: // memory-0x management functions
     inline void setDouble_0x(uint bitOffset, double v)      { m_mem_0x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
 
     Block &memBlockRef_0x() { return m_mem_0x; }
+    const void *memptr_0x() const { return m_mem_0x.data(); }
 
 public: // memory-1x management functions
     void realloc_1x(int count);
     inline uint changeCounter_1x() const { return m_mem_1x.changeCounter(); }
-    inline int count_1x() const { return m_mem_1x.sizeBits(); }
-    inline int count_1x_bites() const { return m_mem_1x.sizeBits(); }
-    inline int count_1x_bytes() const { return m_mem_1x.sizeBytes(); }
-    inline int count_1x_reges() const { return m_mem_1x.sizeRegs(); }
+    inline size_t count_1x() const { return m_mem_1x.sizeBits(); }
+    inline size_t count_1x_bites() const { return m_mem_1x.sizeBits(); }
+    inline size_t count_1x_bytes() const { return m_mem_1x.sizeBytes(); }
+    inline size_t count_1x_reges() const { return m_mem_1x.sizeRegs(); }
     inline void zerroAll_1x() { m_mem_1x.zerroAll(); }
     inline Modbus::StatusCode read_1x (uint bitOffset, uint bitCount, void* bites, uint *fact = nullptr) const { return m_mem_1x.readBits (bitOffset, bitCount, bites, fact); }
     inline Modbus::StatusCode write_1x(uint bitOffset, uint bitCount, const void* bites, uint *fact = nullptr) { return m_mem_1x.writeBits(bitOffset, bitCount, bites, fact); }
@@ -146,14 +148,15 @@ public: // memory-1x management functions
     inline void setDouble_1x(uint bitOffset, double v)      { m_mem_1x.writeBits(bitOffset, sizeof(v) * MB_BYTE_SZ_BITES, &v); }
 
     inline Block &memBlockRef_1x() { return m_mem_1x; }
+    const void *memptr_1x() const { return m_mem_1x.data(); }
 
 public: // memory-3x management functions
     void realloc_3x(int count);
     inline uint changeCounter_3x() const { return m_mem_3x.changeCounter(); }
-    inline int count_3x() const { return m_mem_3x.sizeRegs(); }
-    inline int count_3x_bites() const { return m_mem_3x.sizeBits(); }
-    inline int count_3x_bytes() const { return m_mem_3x.sizeBytes(); }
-    inline int count_3x_reges() const { return m_mem_3x.sizeRegs(); }
+    inline size_t count_3x() const { return m_mem_3x.sizeRegs(); }
+    inline size_t count_3x_bites() const { return m_mem_3x.sizeBits(); }
+    inline size_t count_3x_bytes() const { return m_mem_3x.sizeBytes(); }
+    inline size_t count_3x_reges() const { return m_mem_3x.sizeRegs(); }
     inline void zerroAll_3x() { m_mem_3x.zerroAll(); }
     inline Modbus::StatusCode read_3x (uint offset, uint regCount, void* values, uint *fact = nullptr) const { return m_mem_3x.readRegs (offset, regCount, reinterpret_cast<uint16_t*>(values), fact); }
     inline Modbus::StatusCode write_3x(uint offset, uint regCount, const void* values, uint *fact = nullptr) { return m_mem_3x.writeRegs(offset, regCount, reinterpret_cast<const uint16_t*>(values), fact); }
@@ -187,14 +190,15 @@ public: // memory-3x management functions
     inline void setDouble_3x(uint regOffset, double v)     { m_mem_3x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
 
     inline Block &memBlockRef_3x() { return m_mem_3x; }
+    const void *memptr_3x() const { return m_mem_3x.data(); }
 
 public: // memory-4x management functions
     void realloc_4x(int count);
     inline uint changeCounter_4x() const { return m_mem_4x.changeCounter(); }
-    inline int count_4x() const { return m_mem_4x.sizeRegs(); }
-    inline int count_4x_bites() const { return m_mem_4x.sizeBits(); }
-    inline int count_4x_bytes() const { return m_mem_4x.sizeBytes(); }
-    inline int count_4x_reges() const { return m_mem_4x.sizeRegs(); }
+    inline size_t count_4x() const { return m_mem_4x.sizeRegs(); }
+    inline size_t count_4x_bites() const { return m_mem_4x.sizeBits(); }
+    inline size_t count_4x_bytes() const { return m_mem_4x.sizeBytes(); }
+    inline size_t count_4x_reges() const { return m_mem_4x.sizeRegs(); }
     inline void zerroAll_4x() { m_mem_4x.zerroAll(); }
     inline Modbus::StatusCode read_4x (uint offset, uint regCount, void* values, uint *fact = nullptr) const { return m_mem_4x.readRegs (offset, regCount, reinterpret_cast<uint16_t*>(values), fact); }
     inline Modbus::StatusCode write_4x(uint offset, uint regCount, const void* values, uint *fact = nullptr) { return m_mem_4x.writeRegs(offset, regCount, reinterpret_cast<const uint16_t*>(values), fact); }
@@ -228,13 +232,11 @@ public: // memory-4x management functions
     inline void setDouble_4x(uint regOffset, double v)     { m_mem_4x.write(regOffset * MB_REGE_SZ_BYTES, sizeof(v), &v); }
 
     inline Block &memBlockRef_4x() { return m_mem_4x; }
+    const void *memptr_4x() const { return m_mem_4x.data(); }
 
 public:
-    Modbus::StatusCode read_bits (mb::Address address, uint bitCount, void* buff, uint *fact = nullptr) const;
-    Modbus::StatusCode write_bits(mb::Address address, uint bitCount, const void* buff, uint *fact = nullptr);
-
-    Modbus::StatusCode read_regs (mb::Address address, uint regCount, void* buff, uint *fact = nullptr) const;
-    Modbus::StatusCode write_regs(mb::Address address, uint regCount, const void* buff, uint *fact = nullptr);
+    Modbus::StatusCode read(mb::Address address, uint count, void* buff, uint *fact = nullptr) const;
+    Modbus::StatusCode write(mb::Address address, uint count, const void* buff, uint *fact = nullptr);
 
     uint16_t getUInt16(mb::Address address) const;
     void setUInt16(mb::Address address, uint16_t value);
@@ -243,10 +245,6 @@ public: // Exception Status
     inline mb::Address exceptionStatusAddress() const { return m_exceptionStatusAddress; }
     inline void setExceptionStatusAddress(mb::Address exceptionStatusAddress) { m_exceptionStatusAddress = exceptionStatusAddress; }
     uint8_t exceptionStatus() const;
-
-public:
-    Modbus::StatusCode copy(mb::Address src, mb::Address dst, uint count);
-    Modbus::StatusCode dump(mb::Address adr, mb::Format fmt, uint count);
 
 private:
     Block m_mem_0x;

@@ -2,6 +2,7 @@
 #define MB_COMMAND_H
 
 #include "mb_core.h"
+#include "mbMemory.h"
 
 class mbMemory;
 class mbClient;
@@ -136,23 +137,45 @@ class mbCommandCopy : public mbCommand
 {
 public:
     mbCommandCopy(mbMemory *memory);
-    bool run() override;
 
 public:
     inline mb::Address srcAddress() const { return m_srcAdr; }
-    inline void setSrcAddress(mb::Address adr) { m_srcAdr = adr; }
-
     inline mb::Address dstAddress() const { return m_dstAdr; }
-    inline void setDstAddress(mb::Address adr) { m_dstAdr = adr; }
-
     inline uint16_t count() const { return m_count; }
-    inline void setCount(uint16_t c) { m_count = c; }
+    void setParams(mb::Address srcAddress, mb::Address dstAddress, uint16_t count);
+
+public:
+    bool run() override;
+
+protected:
+    void calcreadbits();
+    void calcreadbytes();
+    void calcwritebits(bool countIsBits);
+    void calcwritebytes(bool countIsBits);
+    void zeroCount();
+
+protected:
+    void readBits();
+    void readBytes();
+    void writeBits();
+    void writeBytes();
 
 protected:
     mbMemory *m_memory;
+    mbMemory::Block *m_readblock;
+    mbMemory::Block *m_writeblock;
     mb::Address m_srcAdr;
     mb::Address m_dstAdr;
     uint16_t m_count;
+    mb::ByteArray m_buff;
+    uint16_t m_readOffset;
+    uint16_t m_readCount;
+    uint16_t m_writeOffset;
+    uint16_t m_writeCount;
+
+    typedef void (mbCommandCopy::*pmethod)();
+    pmethod m_readmethod;
+    pmethod m_writemethod;
 };
 
 
@@ -164,23 +187,33 @@ class mbCommandDump : public mbCommand
 {
 public:
     mbCommandDump(mbMemory *memory);
-    bool run() override;
 
 public:
     inline mb::Address memAddress() const { return m_memAdr; }
-    inline void setMemAddress(mb::Address adr) { m_memAdr = adr; }
-
     inline mb::Format format() const { return m_format; }
-    inline void setFormat(mb::Format fmt) { m_format = fmt; }
-
     inline uint16_t count() const { return m_count; }
-    inline void setCount(uint16_t c) { m_count = c; }    
+    void setParams(mb::Address memAddress, mb::Format fmt, uint16_t count);
+
+public:
+    bool run() override;
+
+protected:
+    void calcbits();
+    void calcregs();
+    void printbits();
+    void printregs();
 
 protected:
     mbMemory *m_memory;
+    mbMemory::Block *m_block;
     mb::Address m_memAdr;
     mb::Format m_format;
     uint16_t m_count;
+    uint16_t m_elemCount;
+    mb::ByteArray m_buff;
+
+    typedef void (mbCommandDump::*pprintmethod)();
+    pprintmethod m_printmethod;
 };
 
 

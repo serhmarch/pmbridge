@@ -478,13 +478,13 @@ mbCommand* mbBuilder::parseQuery(const std::list<std::string> &args)
 
     uint8_t unit = static_cast<uint8_t>(std::atoi((*it).data()));           ++it;
     const std::string &func = *it;                                          ++it;                       
-    mb::Address devAdr   = mb::Address::fromString(*it);                    ++it;
+    Modbus::Address devAdr   = Modbus::Address::fromString(*it);                    ++it;
     uint16_t     count    = static_cast<uint16_t>(std::atoi((*it).data())); ++it;
-    mb::Address memAdr   = mb::Address::fromString(*it);                    ++it;
+    Modbus::Address memAdr   = Modbus::Address::fromString(*it);                    ++it;
     uint16_t     execPatt = static_cast<uint16_t>(std::atoi((*it).data())); ++it;
-    mb::Address succAdr  = mb::Address::fromString(*it);                    ++it;
-    mb::Address errcAdr  = mb::Address::fromString(*it);                    ++it;
-    mb::Address errvAdr  = mb::Address::fromString(*it);          
+    Modbus::Address succAdr  = Modbus::Address::fromString(*it);                    ++it;
+    Modbus::Address errcAdr  = Modbus::Address::fromString(*it);                    ++it;
+    Modbus::Address errvAdr  = Modbus::Address::fromString(*it);          
 
     mbCommandQueryBase *cmd = nullptr;
     if (func == "RD")
@@ -548,9 +548,9 @@ mbCommand* mbBuilder::parseCopy(const std::list<std::string> &args)
     }
 
     auto it = args.begin();
-    mb::Address srcAdr  = mb::Address::fromString(*it);         ++it;
+    Modbus::Address srcAdr  = Modbus::Address::fromString(*it);         ++it;
     uint16_t     count   = static_cast<uint16_t>(std::atoi((*it).data())); ++it;
-    mb::Address destAdr = mb::Address::fromString(*it);
+    Modbus::Address destAdr = Modbus::Address::fromString(*it);
 
     mbCommandCopy *cmd = new mbCommandCopy(m_project->memory());
     cmd->setParams(srcAdr, destAdr, count);
@@ -582,7 +582,7 @@ mbCommand* mbBuilder::parseDump(const std::list<std::string> &args)
     }
 
     auto it = args.begin();
-    mb::Address srcAdr  = mb::Address::fromString(*it);         ++it;
+    Modbus::Address srcAdr  = Modbus::Address::fromString(*it);         ++it;
     uint16_t count       = static_cast<uint16_t>(std::atoi((*it).data())); ++it;
     mb::Format format   = mb::toFormat(*it);
 

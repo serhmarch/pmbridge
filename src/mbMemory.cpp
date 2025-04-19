@@ -213,7 +213,7 @@ void mbMemory::realloc_4x(int count)
     }
 }
 
-Modbus::StatusCode mbMemory::read(mb::Address address, uint count, void *buff, uint *fact) const
+Modbus::StatusCode mbMemory::read(Modbus::Address address, uint count, void *buff, uint *fact) const
 {
     switch (address.type())
     {
@@ -226,7 +226,7 @@ Modbus::StatusCode mbMemory::read(mb::Address address, uint count, void *buff, u
     }
 }
 
-Modbus::StatusCode mbMemory::write(mb::Address address, uint count, const void *buff, uint *fact)
+Modbus::StatusCode mbMemory::write(Modbus::Address address, uint count, const void *buff, uint *fact)
 {
     switch (address.type())
     {
@@ -239,7 +239,7 @@ Modbus::StatusCode mbMemory::write(mb::Address address, uint count, const void *
     }
 }
 
-uint16_t mbMemory::getUInt16(mb::Address address) const
+uint16_t mbMemory::getUInt16(Modbus::Address address) const
 {
     switch (address.type())
     {
@@ -252,7 +252,7 @@ uint16_t mbMemory::getUInt16(mb::Address address) const
     }
 }
 
-void mbMemory::setUInt16(mb::Address address, uint16_t value)
+void mbMemory::setUInt16(Modbus::Address address, uint16_t value)
 {
     switch (address.type())
     {

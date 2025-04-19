@@ -235,15 +235,15 @@ public: // memory-4x management functions
     const void *memptr_4x() const { return m_mem_4x.data(); }
 
 public:
-    Modbus::StatusCode read(mb::Address address, uint count, void* buff, uint *fact = nullptr) const;
-    Modbus::StatusCode write(mb::Address address, uint count, const void* buff, uint *fact = nullptr);
+    Modbus::StatusCode read(Modbus::Address address, uint count, void* buff, uint *fact = nullptr) const;
+    Modbus::StatusCode write(Modbus::Address address, uint count, const void* buff, uint *fact = nullptr);
 
-    uint16_t getUInt16(mb::Address address) const;
-    void setUInt16(mb::Address address, uint16_t value);
+    uint16_t getUInt16(Modbus::Address address) const;
+    void setUInt16(Modbus::Address address, uint16_t value);
     
 public: // Exception Status
-    inline mb::Address exceptionStatusAddress() const { return m_exceptionStatusAddress; }
-    inline void setExceptionStatusAddress(mb::Address exceptionStatusAddress) { m_exceptionStatusAddress = exceptionStatusAddress; }
+    inline Modbus::Address exceptionStatusAddress() const { return m_exceptionStatusAddress; }
+    inline void setExceptionStatusAddress(Modbus::Address exceptionStatusAddress) { m_exceptionStatusAddress = exceptionStatusAddress; }
     uint8_t exceptionStatus() const;
 
 private:
@@ -251,7 +251,7 @@ private:
     Block m_mem_1x;
     Block m_mem_3x;
     Block m_mem_4x;
-    mb::Address m_exceptionStatusAddress;
+    Modbus::Address m_exceptionStatusAddress;
 };
 
 #endif //MB_MEMORY_H

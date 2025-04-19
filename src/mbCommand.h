@@ -35,14 +35,14 @@ public:
     inline uint16_t exec() const { return m_exec; }
     inline void setExec(uint16_t exec) { m_exec = exec; }
 
-    inline mb::Address succAddress() const { return m_succAdr; }
-    inline void setSuccAddress(mb::Address adr) { m_succAdr = adr; }
+    inline Modbus::Address succAddress() const { return m_succAdr; }
+    inline void setSuccAddress(Modbus::Address adr) { m_succAdr = adr; }
 
-    inline mb::Address errcAddress() const { return m_errcAdr; }
-    inline void setErrcAddress(mb::Address adr) { m_errcAdr = adr; }
+    inline Modbus::Address errcAddress() const { return m_errcAdr; }
+    inline void setErrcAddress(Modbus::Address adr) { m_errcAdr = adr; }
 
-    inline mb::Address errvAddress() const { return m_errvAdr; }
-    inline void setErrvAddress(mb::Address adr) { m_errvAdr = adr; }
+    inline Modbus::Address errvAddress() const { return m_errvAdr; }
+    inline void setErrvAddress(Modbus::Address adr) { m_errvAdr = adr; }
     
 public:
     bool run() override;
@@ -56,9 +56,9 @@ protected:
     mbClient *m_client;
     uint8_t m_unit;
     uint16_t m_exec;
-    mb::Address m_succAdr;
-    mb::Address m_errcAdr;
-    mb::Address m_errvAdr;
+    Modbus::Address m_succAdr;
+    Modbus::Address m_errcAdr;
+    Modbus::Address m_errvAdr;
     mb::ByteArray m_buffer;
     bool m_isBegin;
 };
@@ -75,13 +75,13 @@ public:
     inline uint16_t count() const { return m_count; }
     inline void setCount(uint16_t c) { m_count = c; }
 
-    inline mb::Address memAddress() const { return m_memAdr; }
-    inline void setMemAddress(mb::Address adr) { m_memAdr = adr; }
+    inline Modbus::Address memAddress() const { return m_memAdr; }
+    inline void setMemAddress(Modbus::Address adr) { m_memAdr = adr; }
 
 protected:
     uint16_t m_offset;
     uint16_t m_count;
-    mb::Address m_memAdr;
+    Modbus::Address m_memAdr;
 };
 
 class mbCommandQueryReadCoils : public mbCommandQueryBase
@@ -139,10 +139,10 @@ public:
     mbCommandCopy(mbMemory *memory);
 
 public:
-    inline mb::Address srcAddress() const { return m_srcAdr; }
-    inline mb::Address dstAddress() const { return m_dstAdr; }
+    inline Modbus::Address srcAddress() const { return m_srcAdr; }
+    inline Modbus::Address dstAddress() const { return m_dstAdr; }
     inline uint16_t count() const { return m_count; }
-    void setParams(mb::Address srcAddress, mb::Address dstAddress, uint16_t count);
+    void setParams(Modbus::Address srcAddress, Modbus::Address dstAddress, uint16_t count);
 
 public:
     bool run() override;
@@ -164,8 +164,8 @@ protected:
     mbMemory *m_memory;
     mbMemory::Block *m_readblock;
     mbMemory::Block *m_writeblock;
-    mb::Address m_srcAdr;
-    mb::Address m_dstAdr;
+    Modbus::Address m_srcAdr;
+    Modbus::Address m_dstAdr;
     uint16_t m_count;
     mb::ByteArray m_buff;
     uint16_t m_readOffset;
@@ -189,10 +189,10 @@ public:
     mbCommandDump(mbMemory *memory);
 
 public:
-    inline mb::Address memAddress() const { return m_memAdr; }
+    inline Modbus::Address memAddress() const { return m_memAdr; }
     inline mb::Format format() const { return m_format; }
     inline uint16_t count() const { return m_count; }
-    void setParams(mb::Address memAddress, mb::Format fmt, uint16_t count);
+    void setParams(Modbus::Address memAddress, mb::Format fmt, uint16_t count);
 
 public:
     bool run() override;
@@ -206,7 +206,7 @@ protected:
 protected:
     mbMemory *m_memory;
     mbMemory::Block *m_block;
-    mb::Address m_memAdr;
+    Modbus::Address m_memAdr;
     mb::Format m_format;
     uint16_t m_count;
     uint16_t m_elemCount;

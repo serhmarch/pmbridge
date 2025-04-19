@@ -144,7 +144,7 @@ Modbus::StatusCode mbCommandQueryWriteMultipleRegisters::runQuery()
     m_writemethod = &mbCommandCopy::writeBytes;
 }
 
-void mbCommandCopy::setParams(mb::Address srcAddress, mb::Address dstAddress, uint16_t count)
+void mbCommandCopy::setParams(Modbus::Address srcAddress, Modbus::Address dstAddress, uint16_t count)
 {
     m_srcAdr = srcAddress;
     m_dstAdr = dstAddress;
@@ -513,7 +513,7 @@ static void printformat(mb::Format fmt, const void *mem, uint16_t count)
     }
 }
 
-void mbCommandDump::setParams(mb::Address memAddress, mb::Format fmt, uint16_t count)
+void mbCommandDump::setParams(Modbus::Address memAddress, mb::Format fmt, uint16_t count)
 {
     m_memAdr = memAddress;
     m_format = fmt;

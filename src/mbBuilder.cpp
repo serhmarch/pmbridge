@@ -6,6 +6,7 @@
 
 #include <ModbusSerialPort.h>
 #include <ModbusTcpPort.h>
+#include <ModbusTcpServer.h>
 
 #include "mbProject.h"
 #include "mbMemory.h"
@@ -366,11 +367,11 @@ mbCommand *mbBuilder::parseServer(const std::list<std::string> &args)
         break;
     default:
     {
-        const ModbusTcpPort::Defaults &d = ModbusTcpPort::Defaults::instance();
+        const ModbusTcpServer::Defaults &d = ModbusTcpServer::Defaults::instance();
         Modbus::TcpSettings settings;
         settings.port    = d.port;
         settings.timeout = d.timeout;
-        uint16_t maxconn = 10;
+        settings.maxconn = d.maxconn;
         if (it != end)
         {     
             settings.port = static_cast<uint16_t>(std::atoi((*it).data()));
@@ -380,7 +381,7 @@ mbCommand *mbBuilder::parseServer(const std::list<std::string> &args)
                 settings.timeout = static_cast<uint16_t>(std::atoi((*it).data()));
                 ++it;
                 if (it != end)
-                    maxconn = static_cast<uint16_t>(std::atoi((*it).data())); // TODO:
+                    settings.maxconn = static_cast<uint16_t>(std::atoi((*it).data()));
             }
         }
         server->setSettings(type, &settings);
@@ -476,14 +477,14 @@ mbCommand* mbBuilder::parseQuery(const std::list<std::string> &args)
         return nullptr;
     }
 
-    uint8_t unit = static_cast<uint8_t>(std::atoi((*it).data()));           ++it;
-    const std::string &func = *it;                                          ++it;                       
-    Modbus::Address devAdr   = Modbus::Address::fromString(*it);                    ++it;
-    uint16_t     count    = static_cast<uint16_t>(std::atoi((*it).data())); ++it;
-    Modbus::Address memAdr   = Modbus::Address::fromString(*it);                    ++it;
-    uint16_t     execPatt = static_cast<uint16_t>(std::atoi((*it).data())); ++it;
-    Modbus::Address succAdr  = Modbus::Address::fromString(*it);                    ++it;
-    Modbus::Address errcAdr  = Modbus::Address::fromString(*it);                    ++it;
+    uint8_t unit = static_cast<uint8_t>(std::atoi((*it).data()));               ++it;
+    const std::string &func = *it;                                              ++it;                       
+    Modbus::Address devAdr   = Modbus::Address::fromString(*it);                ++it;
+    uint16_t        count    = static_cast<uint16_t>(std::atoi((*it).data()));  ++it;
+    Modbus::Address memAdr   = Modbus::Address::fromString(*it);                ++it;
+    uint16_t        execPatt = static_cast<uint16_t>(std::atoi((*it).data()));  ++it;
+    Modbus::Address succAdr  = Modbus::Address::fromString(*it);                ++it;
+    Modbus::Address errcAdr  = Modbus::Address::fromString(*it);                ++it;
     Modbus::Address errvAdr  = Modbus::Address::fromString(*it);          
 
     mbCommandQueryBase *cmd = nullptr;

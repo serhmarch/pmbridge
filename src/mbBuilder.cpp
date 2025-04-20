@@ -203,6 +203,7 @@ bool mbBuilder::parseString(std::string &buffer, const char *endchars, bool mult
             buffer += m_ch;
             nextChar();
         }
+        buffer = Modbus::trim(buffer);
     }
     return !(endchars && notfound);  
 }
@@ -615,23 +616,33 @@ bool mbBuilder::parseSerialSettings(std::list<std::string>::const_iterator &it, 
     ++it;
     if (it != end)
     {
-        settings.baudRate = static_cast<uint32_t>(std::atoi((*it).data())); 
+        auto baudRate = Modbus::tobaudRate((*it).data());
+        if (baudRate >= 0)
+            settings.baudRate = baudRate;
         ++it;
         if (it != end)
         {
-            settings.dataBits = static_cast<uint8_t>(std::atoi((*it).data()));
+            auto dataBits = Modbus::todataBits((*it).data());
+            if (dataBits >= 0)
+                settings.dataBits = dataBits;
             ++it;
             if (it != end)
             {
-                settings.parity = static_cast<Modbus::Parity>(std::atoi((*it).data()));
+                auto parity = Modbus::toparity((*it).data());
+                if (parity >= 0)
+                    settings.parity = parity;
                 ++it;
                 if (it != end)
                 {
-                    settings.stopBits = static_cast<Modbus::StopBits>(std::atoi((*it).data()));
+                    auto stopBits = Modbus::tostopBits((*it).data());
+                    if (stopBits >= 0)
+                        settings.stopBits = stopBits;
                     ++it;
                     if (it != end)
                     {
-                        settings.flowControl = static_cast<Modbus::FlowControl>(std::atoi((*it).data()));
+                        auto flowControl = Modbus::toflowControl((*it).data());
+                        if (flowControl >= 0)
+                            settings.flowControl = flowControl;
                         ++it;
                         if (it != end)
                         {

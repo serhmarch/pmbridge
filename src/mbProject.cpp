@@ -3,6 +3,7 @@
 #include "mbMemory.h"
 #include "mbClient.h"
 #include "mbServer.h"
+#include "mbCommand.h"
 
 mbProject::mbProject()
 {

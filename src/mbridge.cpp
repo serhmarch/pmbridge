@@ -2,6 +2,7 @@
 #include <csignal>
 #include <vector>
 
+#include "mbLog.h"
 #include "mbBuilder.h"
 #include "mbProject.h"
 #include "mbServer.h"
@@ -60,12 +61,12 @@ int main(int argc, char **argv)
         project = builder.load(options.file);
         if (builder.hasError())
         {
-            std::cerr << "Error: " << builder.lastError() << std::endl;
+            mbLogError("%s", builder.lastError().data());
             return 1;
         }
         if (project == nullptr)
         {
-            std::cerr << "Error: Project is null" << std::endl;
+            mbLogError("Project is null");
             return 1;
         }
     }

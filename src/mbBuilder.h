@@ -36,6 +36,7 @@ private:
 private:
     // Helper methods for parsing specific commands    // Parses the configuration file and builds the mbProject
     mbCommand *parseCommand(const std::string &command, const std::list<std::string> &args);
+    mbCommand *parseLog(const std::list<std::string> &args);
     mbCommand *parseMemory(const std::list<std::string> &args);
     mbCommand *parseServer(const std::list<std::string> &args);
     mbCommand *parseClient(const std::list<std::string> &args);

@@ -8,6 +8,7 @@
 #include <ModbusTcpPort.h>
 #include <ModbusTcpServer.h>
 
+#include "mbLog.h"
 #include "mbProject.h"
 #include "mbMemory.h"
 #include "mbClient.h"
@@ -220,6 +221,7 @@ bool mbBuilder::parseArgs(std::list<std::string> &args)
         nextChar();
         while (m_ch != '}')
         {
+            passSpace();
             std::string arg;
             if (!parseString(arg, ",}", true))
             {
@@ -245,6 +247,7 @@ bool mbBuilder::parseArgs(std::list<std::string> &args)
     {
         while (!isEndOfLine() && !isEOF())
         {
+            passSpace();
             std::string arg;
             if (!parseString(arg, ",\r\n"))
             {
@@ -264,7 +267,11 @@ bool mbBuilder::parseArgs(std::list<std::string> &args)
 
 mbCommand* mbBuilder::parseCommand(const std::string &command, const std::list<std::string> &args)
 {
-    if (command == "MEMORY")
+    if (command == "Log")
+    {
+        return parseLog(args);
+    }
+    else if (command == "MEMORY")
     {
         return parseMemory(args);
     }
@@ -291,6 +298,38 @@ mbCommand* mbBuilder::parseCommand(const std::string &command, const std::list<s
     else if (command == "DUMP")
     {
         return parseDump(args);
+    }
+    return nullptr;
+}
+
+mbCommand *mbBuilder::parseLog(const std::list<std::string> &args)
+{
+    mb::LogFlags flags = mb::Log_Error;
+    for (const auto &arg : args)
+    {
+        if (arg == "ALL")
+            flags |= (mb::Log_All);
+        else if (arg == "ERROR")
+            flags |= (mb::Log_Error);
+        else if (arg == "WARNING")
+            flags |= (mb::Log_Warning);
+        else if (arg == "INFO")
+            flags |= (mb::Log_Info);
+        else if (arg == "TRACE")
+            flags |= (mb::Log_Trace);
+        else if (arg == "DEBUG")
+            flags |= (mb::Log_Debug);
+        else if (arg == "CONN")
+            flags |= (mb::Log_Connection);
+        else if (arg == "RX")
+            flags |= (mb::Log_Rx);
+        else if (arg == "TX")
+            flags |= (mb::Log_Tx);
+        else
+        {
+            m_lastError = "Unknown log level: " + arg;
+            return nullptr;
+        }
     }
     return nullptr;
 }

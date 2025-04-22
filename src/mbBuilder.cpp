@@ -8,7 +8,8 @@
 #include <ModbusTcpPort.h>
 #include <ModbusTcpServer.h>
 
-#include "mbLog.h"
+#include "mb_print.h"
+#include "mb_log.h"
 #include "mbProject.h"
 #include "mbMemory.h"
 #include "mbClient.h"
@@ -154,7 +155,7 @@ bool mbBuilder::parseString(std::string &buffer, const char *endchars, bool mult
             buffer += m_ch;
         if (m_ch != quoteChar)
         {
-            m_lastError = mbSTR("Error: Not finished quotes '\"'");
+            m_lastError = mbSTR("Error: Not finished quotes");
             return false;
         }
         nextChar();
@@ -204,7 +205,8 @@ bool mbBuilder::parseString(std::string &buffer, const char *endchars, bool mult
             buffer += m_ch;
             nextChar();
         }
-        buffer = Modbus::trim(buffer);
+        while (buffer.size() && std::isspace(buffer.back()))
+            buffer.pop_back(); // Remove trailing spaces
     }
     return !(endchars && notfound);  
 }
@@ -267,7 +269,7 @@ bool mbBuilder::parseArgs(std::list<std::string> &args)
 
 mbCommand* mbBuilder::parseCommand(const std::string &command, const std::list<std::string> &args)
 {
-    if (command == "Log")
+    if (command == "LOG")
     {
         return parseLog(args);
     }
@@ -304,19 +306,29 @@ mbCommand* mbBuilder::parseCommand(const std::string &command, const std::list<s
 
 mbCommand *mbBuilder::parseLog(const std::list<std::string> &args)
 {
-    mb::LogFlags flags = mb::Log_Error;
-    for (const auto &arg : args)
+    if (args.size() < 2)
     {
+        m_lastError = "LOG-command must have at least 2 params";
+        return nullptr;
+    }
+    auto it = args.begin();
+    auto end = args.end();
+    const std::string &format = *it; ++it;
+    const std::string &timeformat = *it;
+    mb::setLogFormat(format);
+    mb::setLogTimeFormat(timeformat);
+    mb::LogFlags flags = 0;
+    for (; it != end; ++it)
+    {
+        const std::string &arg = *it;
         if (arg == "ALL")
             flags |= (mb::Log_All);
         else if (arg == "ERROR")
             flags |= (mb::Log_Error);
-        else if (arg == "WARNING")
+        else if (arg == "WARN")
             flags |= (mb::Log_Warning);
         else if (arg == "INFO")
             flags |= (mb::Log_Info);
-        else if (arg == "TRACE")
-            flags |= (mb::Log_Trace);
         else if (arg == "DEBUG")
             flags |= (mb::Log_Debug);
         else if (arg == "CONN")
@@ -327,10 +339,11 @@ mbCommand *mbBuilder::parseLog(const std::list<std::string> &args)
             flags |= (mb::Log_Tx);
         else
         {
-            m_lastError = "Unknown log level: " + arg;
+            m_lastError = "Unknown log category: " + arg;
             return nullptr;
         }
     }
+    mb::setLogFlags(flags);
     return nullptr;
 }
 
@@ -389,7 +402,7 @@ mbCommand *mbBuilder::parseServer(const std::list<std::string> &args)
     mbServer *server = new mbServer(m_project->memory());
     server->setName(name);
     m_project->addServer(server);
-
+    ModbusServerPort *srv;
     switch (type)
     {
     case Modbus::RTU:
@@ -403,6 +416,18 @@ mbCommand *mbBuilder::parseServer(const std::list<std::string> &args)
         Modbus::SerialSettings settings;
         if (parseSerialSettings(it, end, settings))
             server->setSettings(type, &settings);
+        srv = server->port();
+        srv->connect(&ModbusServerPort::signalError, printErrorSerialServer);
+        if (type == Modbus::RTU)
+        {
+            srv->connect(&ModbusServerPort::signalTx, printTx);
+            srv->connect(&ModbusServerPort::signalRx, printRx);
+        }
+        else
+        {
+            srv->connect(&ModbusServerPort::signalTx, printTxAsc);
+            srv->connect(&ModbusServerPort::signalRx, printRxAsc);
+        }
     }
         break;
     default:
@@ -425,9 +450,18 @@ mbCommand *mbBuilder::parseServer(const std::list<std::string> &args)
             }
         }
         server->setSettings(type, &settings);
+        ModbusTcpServer *tcpsrv = static_cast<ModbusTcpServer*>(server->port());
+        tcpsrv->connect(&ModbusServerPort::signalTx, printTx);
+        tcpsrv->connect(&ModbusServerPort::signalRx, printRx);
+        tcpsrv->connect(&ModbusTcpServer::signalNewConnection, printNewConnection);
+        tcpsrv->connect(&ModbusTcpServer::signalCloseConnection, printCloseConnection);
+        tcpsrv->connect(&ModbusServerPort::signalError, printError);
+        srv = tcpsrv;
     }
         break;
     }
+    srv->connect(&ModbusServerPort::signalOpened, printOpened);
+    srv->connect(&ModbusServerPort::signalClosed, printClosed);
     return nullptr;
 }
 
@@ -463,16 +497,28 @@ mbCommand *mbBuilder::parseClient(const std::list<std::string> &args)
     mbClient *client = new mbClient();
     client->setName(name);
     m_project->addClient(client);
-
+    ModbusClientPort *cli;
     switch (type)
     {
     case Modbus::RTU:
     case Modbus::ASC:
     {
         Modbus::SerialSettings settings;
-        if (parseSerialSettings(it, end, settings))
-            client->setSettings(type, &settings);
-    }
+        if (!parseSerialSettings(it, end, settings))
+            return nullptr;
+        client->setSettings(type, &settings);
+        cli = client->port();
+        if (type == Modbus::RTU)
+        {
+            cli->connect(&ModbusClientPort::signalTx, printTx);
+            cli->connect(&ModbusClientPort::signalRx, printRx);
+        }
+        else
+        {
+            cli->connect(&ModbusClientPort::signalTx, printTxAsc);
+            cli->connect(&ModbusClientPort::signalRx, printRxAsc);
+        }
+        }
         break;
     default:
     {
@@ -491,9 +537,15 @@ mbCommand *mbBuilder::parseClient(const std::list<std::string> &args)
                 settings.timeout = static_cast<uint16_t>(std::atoi((*it).data()));
         }
         client->setSettings(Modbus::TCP, &settings);
+        cli = client->port();
+        cli->connect(&ModbusClientPort::signalTx, printTx);
+        cli->connect(&ModbusClientPort::signalRx, printRx);
     }
         break;
     }
+    cli->connect(&ModbusClientPort::signalOpened, printOpened);
+    cli->connect(&ModbusClientPort::signalClosed, printClosed);
+    cli->connect(&ModbusClientPort::signalError , printError );
     return nullptr;
 }
 

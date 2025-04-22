@@ -14,6 +14,7 @@ public:
     ~mbServer();
 
 public:
+    inline ModbusServerPort *port() const { return m_port; }
     inline const mb::String &name() const { return m_name; }
     inline void setName(const mb::String &name) { m_name = name; } 
     void setSettings(Modbus::ProtocolType type, const void *settings);

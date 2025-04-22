@@ -12,6 +12,8 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/mb_config.h.in ${CMAKE_CURRENT_LIST_DIR
 set(MB_HEADERS
     mb_config.h
     mb_core.h
+    mb_log.h
+    mb_print.h
     mbMemory.h
     mbServer.h
     mbClient.h
@@ -22,6 +24,8 @@ set(MB_HEADERS
 
 set(MB_SOURCES
     mb_core.cpp
+    mb_log.cpp
+    mb_print.cpp
     mbMemory.cpp
     mbServer.cpp
     mbClient.cpp

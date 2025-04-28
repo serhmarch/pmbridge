@@ -12,7 +12,10 @@ volatile bool fRun = true;
 
 struct Options
 {
-    pmb::String file{"pmbridge.conf"};
+    pmb::String file      {"pmbridge.conf"};
+    pmb::String log_flags ;
+    pmb::String log_time  {"[%time] %cat: %text"};
+    pmb::String log_format{"%Y-%M-%D %h:%m:%s.%f"};
 };
 
 Options options;
@@ -24,7 +27,7 @@ void parseOptions(int argc, char **argv)
         char *opt = argv[i];
         if (!strcmp(opt, "--version") || !strcmp(opt, "-v"))
         {
-            puts("pmbridge : " MBRIDGE_VERSION_STR "\n"
+            puts("pmbridge : " PMBRIDGE_VERSION_STR "\n"
                  "ModbusLib: " MODBUSLIB_VERSION_STR);
             exit(0);
         }
@@ -41,6 +44,36 @@ void parseOptions(int argc, char **argv)
                 std::exit(1);
             }
             options.file = argv[i];
+            continue;
+        }
+        if (!std::strcmp(opt, "--log-flags"))
+        {
+            if (++i >= argc)
+            {
+                //printHelp();
+                std::exit(1);
+            }
+            options.log_flags = argv[i];
+            continue;
+        }
+        if (!std::strcmp(opt, "--log-time"))
+        {
+            if (++i >= argc)
+            {
+                //printHelp();
+                std::exit(1);
+            }
+            options.log_time = argv[i];
+            continue;
+        }
+        if (!std::strcmp(opt, "--log-format"))
+        {
+            if (++i >= argc)
+            {
+                //printHelp();
+                std::exit(1);
+            }
+            options.log_format = argv[i];
             continue;
         }
     }

@@ -27,6 +27,9 @@ enum LogFlag
 typedef uint64_t LogFlags;
 
 /// \details
+const Char* toConstCharPtr(LogFlag logFlag);
+
+/// \details
 LogFlags logFlags();
 
 /// \details

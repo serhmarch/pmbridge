@@ -69,18 +69,19 @@ Format toFormat(const String &s);
 const Char* toConstCharPtr(Format fmt);
 
 template<class T>
-String toBinString(T value)
-{
-    size_t c = sizeof(value) * MB_BYTE_SZ_BITES;
-    String res(c, '0');
-    while (value)
-    {
-        res[c-1] = '0' + static_cast<char>(value & 1);
-        value >>= 1;
-        c--;
-    }
-    return res;
-}
+inline String toBinString(T value) { return Modbus::toBinString<String>(value); }
+
+template<class T>
+inline String toOctString(T value) { return Modbus::toOctString<String>(value); }
+
+template<class T>
+inline String toHexString(T value) { return Modbus::toHexString<String>(value); }
+
+template<class T>
+inline String toDecString(T value) { return Modbus::toDecString<String>(value); }
+
+template<class T>
+inline String toDecString(T value, int c, char fillChar = '0') { return Modbus::toDecString<String>(value, c, fillChar); }
 
 } // namespace pmb
 

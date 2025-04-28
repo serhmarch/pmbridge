@@ -1,16 +1,16 @@
-#include "mbClient.h"
+#include "pmbClient.h"
 
-mbClient::mbClient()
+pmbClient::pmbClient()
 {
     m_port = nullptr;
 }
 
-mbClient::~mbClient()
+pmbClient::~pmbClient()
 {
     delete m_port;
 }
 
-void mbClient::setSettings(Modbus::ProtocolType type, const void *settings)
+void pmbClient::setSettings(Modbus::ProtocolType type, const void *settings)
 {
     if (m_port)
         delete m_port;

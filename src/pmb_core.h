@@ -1,15 +1,15 @@
-#ifndef MBP_GLOBAL_H
-#define MBP_GLOBAL_H
+#ifndef PMB_GLOBAL_H
+#define PMB_GLOBAL_H
 
-#include "mb_config.h"
+#include "pmb_config.h"
 
-#define MBRIDGE_VERSION ((MBRIDGE_VERSION_MAJOR<<16)|(MBRIDGE_VERSION_MINOR<<8)|(MBRIDGE_VERSION_PATCH))
+#define PMBRIDGE_VERSION ((PMBRIDGE_VERSION_MAJOR<<16)|(PMBRIDGE_VERSION_MINOR<<8)|(PMBRIDGE_VERSION_PATCH))
 
-#define MBRIDGE_VERSION_STR_HELPER(major,minor,patch) #major"."#minor"."#patch
+#define PMBRIDGE_VERSION_STR_HELPER(major,minor,patch) #major"."#minor"."#patch
 
-#define MBRIDGE_VERSION_STR_MAKE(major,minor,patch) MBRIDGE_VERSION_STR_HELPER(major,minor,patch)
+#define PMBRIDGE_VERSION_STR_MAKE(major,minor,patch) PMBRIDGE_VERSION_STR_HELPER(major,minor,patch)
 
-#define MBRIDGE_VERSION_STR MBRIDGE_VERSION_STR_MAKE(MBRIDGE_VERSION_MAJOR,MBRIDGE_VERSION_MINOR,MBRIDGE_VERSION_PATCH)
+#define PMBRIDGE_VERSION_STR PMBRIDGE_VERSION_STR_MAKE(PMBRIDGE_VERSION_MAJOR,PMBRIDGE_VERSION_MINOR,PMBRIDGE_VERSION_PATCH)
 
 #include <string>
 #include <vector>
@@ -18,12 +18,12 @@
 
 #include <Modbus.h>
 
-#define mbCHR(x) x
-#define mbSTR(x) x
+#define pmbCHR(x) x
+#define pmbSTR(x) x
 
 typedef unsigned int uint;
 
-namespace mb {
+namespace pmb {
 
 typedef char Char;
 
@@ -82,6 +82,6 @@ String toBinString(T value)
     return res;
 }
 
-} // namespace mb
+} // namespace pmb
 
-#endif // MBP_GLOBAL_H
+#endif // PMB_GLOBAL_H

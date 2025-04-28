@@ -1,5 +1,3 @@
-#include "help.h"
-
 #include <string.h>
 
 const char* help_options =

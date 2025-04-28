@@ -1,32 +1,32 @@
-#include "mbMemory.h"
+#include "pmbMemory.h"
 
-mbMemory::Block::Block()
+pmbMemory::Block::Block()
 {
     m_sizeBits = 0;
     m_changeCounter = 0;
 }
 
-void mbMemory::Block::resize(int bytes)
+void pmbMemory::Block::resize(int bytes)
 {
     m_data.resize(bytes);
     memset(m_data.data(), 0, m_data.size());
     m_sizeBits = m_data.size() * MB_BYTE_SZ_BITES;
 }
 
-void mbMemory::Block::resizeBits(int bits)
+void pmbMemory::Block::resizeBits(int bits)
 {
     m_data.resize((bits+7)/8);
     memset(m_data.data(), 0, m_data.size());
     m_sizeBits = bits;
 }
 
-void mbMemory::Block::zerroAll()
+void pmbMemory::Block::zerroAll()
 {
     m_changeCounter++;
     memset(m_data.data(), 0, m_data.size());
 }
 
-Modbus::StatusCode mbMemory::Block::read(uint offset, uint count, void *buff, uint *fact) const
+Modbus::StatusCode pmbMemory::Block::read(uint offset, uint count, void *buff, uint *fact) const
 {
     uint c;
     if (offset >= static_cast<uint>(static_cast<uint>(m_data.size())))
@@ -42,7 +42,7 @@ Modbus::StatusCode mbMemory::Block::read(uint offset, uint count, void *buff, ui
     return Modbus::Status_Good;
 }
 
-Modbus::StatusCode mbMemory::Block::write(uint offset, uint count, const void *buff, uint *fact)
+Modbus::StatusCode pmbMemory::Block::write(uint offset, uint count, const void *buff, uint *fact)
 {
     uint c;
     if (offset >= static_cast<uint>(m_data.size()))
@@ -61,17 +61,17 @@ Modbus::StatusCode mbMemory::Block::write(uint offset, uint count, const void *b
     return Modbus::Status_Good;
 }
 
-Modbus::StatusCode mbMemory::Block::readBits(uint bitOffset, uint bitCount, void *buff, uint *fact) const
+Modbus::StatusCode pmbMemory::Block::readBits(uint bitOffset, uint bitCount, void *buff, uint *fact) const
 {
     return Modbus::readMemBits(bitOffset, bitCount, buff, m_data.data(), static_cast<uint32_t>(m_data.size()), fact);
 }
 
-Modbus::StatusCode mbMemory::Block::writeBits(uint bitOffset, uint bitCount, const void *buff, uint *fact)
+Modbus::StatusCode pmbMemory::Block::writeBits(uint bitOffset, uint bitCount, const void *buff, uint *fact)
 {
     return Modbus::writeMemBits(bitOffset, bitCount, buff, m_data.data(), static_cast<uint32_t>(m_data.size()), fact);
 }
 
-Modbus::StatusCode mbMemory::Block::readRegs(uint regOffset, uint regCount, uint16_t *buff, uint *fact) const
+Modbus::StatusCode pmbMemory::Block::readRegs(uint regOffset, uint regCount, uint16_t *buff, uint *fact) const
 {
     uint offset = regOffset * MB_REGE_SZ_BYTES;
     uint count = regCount * MB_REGE_SZ_BYTES;
@@ -84,7 +84,7 @@ Modbus::StatusCode mbMemory::Block::readRegs(uint regOffset, uint regCount, uint
     return r;
 }
 
-Modbus::StatusCode mbMemory::Block::writeRegs(uint regOffset, uint regCount, const uint16_t *buff, uint *fact)
+Modbus::StatusCode pmbMemory::Block::writeRegs(uint regOffset, uint regCount, const uint16_t *buff, uint *fact)
 {
     uint offset = regOffset * MB_REGE_SZ_BYTES;
     uint count = regCount * MB_REGE_SZ_BYTES;
@@ -97,65 +97,65 @@ Modbus::StatusCode mbMemory::Block::writeRegs(uint regOffset, uint regCount, con
     return r;
 }
 
-mbMemory::mbMemory()
+pmbMemory::pmbMemory()
 {
 }
 
-mbMemory::~mbMemory()
+pmbMemory::~pmbMemory()
 {
 }
 
-Modbus::StatusCode mbMemory::readCoils(uint8_t /*unit*/, uint16_t offset, uint16_t count, void *values)
+Modbus::StatusCode pmbMemory::readCoils(uint8_t /*unit*/, uint16_t offset, uint16_t count, void *values)
 {
     return this->read_0x(offset, count, values);
 }
 
-Modbus::StatusCode mbMemory::readDiscreteInputs(uint8_t /*unit*/, uint16_t offset, uint16_t count, void *values)
+Modbus::StatusCode pmbMemory::readDiscreteInputs(uint8_t /*unit*/, uint16_t offset, uint16_t count, void *values)
 {
     return this->read_1x(offset, count, values);
 }
 
-Modbus::StatusCode mbMemory::readHoldingRegisters(uint8_t /*unit*/, uint16_t offset, uint16_t count, uint16_t *values)
+Modbus::StatusCode pmbMemory::readHoldingRegisters(uint8_t /*unit*/, uint16_t offset, uint16_t count, uint16_t *values)
 {
     return this->read_4x(offset, count, values);
 }
 
-Modbus::StatusCode mbMemory::readInputRegisters(uint8_t /*unit*/, uint16_t offset, uint16_t count, uint16_t *values)
+Modbus::StatusCode pmbMemory::readInputRegisters(uint8_t /*unit*/, uint16_t offset, uint16_t count, uint16_t *values)
 {
     return this->read_3x(offset, count, values);
 }
 
-Modbus::StatusCode mbMemory::writeSingleCoil(uint8_t /*unit*/, uint16_t offset, bool value)
+Modbus::StatusCode pmbMemory::writeSingleCoil(uint8_t /*unit*/, uint16_t offset, bool value)
 {
     this->setBool_0x(offset, value);
     return Modbus::Status_Good;
 }
 
-Modbus::StatusCode mbMemory::writeSingleRegister(uint8_t /*unit*/, uint16_t offset, uint16_t value)
+Modbus::StatusCode pmbMemory::writeSingleRegister(uint8_t /*unit*/, uint16_t offset, uint16_t value)
 {
     this->setUInt16_4x(offset, value);
     return Modbus::Status_Good;
 }
 
-Modbus::StatusCode mbMemory::readExceptionStatus(uint8_t /*unit*/, uint8_t *status)
+Modbus::StatusCode pmbMemory::readExceptionStatus(uint8_t /*unit*/, uint8_t *status)
 {
     *status = this->exceptionStatus();
     return Modbus::Status_Good;
 }
 
-Modbus::StatusCode mbMemory::writeMultipleCoils(uint8_t /*unit*/, uint16_t offset, uint16_t count, const void *values)
+Modbus::StatusCode pmbMemory::writeMultipleCoils(uint8_t /*unit*/, uint16_t offset, uint16_t count, const void *values)
 {
     return this->write_0x(offset, count, values);
 }
 
-Modbus::StatusCode mbMemory::writeMultipleRegisters(uint8_t /*unit*/, uint16_t offset, uint16_t count, const uint16_t *values)
+Modbus::StatusCode pmbMemory::writeMultipleRegisters(uint8_t /*unit*/, uint16_t offset, uint16_t count, const uint16_t *values)
 {
     return this->write_4x(offset, count, values);
 }
 
-Modbus::StatusCode mbMemory::reportServerID(uint8_t /*unit*/, uint8_t *count, uint8_t *data)
+Modbus::StatusCode pmbMemory::reportServerID(uint8_t /*unit*/, uint8_t *count, uint8_t *data)
 {
-    mb::String utf8 = mbSTR("mbridge");
+    pmb::String utf8 = pmbSTR("pmbridge");
     if (utf8.size() > MB_MAX_BYTES)
         *count = MB_MAX_BYTES;
     else
@@ -165,7 +165,7 @@ Modbus::StatusCode mbMemory::reportServerID(uint8_t /*unit*/, uint8_t *count, ui
 }
 
 
-Modbus::StatusCode mbMemory::maskWriteRegister(uint8_t /*unit*/, uint16_t offset, uint16_t andMask, uint16_t orMask)
+Modbus::StatusCode pmbMemory::maskWriteRegister(uint8_t /*unit*/, uint16_t offset, uint16_t andMask, uint16_t orMask)
 {
     uint16_t c = this->uint16_4x(offset);
     uint16_t r = (c & andMask) | (orMask & ~andMask);
@@ -173,7 +173,7 @@ Modbus::StatusCode mbMemory::maskWriteRegister(uint8_t /*unit*/, uint16_t offset
     return Modbus::Status_Good;
 }
 
-Modbus::StatusCode mbMemory::readWriteMultipleRegisters(uint8_t /*unit*/, uint16_t readOffset, uint16_t readCount, uint16_t *readValues, uint16_t writeOffset, uint16_t writeCount, const uint16_t *writeValues)
+Modbus::StatusCode pmbMemory::readWriteMultipleRegisters(uint8_t /*unit*/, uint16_t readOffset, uint16_t readCount, uint16_t *readValues, uint16_t writeOffset, uint16_t writeCount, const uint16_t *writeValues)
 {
     Modbus::StatusCode s = this->write_4x(writeOffset, writeCount, writeValues);
     if (!Modbus::StatusIsGood(s))
@@ -181,7 +181,7 @@ Modbus::StatusCode mbMemory::readWriteMultipleRegisters(uint8_t /*unit*/, uint16
     return this->read_4x(readOffset, readCount, readValues);
 }
 
-void mbMemory::realloc_0x(int count)
+void pmbMemory::realloc_0x(int count)
 {
     if (count_0x() != count)
     {
@@ -189,7 +189,7 @@ void mbMemory::realloc_0x(int count)
     }
 }
 
-void mbMemory::realloc_1x(int count)
+void pmbMemory::realloc_1x(int count)
 {
     if (count_1x() != count)
     {
@@ -197,7 +197,7 @@ void mbMemory::realloc_1x(int count)
     }
 }
 
-void mbMemory::realloc_3x(int count)
+void pmbMemory::realloc_3x(int count)
 {
     if (count_3x() != count)
     {
@@ -205,7 +205,7 @@ void mbMemory::realloc_3x(int count)
     }
 }
 
-void mbMemory::realloc_4x(int count)
+void pmbMemory::realloc_4x(int count)
 {
     if (count_4x() != count)
     {
@@ -213,7 +213,7 @@ void mbMemory::realloc_4x(int count)
     }
 }
 
-Modbus::StatusCode mbMemory::read(Modbus::Address address, uint count, void *buff, uint *fact) const
+Modbus::StatusCode pmbMemory::read(Modbus::Address address, uint count, void *buff, uint *fact) const
 {
     switch (address.type())
     {
@@ -226,7 +226,7 @@ Modbus::StatusCode mbMemory::read(Modbus::Address address, uint count, void *buf
     }
 }
 
-Modbus::StatusCode mbMemory::write(Modbus::Address address, uint count, const void *buff, uint *fact)
+Modbus::StatusCode pmbMemory::write(Modbus::Address address, uint count, const void *buff, uint *fact)
 {
     switch (address.type())
     {
@@ -239,7 +239,7 @@ Modbus::StatusCode mbMemory::write(Modbus::Address address, uint count, const vo
     }
 }
 
-uint16_t mbMemory::getUInt16(Modbus::Address address) const
+uint16_t pmbMemory::getUInt16(Modbus::Address address) const
 {
     switch (address.type())
     {
@@ -252,7 +252,7 @@ uint16_t mbMemory::getUInt16(Modbus::Address address) const
     }
 }
 
-void mbMemory::setUInt16(Modbus::Address address, uint16_t value)
+void pmbMemory::setUInt16(Modbus::Address address, uint16_t value)
 {
     switch (address.type())
     {
@@ -265,7 +265,7 @@ void mbMemory::setUInt16(Modbus::Address address, uint16_t value)
     }
 }
 
-uint8_t mbMemory::exceptionStatus() const
+uint8_t pmbMemory::exceptionStatus() const
 {
     switch (m_exceptionStatusAddress.type())
     {

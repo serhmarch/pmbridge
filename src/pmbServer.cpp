@@ -1,26 +1,26 @@
-#include "mbServer.h"
+#include "pmbServer.h"
 
-#include "mbMemory.h"
+#include "pmbMemory.h"
 
-mbServer::mbServer(mbMemory *memory) : 
+pmbServer::pmbServer(pmbMemory *memory) : 
     m_memory(memory),
     m_port(nullptr)
 {
 }
 
-mbServer::~mbServer()
+pmbServer::~pmbServer()
 {
     delete m_port;
 }
 
-void mbServer::setSettings(Modbus::ProtocolType type, const void *settings)
+void pmbServer::setSettings(Modbus::ProtocolType type, const void *settings)
 {
     if (m_port)
         delete m_port;
     m_port = Modbus::createServerPort(m_memory, type, settings, false);
 }
 
-void mbServer::run()
+void pmbServer::run()
 {
     m_port->process();
 }

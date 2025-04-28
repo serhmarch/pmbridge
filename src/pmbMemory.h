@@ -2,12 +2,12 @@
  * memory - realizes functions for management
  * of daemon internal memory
  */
-#ifndef MB_MEMORY_H
-#define MB_MEMORY_H
+#ifndef PMB_MEMORY_H
+#define PMB_MEMORY_H
 
-#include "mb_core.h"
+#include "pmb_core.h"
 
-class mbMemory : public ModbusInterface
+class pmbMemory : public ModbusInterface
 {
 public:
     class Block
@@ -37,14 +37,14 @@ public:
         Modbus::StatusCode writeRegs(uint regOffset, uint regCount, const uint16_t *values, uint *fact = nullptr);
 
     private:
-        mb::ByteArray m_data;
+        pmb::ByteArray m_data;
         size_t m_sizeBits;
         uint m_changeCounter;
     };
 
 public:
-    mbMemory();
-    ~mbMemory();
+    pmbMemory();
+    ~pmbMemory();
 
 public:
 
@@ -254,4 +254,4 @@ private:
     Modbus::Address m_exceptionStatusAddress;
 };
 
-#endif //MB_MEMORY_H
+#endif // PMB_MEMORY_H

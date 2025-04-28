@@ -2,17 +2,17 @@
 #include <csignal>
 #include <vector>
 
-#include "mb_log.h"
-#include "mbBuilder.h"
-#include "mbProject.h"
-#include "mbServer.h"
-#include "mbCommand.h"
+#include "pmb_log.h"
+#include "pmbBuilder.h"
+#include "pmbProject.h"
+#include "pmbServer.h"
+#include "pmbCommand.h"
 
 volatile bool fRun = true;
 
 struct Options
 {
-    mb::String file{"mbridge.conf"};
+    pmb::String file{"pmbridge.conf"};
 };
 
 Options options;
@@ -24,7 +24,7 @@ void parseOptions(int argc, char **argv)
         char *opt = argv[i];
         if (!strcmp(opt, "--version") || !strcmp(opt, "-v"))
         {
-            puts("mpbridge : " MBRIDGE_VERSION_STR "\n"
+            puts("pmbridge : " MBRIDGE_VERSION_STR "\n"
                  "ModbusLib: " MODBUSLIB_VERSION_STR);
             exit(0);
         }
@@ -53,11 +53,11 @@ void signal_handler(int /*signal*/)
 
 int main(int argc, char **argv)
 {
-    std::cout << "mbridge starts ..." << std::endl;
+    std::cout << "pmbridge starts ..." << std::endl;
     parseOptions(argc, argv);
-    mbProject *project;
+    pmbProject *project;
     {
-        mbBuilder builder;
+        pmbBuilder builder;
         project = builder.load(options.file);
         if (builder.hasError())
         {
@@ -70,8 +70,8 @@ int main(int argc, char **argv)
             return 1;
         }
     }
-    const mb::List<mbServer*> &servers = project->servers();
-    const mb::List<mbCommand*> &commands = project->commands();
+    const pmb::List<pmbServer*> &servers = project->servers();
+    const pmb::List<pmbCommand*> &commands = project->commands();
     auto cmdit = commands.begin();
     std::signal(SIGINT, signal_handler);
     while (fRun)
@@ -89,5 +89,5 @@ int main(int argc, char **argv)
         Modbus::msleep(1);
     }
     delete project;
-    std::cout << "mbridge stopped" << std::endl;
+    std::cout << "pmbridge stopped" << std::endl;
 }

@@ -1,16 +1,16 @@
-#include "mbProject.h"
+#include "pmbProject.h"
 
-#include "mbMemory.h"
-#include "mbClient.h"
-#include "mbServer.h"
-#include "mbCommand.h"
+#include "pmbMemory.h"
+#include "pmbClient.h"
+#include "pmbServer.h"
+#include "pmbCommand.h"
 
-mbProject::mbProject()
+pmbProject::pmbProject()
 {
-    m_memory = new mbMemory();
+    m_memory = new pmbMemory();
 }
 
-mbProject::~mbProject()
+pmbProject::~pmbProject()
 {
     delete m_memory;
     for (auto server : m_servers)
@@ -21,7 +21,7 @@ mbProject::~mbProject()
         delete command;
 }
 
-mbServer *mbProject::server(const mb::String &name) const
+pmbServer *pmbProject::server(const pmb::String &name) const
 {
     auto it = m_hashServers.find(name);
     if (it != m_hashServers.end())
@@ -29,13 +29,13 @@ mbServer *mbProject::server(const mb::String &name) const
     return nullptr;
 }
 
-void mbProject::addServer(mbServer *server)
+void pmbProject::addServer(pmbServer *server)
 {
     m_servers.push_back(server);
     m_hashServers[server->name()] = server;
 }
 
-mbClient *mbProject::client(const mb::String &name) const
+pmbClient *pmbProject::client(const pmb::String &name) const
 {
     auto it = m_hashClients.find(name);
     if (it != m_hashClients.end())
@@ -43,7 +43,7 @@ mbClient *mbProject::client(const mb::String &name) const
     return nullptr;
 }
 
-void mbProject::addClient(mbClient *client)
+void pmbProject::addClient(pmbClient *client)
 {
     m_clients.push_back(client);
     m_hashClients[client->name()] = client;

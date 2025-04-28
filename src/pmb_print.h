@@ -1,14 +1,14 @@
 /*!
- * \file   mb_print.h
+ * \file   pmb_print.h
  * \brief  
  * 
  * \author serhmarch
  * \date   April 2025
  */
-#ifndef MB_PRINT_H
-#define MB_PRINT_H
+#ifndef PMB_PRINT_H
+#define PMB_PRINT_H
 
-#include "mb_log.h"
+#include "pmb_log.h"
 
 void printTx(const Modbus::Char *source, const uint8_t* buff, uint16_t size);
 void printRx(const Modbus::Char *source, const uint8_t* buff, uint16_t size);
@@ -21,4 +21,4 @@ void printErrorSerialServer(const Modbus::Char *source, Modbus::StatusCode statu
 void printNewConnection(const Modbus::Char *source);
 void printCloseConnection(const Modbus::Char *source);
 
-#endif // MB_PRINT_H
+#endif // PMB_PRINT_H

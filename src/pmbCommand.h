@@ -1,16 +1,16 @@
-#ifndef MB_COMMAND_H
-#define MB_COMMAND_H
+#ifndef PMB_COMMAND_H
+#define PMB_COMMAND_H
 
-#include "mb_core.h"
-#include "mbMemory.h"
+#include "pmb_core.h"
+#include "pmbMemory.h"
 
-class mbMemory;
-class mbClient;
+class pmbMemory;
+class pmbClient;
 
-class mbCommand
+class pmbCommand
 {
 public:
-    virtual ~mbCommand();
+    virtual ~pmbCommand();
     virtual bool run() = 0;
 };
 
@@ -19,15 +19,15 @@ public:
  ********************************* QUERY ********************************
  ************************************************************************/
 
-class mbCommandQuery : public mbCommand
+class mbCommandQuery : public pmbCommand
 {
 public:
-    mbCommandQuery(mbMemory *memory, mbClient *client);
+    mbCommandQuery(pmbMemory *memory, pmbClient *client);
     ~mbCommandQuery() override;
 
 public:
-    inline mbMemory *memory() const { return m_memory; }
-    inline mbClient *client() const { return m_client; }
+    inline pmbMemory *memory() const { return m_memory; }
+    inline pmbClient *client() const { return m_client; }
 
     inline uint8_t unit() const { return m_unit; }
     inline void setUnit(uint8_t unit) { m_unit = unit; }
@@ -52,14 +52,14 @@ protected:
     virtual Modbus::StatusCode runQuery() = 0;
 
 protected:
-    mbMemory *m_memory;
-    mbClient *m_client;
+    pmbMemory *m_memory;
+    pmbClient *m_client;
     uint8_t m_unit;
     uint16_t m_exec;
     Modbus::Address m_succAdr;
     Modbus::Address m_errcAdr;
     Modbus::Address m_errvAdr;
-    mb::ByteArray m_buffer;
+    pmb::ByteArray m_buffer;
     bool m_isBegin;
 };
 
@@ -133,10 +133,10 @@ public:
  ********************************* COPY *********************************
  ************************************************************************/
 
-class mbCommandCopy : public mbCommand
+class mbCommandCopy : public pmbCommand
 {
 public:
-    mbCommandCopy(mbMemory *memory);
+    mbCommandCopy(pmbMemory *memory);
 
 public:
     inline Modbus::Address srcAddress() const { return m_srcAdr; }
@@ -161,13 +161,13 @@ protected:
     void writeBytes();
 
 protected:
-    mbMemory *m_memory;
-    mbMemory::Block *m_readblock;
-    mbMemory::Block *m_writeblock;
+    pmbMemory *m_memory;
+    pmbMemory::Block *m_readblock;
+    pmbMemory::Block *m_writeblock;
     Modbus::Address m_srcAdr;
     Modbus::Address m_dstAdr;
     uint16_t m_count;
-    mb::ByteArray m_buff;
+    pmb::ByteArray m_buff;
     uint16_t m_readOffset;
     uint16_t m_readCount;
     uint16_t m_writeOffset;
@@ -183,16 +183,16 @@ protected:
  ********************************* DUMP *********************************
  ************************************************************************/
 
-class mbCommandDump : public mbCommand
+class mbCommandDump : public pmbCommand
 {
 public:
-    mbCommandDump(mbMemory *memory);
+    mbCommandDump(pmbMemory *memory);
 
 public:
     inline Modbus::Address memAddress() const { return m_memAdr; }
-    inline mb::Format format() const { return m_format; }
+    inline pmb::Format format() const { return m_format; }
     inline uint16_t count() const { return m_count; }
-    void setParams(Modbus::Address memAddress, mb::Format fmt, uint16_t count);
+    void setParams(Modbus::Address memAddress, pmb::Format fmt, uint16_t count);
 
 public:
     bool run() override;
@@ -204,13 +204,13 @@ protected:
     void printregs();
 
 protected:
-    mbMemory *m_memory;
-    mbMemory::Block *m_block;
+    pmbMemory *m_memory;
+    pmbMemory::Block *m_block;
     Modbus::Address m_memAdr;
-    mb::Format m_format;
+    pmb::Format m_format;
     uint16_t m_count;
     uint16_t m_elemCount;
-    mb::ByteArray m_buff;
+    pmb::ByteArray m_buff;
 
     typedef void (mbCommandDump::*pprintmethod)();
     pprintmethod m_printmethod;
@@ -222,7 +222,7 @@ protected:
  ********************************* DELAY ********************************
  ************************************************************************/
 
-class mbCommandDelay : public mbCommand
+class mbCommandDelay : public pmbCommand
 {
 public:
     mbCommandDelay();
@@ -238,4 +238,4 @@ protected:
     bool m_isBegin;
 };
 
-#endif // MB_COMMAND_H
+#endif // PMB_COMMAND_H

@@ -1,4 +1,4 @@
-#include "mbBuilder.h"
+#include "pmbBuilder.h"
 
 #include <fstream>
 #include <sstream>
@@ -8,13 +8,13 @@
 #include <ModbusTcpPort.h>
 #include <ModbusTcpServer.h>
 
-#include "mb_print.h"
-#include "mb_log.h"
-#include "mbProject.h"
-#include "mbMemory.h"
-#include "mbClient.h"
-#include "mbServer.h"
-#include "mbCommand.h"
+#include "pmb_print.h"
+#include "pmb_log.h"
+#include "pmbProject.h"
+#include "pmbMemory.h"
+#include "pmbClient.h"
+#include "pmbServer.h"
+#include "pmbCommand.h"
 
 #define CHAIN_CONFREADER_EOF (std::char_traits<char>::eof())
 
@@ -23,28 +23,28 @@ static inline bool containsChar(const char* str, char ch)
     return std::strchr(str, ch) != nullptr;
 }
 
-mbBuilder::mbBuilder() :
+pmbBuilder::pmbBuilder() :
     m_project(nullptr),
     m_ch(mbEMPTY_CHAR)
 {
 
 }
 
-mbBuilder::~mbBuilder()
+pmbBuilder::~pmbBuilder()
 {
     delete m_project;
 }
 
-mbProject *mbBuilder::load(const mb::String &filePath)
+pmbProject *pmbBuilder::load(const pmb::String &filePath)
 {
     m_file.open(filePath.c_str(), std::ios::in);
     if (!m_file.is_open())
     {
-        m_lastError =  mbSTR("Error opening file: ") + filePath;
+        m_lastError =  pmbSTR("Error opening file: ") + filePath;
         return nullptr;
     }
-    m_project = new mbProject();
-    mbProject *res = nullptr;
+    m_project = new pmbProject();
+    pmbProject *res = nullptr;
     nextChar();
     while (readNext())
         ;
@@ -57,7 +57,7 @@ mbProject *mbBuilder::load(const mb::String &filePath)
     return res;
 }
 
-bool mbBuilder::readNext()
+bool pmbBuilder::readNext()
 {
     std::string buffer;
     passSpace();
@@ -78,7 +78,7 @@ bool mbBuilder::readNext()
         if (!parseString(buffer, "="))
         {
             if (m_lastError.empty())
-                m_lastError = mbSTR("Error: Missed key-value pair separator '='");
+                m_lastError = pmbSTR("Error: Missed key-value pair separator '='");
             return false;
         }
         std::string command;
@@ -90,10 +90,10 @@ bool mbBuilder::readNext()
         if (!parseArgs(args))
         {
             if (m_lastError.empty())
-                m_lastError = mbSTR("Error: Parsing command arguments");
+                m_lastError = pmbSTR("Error: Parsing command arguments");
             return false;
         }
-        mbCommand *cmd = parseCommand(command, args);
+        pmbCommand *cmd = parseCommand(command, args);
         if (cmd)
             m_project->addCommand(cmd);
         else if (hasError())
@@ -103,14 +103,14 @@ bool mbBuilder::readNext()
     return true;
 }
 
-int mbBuilder::nextChar()
+int pmbBuilder::nextChar()
 {
     m_ch = m_file.get(); 
     return m_ch;
 }
 
 // Helper to skip over whitespace
-void mbBuilder::passSpace()
+void pmbBuilder::passSpace()
 {
     while (!isEOF() && (m_ch == (' ') || m_ch == ('\t') || m_ch == ('\v')))
     {
@@ -125,7 +125,7 @@ void mbBuilder::passSpace()
 }
 
 // Helper to skip the rest of the line (used for comments or after parsing a line)
-bool mbBuilder::passLine()
+bool pmbBuilder::passLine()
 {
     while (m_ch != CHAIN_CONFREADER_EOF)
     {  
@@ -145,7 +145,7 @@ bool mbBuilder::passLine()
     return !isEOF();
 }
 
-bool mbBuilder::parseString(std::string &buffer, const char *endchars, bool multiline)
+bool pmbBuilder::parseString(std::string &buffer, const char *endchars, bool multiline)
 {
     bool notfound = true;
     if (m_ch == '"' || m_ch == '\'')
@@ -155,7 +155,7 @@ bool mbBuilder::parseString(std::string &buffer, const char *endchars, bool mult
             buffer += m_ch;
         if (m_ch != quoteChar)
         {
-            m_lastError = mbSTR("Error: Not finished quotes");
+            m_lastError = pmbSTR("Error: Not finished quotes");
             return false;
         }
         nextChar();
@@ -211,11 +211,11 @@ bool mbBuilder::parseString(std::string &buffer, const char *endchars, bool mult
     return !(endchars && notfound);  
 }
 
-bool mbBuilder::parseArgs(std::list<std::string> &args)
+bool pmbBuilder::parseArgs(std::list<std::string> &args)
 {
     if (isEOF())
     {
-        m_lastError = mbSTR("Error: End of file while parsing arguments");
+        m_lastError = pmbSTR("Error: End of file while parsing arguments");
         return false;
     }
     if (m_ch == '{')
@@ -227,13 +227,13 @@ bool mbBuilder::parseArgs(std::list<std::string> &args)
             std::string arg;
             if (!parseString(arg, ",}", true))
             {
-                m_lastError = mbSTR("Error: Parsing argument string");
+                m_lastError = pmbSTR("Error: Parsing argument string");
                 return false;
             }
             args.push_back(std::move(arg));
             if (isEOF())
             {
-                m_lastError = mbSTR("Error: Ending '}' not found");
+                m_lastError = pmbSTR("Error: Ending '}' not found");
                 return false;
             }
             if (m_ch == ',')
@@ -253,7 +253,7 @@ bool mbBuilder::parseArgs(std::list<std::string> &args)
             std::string arg;
             if (!parseString(arg, ",\r\n"))
             {
-                m_lastError = mbSTR("Error: Parsing argument string");
+                m_lastError = pmbSTR("Error: Parsing argument string");
                 return false;
             }
             args.push_back(std::move(arg));
@@ -267,7 +267,7 @@ bool mbBuilder::parseArgs(std::list<std::string> &args)
     return true;
 }
 
-mbCommand* mbBuilder::parseCommand(const std::string &command, const std::list<std::string> &args)
+pmbCommand* pmbBuilder::parseCommand(const std::string &command, const std::list<std::string> &args)
 {
     if (command == "LOG")
     {
@@ -304,7 +304,7 @@ mbCommand* mbBuilder::parseCommand(const std::string &command, const std::list<s
     return nullptr;
 }
 
-mbCommand *mbBuilder::parseLog(const std::list<std::string> &args)
+pmbCommand *pmbBuilder::parseLog(const std::list<std::string> &args)
 {
     if (args.size() < 2)
     {
@@ -315,39 +315,39 @@ mbCommand *mbBuilder::parseLog(const std::list<std::string> &args)
     auto end = args.end();
     const std::string &format = *it; ++it;
     const std::string &timeformat = *it;
-    mb::setLogFormat(format);
-    mb::setLogTimeFormat(timeformat);
-    mb::LogFlags flags = 0;
+    pmb::setLogFormat(format);
+    pmb::setLogTimeFormat(timeformat);
+    pmb::LogFlags flags = 0;
     for (; it != end; ++it)
     {
         const std::string &arg = *it;
         if (arg == "ALL")
-            flags |= (mb::Log_All);
+            flags |= (pmb::Log_All);
         else if (arg == "ERROR")
-            flags |= (mb::Log_Error);
+            flags |= (pmb::Log_Error);
         else if (arg == "WARN")
-            flags |= (mb::Log_Warning);
+            flags |= (pmb::Log_Warning);
         else if (arg == "INFO")
-            flags |= (mb::Log_Info);
+            flags |= (pmb::Log_Info);
         else if (arg == "DEBUG")
-            flags |= (mb::Log_Debug);
+            flags |= (pmb::Log_Debug);
         else if (arg == "CONN")
-            flags |= (mb::Log_Connection);
+            flags |= (pmb::Log_Connection);
         else if (arg == "RX")
-            flags |= (mb::Log_Rx);
+            flags |= (pmb::Log_Rx);
         else if (arg == "TX")
-            flags |= (mb::Log_Tx);
+            flags |= (pmb::Log_Tx);
         else
         {
             m_lastError = "Unknown log category: " + arg;
             return nullptr;
         }
     }
-    mb::setLogFlags(flags);
+    pmb::setLogFlags(flags);
     return nullptr;
 }
 
-mbCommand* mbBuilder::parseMemory(const std::list<std::string> &args)
+pmbCommand* pmbBuilder::parseMemory(const std::list<std::string> &args)
 {
     if (args.size() != 4)
     {
@@ -370,7 +370,7 @@ mbCommand* mbBuilder::parseMemory(const std::list<std::string> &args)
     return nullptr;
 }
 
-mbCommand *mbBuilder::parseServer(const std::list<std::string> &args)
+pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
 {
     if (args.size() < 2)
     {
@@ -384,7 +384,7 @@ mbCommand *mbBuilder::parseServer(const std::list<std::string> &args)
     bool ok;
     const std::string &stype = *it;
     ++it;
-    Modbus::ProtocolType type = mb::toProtocolType(stype, &ok);
+    Modbus::ProtocolType type = pmb::toProtocolType(stype, &ok);
     if (!ok)
     {
         m_lastError = "Unknown port type for SERVER-port: " + stype;
@@ -399,7 +399,7 @@ mbCommand *mbBuilder::parseServer(const std::list<std::string> &args)
         m_lastError = "Server with this name already exists: " + name;
         return nullptr;
     }
-    mbServer *server = new mbServer(m_project->memory());
+    pmbServer *server = new pmbServer(m_project->memory());
     server->setName(name);
     m_project->addServer(server);
     ModbusServerPort *srv;
@@ -465,7 +465,7 @@ mbCommand *mbBuilder::parseServer(const std::list<std::string> &args)
     return nullptr;
 }
 
-mbCommand *mbBuilder::parseClient(const std::list<std::string> &args)
+pmbCommand *pmbBuilder::parseClient(const std::list<std::string> &args)
 {
     if (args.size() < 3)
     {
@@ -479,7 +479,7 @@ mbCommand *mbBuilder::parseClient(const std::list<std::string> &args)
     bool ok;
     const std::string &stype = *it;
     ++it;
-    Modbus::ProtocolType type = mb::toProtocolType(stype, &ok);
+    Modbus::ProtocolType type = pmb::toProtocolType(stype, &ok);
     if (!ok)
     {
         m_lastError = "Unknown port type for CLIENT-port: " + stype;
@@ -494,7 +494,7 @@ mbCommand *mbBuilder::parseClient(const std::list<std::string> &args)
         m_lastError = "Client with this name already exists: " + name;
         return nullptr;
     }
-    mbClient *client = new mbClient();
+    pmbClient *client = new pmbClient();
     client->setName(name);
     m_project->addClient(client);
     ModbusClientPort *cli;
@@ -549,7 +549,7 @@ mbCommand *mbBuilder::parseClient(const std::list<std::string> &args)
     return nullptr;
 }
 
-mbCommand* mbBuilder::parseQuery(const std::list<std::string> &args)
+pmbCommand* pmbBuilder::parseQuery(const std::list<std::string> &args)
 {
     if (args.size() != 10)
     {
@@ -632,7 +632,7 @@ mbCommand* mbBuilder::parseQuery(const std::list<std::string> &args)
     return cmd;
 }
 
-mbCommand* mbBuilder::parseCopy(const std::list<std::string> &args)
+pmbCommand* pmbBuilder::parseCopy(const std::list<std::string> &args)
 {
     if (args.size() != 3)
     {
@@ -650,7 +650,7 @@ mbCommand* mbBuilder::parseCopy(const std::list<std::string> &args)
     return cmd;
 }
 
-mbCommand* mbBuilder::parseDelay(const std::list<std::string> &args)
+pmbCommand* pmbBuilder::parseDelay(const std::list<std::string> &args)
 {
     if (args.size() != 1)
     {
@@ -666,7 +666,7 @@ mbCommand* mbBuilder::parseDelay(const std::list<std::string> &args)
     return cmd;
 }
 
-mbCommand* mbBuilder::parseDump(const std::list<std::string> &args)
+pmbCommand* pmbBuilder::parseDump(const std::list<std::string> &args)
 {
     if (args.size() != 3)
     {
@@ -677,9 +677,9 @@ mbCommand* mbBuilder::parseDump(const std::list<std::string> &args)
     auto it = args.begin();
     Modbus::Address srcAdr  = Modbus::Address::fromString(*it);         ++it;
     uint16_t count       = static_cast<uint16_t>(std::atoi((*it).data())); ++it;
-    mb::Format format   = mb::toFormat(*it);
+    pmb::Format format   = pmb::toFormat(*it);
 
-    if (format == mb::Format_Unknown)
+    if (format == pmb::Format_Unknown)
     {
         m_lastError = "Unknown format: " + *it;
         return nullptr;
@@ -690,7 +690,7 @@ mbCommand* mbBuilder::parseDump(const std::list<std::string> &args)
     return cmd;
 }
 
-bool mbBuilder::parseSerialSettings(std::list<std::string>::const_iterator &it, const std::list<std::string>::const_iterator &end, Modbus::SerialSettings &settings)
+bool pmbBuilder::parseSerialSettings(std::list<std::string>::const_iterator &it, const std::list<std::string>::const_iterator &end, Modbus::SerialSettings &settings)
 {
     const ModbusSerialPort::Defaults &d = ModbusSerialPort::Defaults::instance();
 

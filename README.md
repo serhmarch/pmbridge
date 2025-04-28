@@ -2,7 +2,7 @@
 
 ## Overview
 
-ModbusBridge (`mbridge`) is a simple cross-platform (Windows, Linux) Modbus converter application
+ModbusBridge (`pmbridge`) is a simple cross-platform (Windows, Linux) Modbus converter application
 that provides interconvertion between different types of Modbus protocol: `TCP`, `RTU`, `ASC`.
 
 It can be used, for instance, in Raspberry Pi computer to act as Modbus converter.
@@ -29,12 +29,12 @@ Application implements such Modbus functions as:
 * `23` (`0x17`) - `READ_WRITE_MULTIPLE_REGISTERS`
 * `24` (`0x18`) - `READ_FIFO_QUEUE`
 
-## Using mbridge
+## Using pmbridge
 
 To show list of available parameters print:
 ```console
-$ mbridge --help
-Usage: mbridge -ctype <type> [-coptions] -stype <type> [-soptions]
+$ pmbridge --help
+Usage: pmbridge -ctype <type> [-coptions] -stype <type> [-soptions]
 
 Options (-c client, -s server):
   --version (-v) - show program version.
@@ -56,13 +56,13 @@ Params <param> for client (-c) and server (-s):
   * tib <timeout>   - timeout inter byte for RTU or ASC (millisec, default is 50)
 
 Examples:
-  mbridge -stype TCP -ctype RTU -cserial COM6
-  mbridge -stype RTU -sserial /dev/ttyUSB0 -sbaud 19200 -ctype TCP -chost some.plc
+  pmbridge -stype TCP -ctype RTU -cserial COM6
+  pmbridge -stype RTU -sserial /dev/ttyUSB0 -sbaud 19200 -ctype TCP -chost some.plc
 ```
 
 Next example makes Modbus bridge with RTU client part and TCP server part works on TCP port 502:
 ```console
-> mbridge -stype TCP -ctype RTU -cserial COM6
+> pmbridge -stype TCP -ctype RTU -cserial COM6
 RTU:Client parameters:
 ----------------------
 port   = COM6
@@ -79,7 +79,7 @@ TCP:Server parameters:
 port    = 502
 timeout = 3000
 
-mbridge starts ...
+pmbridge starts ...
 New connection: DESKTOP-TNLLA10:7512
 DESKTOP-TNLLA10:7512 Rx: 00 01 00 00 00 06 01 04 00 00 00 04
 RTU:Client Tx: 01 04 00 00 00 04 F1 C9
@@ -91,7 +91,7 @@ RTU:Client Tx: 01 04 00 00 00 04 F1 C9
 RTU:Client Rx: 01 04 08 00 00 00 00 00 00 00 00 24 0D
 DESKTOP-TNLLA10:7512 Tx: 00 05 00 00 00 0B 01 04 08 00 00 00 00 00 00 00 00
 Close connection: DESKTOP-TNLLA10:7512
-mbridge stopped
+pmbridge stopped
 ```
 
 ## Build using CMake

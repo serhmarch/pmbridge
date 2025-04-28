@@ -1,11 +1,11 @@
-#include "mbCommand.h"
+#include "pmbCommand.h"
 
 #include <iostream>
 
-#include "mbMemory.h"
-#include "mbClient.h"
+#include "pmbMemory.h"
+#include "pmbClient.h"
 
-mbCommand::~mbCommand()
+pmbCommand::~pmbCommand()
 {
 }
 
@@ -14,7 +14,7 @@ mbCommand::~mbCommand()
  ********************************* QUERY ********************************
  ************************************************************************/
 
- mbCommandQuery::mbCommandQuery(mbMemory *memory, mbClient *client) :
+ mbCommandQuery::mbCommandQuery(pmbMemory *memory, pmbClient *client) :
     m_memory(memory),
     m_client(client),
     m_unit(0),
@@ -130,7 +130,7 @@ Modbus::StatusCode mbCommandQueryWriteMultipleRegisters::runQuery()
  ********************************* COPY *********************************
  ************************************************************************/
 
- mbCommandCopy::mbCommandCopy(mbMemory *memory) :
+ mbCommandCopy::mbCommandCopy(pmbMemory *memory) :
     m_memory(memory)
 {
     m_readblock = &m_memory->memBlockRef_4x();
@@ -374,133 +374,133 @@ void mbCommandCopy::writeBytes()
  ********************************* DUMP *********************************
  ************************************************************************/
 
-mbCommandDump::mbCommandDump(mbMemory *memory) :
+mbCommandDump::mbCommandDump(pmbMemory *memory) :
     m_memory(memory),
-    m_format(mb::Format_Hex16),
+    m_format(pmb::Format_Hex16),
     m_count(0),
     m_elemCount(0)
 {
     m_printmethod = &mbCommandDump::printregs;
 }
 
-static void printformat(mb::Format fmt, const void *mem, uint16_t count)
+static void printformat(pmb::Format fmt, const void *mem, uint16_t count)
 {
     const uint8_t *bytePtr = static_cast<const uint8_t *>(mem);
     switch (fmt)
     {
-    case mb::Format_Bin16:
+    case pmb::Format_Bin16:
         for (uint16_t i = 0; i < count; ++i)
         {
-            printf("%s ", mb::toBinString(*reinterpret_cast<const uint16_t *>(bytePtr)).data());
+            printf("%s ", pmb::toBinString(*reinterpret_cast<const uint16_t *>(bytePtr)).data());
             bytePtr += sizeof(uint16_t);
         }
         break;
-    case mb::Format_Oct16:
+    case pmb::Format_Oct16:
         for (uint16_t i = 0; i < count; ++i)
         {
             printf("%06o ", *reinterpret_cast<const uint16_t *>(bytePtr));
             bytePtr += sizeof(uint16_t);
         }
         break;
-    case mb::Format_Dec16:
+    case pmb::Format_Dec16:
         for (uint16_t i = 0; i < count; ++i)
         {
             printf("%d ", *reinterpret_cast<const int16_t *>(bytePtr));
             bytePtr += sizeof(uint16_t);
         }
         break;
-    case mb::Format_UDec16:
+    case pmb::Format_UDec16:
         for (uint16_t i = 0; i < count; ++i)
         {
             printf("%u ", *reinterpret_cast<const uint16_t *>(bytePtr));
             bytePtr += sizeof(uint16_t);
         }
         break;
-    case mb::Format_Hex16:
+    case pmb::Format_Hex16:
         for (uint16_t i = 0; i < count; ++i)
         {
             printf("%04X ", *reinterpret_cast<const uint16_t *>(bytePtr));
             bytePtr += sizeof(uint16_t);
         }
         break;
-    case mb::Format_Bin32:
+    case pmb::Format_Bin32:
         for (uint16_t i = 0; i < count; ++i)
         {
-            printf("%s ", mb::toBinString(*reinterpret_cast<const uint32_t *>(bytePtr)).data());
+            printf("%s ", pmb::toBinString(*reinterpret_cast<const uint32_t *>(bytePtr)).data());
             bytePtr += sizeof(uint32_t);
         }
         break;
-    case mb::Format_Oct32:
+    case pmb::Format_Oct32:
         for (uint16_t i = 0; i < count; ++i)
         {
             printf("%011o ", *reinterpret_cast<const uint32_t *>(bytePtr));
             bytePtr += sizeof(uint32_t);
         }
         break;
-    case mb::Format_Dec32:
+    case pmb::Format_Dec32:
         for (uint16_t i = 0; i < count; ++i)
         {
             printf("%d ", *reinterpret_cast<const int32_t *>(bytePtr));
             bytePtr += sizeof(uint32_t);
         }
         break;
-    case mb::Format_UDec32:
+    case pmb::Format_UDec32:
         for (uint16_t i = 0; i < count; ++i)
         {
             printf("%u ", *reinterpret_cast<const uint32_t *>(bytePtr));
             bytePtr += sizeof(uint32_t);
         }
         break;
-    case mb::Format_Hex32:
+    case pmb::Format_Hex32:
         for (uint16_t i = 0; i < count; ++i)
         {
             printf("%08X ", *reinterpret_cast<const uint32_t *>(bytePtr));
             bytePtr += sizeof(uint32_t);
         }
         break;
-    case mb::Format_Bin64:
+    case pmb::Format_Bin64:
         for (uint16_t i = 0; i < count; ++i)
         {
-            printf("%s ", mb::toBinString(*reinterpret_cast<const uint64_t *>(bytePtr)).data());
+            printf("%s ", pmb::toBinString(*reinterpret_cast<const uint64_t *>(bytePtr)).data());
             bytePtr += sizeof(uint64_t);
         }
         break;
-    case mb::Format_Oct64:
+    case pmb::Format_Oct64:
         for (uint16_t i = 0; i < count; ++i)
         {
             printf("%022llo ", *reinterpret_cast<const uint64_t *>(bytePtr));
             bytePtr += sizeof(uint64_t);
         }
         break;
-    case mb::Format_Dec64:
+    case pmb::Format_Dec64:
         for (uint16_t i = 0; i < count; ++i)
         {
             printf("%lld ", *reinterpret_cast<const int64_t *>(bytePtr));
             bytePtr += sizeof(uint64_t);
         }
         break;
-    case mb::Format_UDec64:
+    case pmb::Format_UDec64:
         for (uint16_t i = 0; i < count; ++i)
         {
             printf("%llu ", *reinterpret_cast<const uint64_t *>(bytePtr));
             bytePtr += sizeof(uint64_t);
         }
         break;
-    case mb::Format_Hex64:
+    case pmb::Format_Hex64:
         for (uint16_t i = 0; i < count; ++i)
         {
             printf("%016llX ", *reinterpret_cast<const uint64_t *>(bytePtr));
             bytePtr += sizeof(uint64_t);
         }
         break;
-    case mb::Format_Float:
+    case pmb::Format_Float:
         for (uint16_t i = 0; i < count; ++i)
         {
             printf("%f ", *reinterpret_cast<const float *>(bytePtr));
             bytePtr += sizeof(float);
         }
         break;
-    case mb::Format_Double:
+    case pmb::Format_Double:
         for (uint16_t i = 0; i < count; ++i)
         {
             printf("%lf ", *reinterpret_cast<const double *>(bytePtr));
@@ -513,7 +513,7 @@ static void printformat(mb::Format fmt, const void *mem, uint16_t count)
     }
 }
 
-void mbCommandDump::setParams(Modbus::Address memAddress, mb::Format fmt, uint16_t count)
+void mbCommandDump::setParams(Modbus::Address memAddress, pmb::Format fmt, uint16_t count)
 {
     m_memAdr = memAddress;
     m_format = fmt;
@@ -545,7 +545,7 @@ void mbCommandDump::setParams(Modbus::Address memAddress, mb::Format fmt, uint16
                                                                 m_memAdr.offset()+1,
                                                                 m_memAdr.type(),
                                                                 m_memAdr.offset()+m_elemCount,
-                                                                mb::toConstCharPtr(m_format));
+                                                                pmb::toConstCharPtr(m_format));
     m_prefix = buff;
 }
 
@@ -560,7 +560,7 @@ bool mbCommandDump::run()
 void mbCommandDump::calcbits()
 {
     size_t count = m_count;
-    size_t bytesz = mb::sizeofFormat(m_format);
+    size_t bytesz = pmb::sizeofFormat(m_format);
     size_t bitsz = bytesz * MB_BYTE_SZ_BITES;
     size_t bitcount = count * bitsz;
     if (m_memAdr.offset()+bitcount > m_block->sizeBits())
@@ -577,7 +577,7 @@ void mbCommandDump::calcbits()
 void mbCommandDump::calcregs()
 {
     size_t count = m_count;
-    size_t bytesz = mb::sizeofFormat(m_format);
+    size_t bytesz = pmb::sizeofFormat(m_format);
     size_t regsz = bytesz / MB_REGE_SZ_BYTES;
     size_t regcount = count * regsz;
     if (m_memAdr.offset()+regcount > m_block->sizeRegs())

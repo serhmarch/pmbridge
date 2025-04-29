@@ -8,7 +8,7 @@
 namespace pmb {
 
 #define ccTOKEN_TIME "%time"
-#define ccTOKEN_TEXT "%time"
+#define ccTOKEN_TEXT "%text"
 #define ccTOKEN_CAT "%cat"
 
 class LogConsole
@@ -75,7 +75,7 @@ public:
                 token = Token(Token::Literal);
                 token.str = c;
             }
-            pos += 1;
+            ++pos;
         }
         if (token.type == Token::Literal) 
             res.push_back(token);
@@ -119,6 +119,7 @@ public:
                             token.str = buff;
                         }
                     }
+                        ++pos;
                         continue;
                     }
                     if (token.type == TimeToken::Literal) 
@@ -126,6 +127,7 @@ public:
                     token.type = type;
                     token.str.clear();
                     res.push_back(token);
+                    ++pos;
                     continue;
                 }
             }
@@ -144,7 +146,7 @@ public:
     }
 
 public:
-    LogConsole();
+    LogConsole() {}
 
 public:
     void setLogFormat(const String &fmt)
@@ -218,6 +220,15 @@ public:
         for (auto it = m_formatTokens.begin(); it != m_formatTokens.end(); ++it) 
             res += toString(*it, category, text);
         std::cout << res << std::endl;
+        Modbus::Color color = pmb::toColor(category);
+        if (color == Modbus::Color_Default)
+            std::cout << res << std::endl;
+        else
+        {
+            Modbus::setConsoleColor(color);
+            std::cout << res << std::endl;
+            Modbus::setConsoleColor(Modbus::Color_Default);
+        }
     }
 
 private:
@@ -229,7 +240,18 @@ static LogConsole s_logConsole;
 
 static LogFlags s_logFlags = Log_All;
 
-const Char* toConstCharPtr(LogFlag logFlag)
+Modbus::Color toColor(LogFlag flag)
+{
+    switch (flag)
+    {
+    case Log_Error  : return Modbus::Color_Red;
+    case Log_Warning: return Modbus::Color_Yellow;
+    default:
+        return Modbus::Color_Default;
+    }
+}
+
+const Char *toConstCharPtr(LogFlag logFlag)
 {
     switch (logFlag)
     {
@@ -242,6 +264,30 @@ const Char* toConstCharPtr(LogFlag logFlag)
     case Log_Rx        : return pmbSTR("RX"  );
     }
     return nullptr;
+}
+
+LogFlag toLogFlag(const Char *slogFlag)
+{
+    if (strcmp(slogFlag, pmbSTR("ERR" )) == 0) return Log_Error     ;
+    if (strcmp(slogFlag, pmbSTR("WARN")) == 0) return Log_Warning   ;
+    if (strcmp(slogFlag, pmbSTR("INFO")) == 0) return Log_Info      ;
+    if (strcmp(slogFlag, pmbSTR("DBG" )) == 0) return Log_Debug     ;
+    if (strcmp(slogFlag, pmbSTR("CONN")) == 0) return Log_Connection;
+    if (strcmp(slogFlag, pmbSTR("TX"  )) == 0) return Log_Tx        ;
+    if (strcmp(slogFlag, pmbSTR("RX"  )) == 0) return Log_Rx        ;
+    return static_cast<LogFlag>(0);
+}
+
+LogFlags toLogFlags(const String &slogFlags)
+{
+    LogFlags res = 0;
+    // TODO: trim and upper case every item
+    StringList ls = toStringList(slogFlags);
+    for (const auto &s : ls)
+    {
+        res |= toLogFlag(s);
+    }
+    return res;
 }
 
 LogFlags logFlags()
@@ -261,7 +307,7 @@ void setLogFormat(const String &fmt)
 
 void setLogTimeFormat(const String &fmt)
 {
-    s_logConsole.setLogFormat(fmt);
+    s_logConsole.setLogTimeFormat(fmt);
 }
 
 void logMessage(LogFlag category, const Char *format, ...)

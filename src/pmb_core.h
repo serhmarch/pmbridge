@@ -83,6 +83,9 @@ inline String toDecString(T value) { return Modbus::toDecString<String>(value); 
 template<class T>
 inline String toDecString(T value, int c, char fillChar = '0') { return Modbus::toDecString<String>(value, c, fillChar); }
 
+/// \details Converts string into string list. String elements separated by: ';', ',' або ' '. 
+StringList toStringList(const String &s);
+
 } // namespace pmb
 
 #endif // PMB_GLOBAL_H

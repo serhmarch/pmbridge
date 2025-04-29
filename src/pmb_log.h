@@ -26,8 +26,23 @@ enum LogFlag
 
 typedef uint64_t LogFlags;
 
+/// \details Return console text color for `flag`
+Modbus::Color toColor(LogFlag flag);
+
 /// \details
 const Char* toConstCharPtr(LogFlag logFlag);
+
+/// \details
+inline String toString(LogFlag logFlag) { return String(toConstCharPtr(logFlag)); }
+
+/// \details
+LogFlag toLogFlag(const Char* slogFlag);
+
+/// \details
+inline LogFlag toLogFlag(const String &slogFlag) { return toLogFlag(slogFlag.data()); }
+
+/// \details
+LogFlags toLogFlags(const String &slogFlags);
 
 /// \details
 LogFlags logFlags();

@@ -12,10 +12,10 @@ volatile bool fRun = true;
 
 struct Options
 {
-    pmb::String file      {"pmbridge.conf"};
-    pmb::String log_flags ;
-    pmb::String log_time  {"[%time] %cat: %text"};
-    pmb::String log_format{"%Y-%M-%D %h:%m:%s.%f"};
+    pmb::String   file      {"pmbridge.conf"};
+    pmb::LogFlags log_flags {static_cast<pmb::LogFlags>(pmb::Log_All)};
+    pmb::String   log_format{"[%time] %cat: %text"};
+    pmb::String   log_time  {"%Y-%M-%D %h:%m:%s.%f"};
 };
 
 Options options;
@@ -53,7 +53,8 @@ void parseOptions(int argc, char **argv)
                 //printHelp();
                 std::exit(1);
             }
-            options.log_flags = argv[i];
+            options.log_flags = 0;
+            options.log_flags = pmb::toLogFlags(pmb::String(argv[i]));
             continue;
         }
         if (!std::strcmp(opt, "--log-time"))
@@ -88,6 +89,9 @@ int main(int argc, char **argv)
 {
     std::cout << "pmbridge starts ..." << std::endl;
     parseOptions(argc, argv);
+    pmb::setLogFlags(options.log_flags);
+    pmb::setLogFormat(options.log_format);
+    pmb::setLogTimeFormat(options.log_time);
     pmbProject *project;
     {
         pmbBuilder builder;

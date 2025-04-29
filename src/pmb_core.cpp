@@ -1,5 +1,7 @@
 #include "pmb_core.h"
 
+#include <sstream>
+
 namespace pmb {
 
 Modbus::ProtocolType toProtocolType(const String &stype, bool *ok)
@@ -92,6 +94,30 @@ const Char* toConstCharPtr(Format fmt)
     case Format_Double: return pmbSTR("Double");
     }
     return nullptr;
+}
+
+StringList toStringList(const String &s)
+{
+    std::istringstream stream(s);
+    String output;
+    StringList outputs;
+    size_t start = 0;
+    size_t end = 0;
+    while ((end = s.find_first_of(pmbSTR(";, |"), start)) != String::npos) 
+    {
+        output = s.substr(start, end - start);
+        output.erase(0, output.find_first_not_of(pmbCHR(' ')));
+        output.erase(output.find_last_not_of(pmbCHR(' ')) + 1);
+        if (!output.empty())
+            outputs.push_back(output);
+        start = end + 1;
+    }
+    output = s.substr(start);
+    output.erase(0, output.find_first_not_of(pmbCHR(' ')));
+    output.erase(output.find_last_not_of(pmbCHR(' ')) + 1);
+    if (!output.empty())
+        outputs.push_back(output);
+    return outputs;
 }
 
 } // namespace pmb

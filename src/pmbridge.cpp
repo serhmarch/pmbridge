@@ -46,7 +46,7 @@ void parseOptions(int argc, char **argv)
             options.file = argv[i];
             continue;
         }
-        if (!std::strcmp(opt, "--log-flags"))
+        if (!std::strcmp(opt, "--log-flags") || !std::strcmp(opt, "-c"))
         {
             if (++i >= argc)
             {
@@ -57,7 +57,7 @@ void parseOptions(int argc, char **argv)
             options.log_flags = pmb::toLogFlags(pmb::String(argv[i]));
             continue;
         }
-        if (!std::strcmp(opt, "--log-time"))
+        if (!std::strcmp(opt, "--log-time") || !std::strcmp(opt, "-t"))
         {
             if (++i >= argc)
             {
@@ -67,7 +67,7 @@ void parseOptions(int argc, char **argv)
             options.log_time = argv[i];
             continue;
         }
-        if (!std::strcmp(opt, "--log-format"))
+        if (!std::strcmp(opt, "--log-format") || !std::strcmp(opt, "-fmt"))
         {
             if (++i >= argc)
             {

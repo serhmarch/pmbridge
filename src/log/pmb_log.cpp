@@ -33,11 +33,10 @@ const Char *toConstCharPtr(LogFlag logFlag)
     case Log_Error     : return pmbSTR("ERR" );
     case Log_Warning   : return pmbSTR("WARN");
     case Log_Info      : return pmbSTR("INFO");
-    case Log_Debug     : return pmbSTR("DBG" );
+    case Log_Dump      : return pmbSTR("DUMP");
     case Log_Connection: return pmbSTR("CONN");
     case Log_Tx        : return pmbSTR("TX"  );
     case Log_Rx        : return pmbSTR("RX"  );
-    case Log_Dump      : return pmbSTR("DUMP");
     }
     return nullptr;
 }
@@ -47,11 +46,10 @@ LogFlag toLogFlag(const Char *slogFlag)
     if (strcmp(slogFlag, pmbSTR("ERR" )) == 0) return Log_Error     ;
     if (strcmp(slogFlag, pmbSTR("WARN")) == 0) return Log_Warning   ;
     if (strcmp(slogFlag, pmbSTR("INFO")) == 0) return Log_Info      ;
-    if (strcmp(slogFlag, pmbSTR("DBG" )) == 0) return Log_Debug     ;
+    if (strcmp(slogFlag, pmbSTR("DUMP")) == 0) return Log_Dump      ;
     if (strcmp(slogFlag, pmbSTR("CONN")) == 0) return Log_Connection;
     if (strcmp(slogFlag, pmbSTR("TX"  )) == 0) return Log_Tx        ;
     if (strcmp(slogFlag, pmbSTR("RX"  )) == 0) return Log_Rx        ;
-    if (strcmp(slogFlag, pmbSTR("DUMP")) == 0) return Log_Dump      ;
     return static_cast<LogFlag>(0);
 }
 

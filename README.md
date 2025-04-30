@@ -25,7 +25,7 @@ Clients can use next list of functions:
 * `15` (`0x0F`) - `WRITE_MULTIPLE_COILS`
 * `16` (`0x10`) - `WRITE_MULTIPLE_REGISTERS`
 
-Server can use next list of functions:
+Server implements next list of functions:
 
 * `1`  (`0x01`) - `READ_COILS`
 * `2`  (`0x02`) - `READ_DISCRETE_INPUTS`
@@ -214,6 +214,47 @@ COPY={300901,6,%MW0000h}
 DELAY={2000}
 ```
 
+### Error codes
+
+Table of error codes:
+
+ Hex code | Dec code | Name                                          | Description
+ ---------|----------|-----------------------------------------------|------------------------------------------------
+ `0x0001` | `   1`   | `Status_BadIllegalFunction`                   | Standard error. The feature is not supported
+ `0x0002` | `   2`   | `Status_BadIllegalDataAddress`                | Standard error. Invalid data address
+ `0x0003` | `   3`   | `Status_BadIllegalDataValue`                  | Standard error. Invalid data value
+ `0x0004` | `   4`   | `Status_BadServerDeviceFailure`               | Standard error. Failure during a specified operation
+ `0x0005` | `   5`   | `Status_BadAcknowledge`                       | Standard error. The server has accepted the request and is processing it, but it will take a long time
+ `0x0006` | `   6`   | `Status_BadServerDeviceBusy`                  | Standard error. The server is busy processing a long command. The request must be repeated later
+ `0x0007` | `   7`   | `Status_BadNegativeAcknowledge`               | Standard error. The programming function cannot be performed
+ `0x0008` | `   8`   | `Status_BadMemoryParityError`                 | Standard error. The server attempted to read a record file but detected a parity error in memory
+ `0x000A` | `  10`   | `Status_BadGatewayPathUnavailable`            | Standard error. Indicates that the gateway was unable to allocate an internal communication path from the input port o the output port for processing the request. Usually means that the gateway is misconfigured or overloaded
+ `0x000B` | `  11`   | `Status_BadGatewayTargetDeviceFailedToRespond`| Standard error. Indicates that no response was obtained from the target device. Usually means that the device is not present on the network
+ `0x0101` | ` 257`   | `Status_BadEmptyResponse`                     | Error. Empty request/response body
+ `0x0102` | ` 258`   | `Status_BadNotCorrectRequest`                 | Error. Invalid request
+ `0x0103` | ` 259`   | `Status_BadNotCorrectResponse`                | Error. Invalid response
+ `0x0104` | ` 260`   | `Status_BadWriteBufferOverflow`               | Error. Write buffer overflow
+ `0x0105` | ` 261`   | `Status_BadReadBufferOverflow`                | Error. Request receive buffer overflow
+ `0x0201` | ` 513`   | `Status_BadSerialOpen`                        | Error. Serial port cannot be opened
+ `0x0202` | ` 514`   | `Status_BadSerialWrite`                       | Error. Cannot send a parcel to the serial port
+ `0x0203` | ` 515`   | `Status_BadSerialRead`                        | Error. Reading the serial port
+ `0x0204` | ` 516`   | `Status_BadSerialReadTimeout`                 | Error. Reading the serial port (timeout)
+ `0x0205` | ` 517`   | `Status_BadSerialWriteTimeout`                | Error. Writing the serial port (timeout)
+ `0x0301` | ` 769`   | `Status_BadAscMissColon`                      | Error (ASC). Missing packet start character ':'
+ `0x0302` | ` 770`   | `Status_BadAscMissCrLf`                       | Error (ASC). '\\r\\n' end of packet character missing
+ `0x0303` | ` 771`   | `Status_BadAscChar`                           | Error (ASC). Invalid ASCII character
+ `0x0304` | ` 772`   | `Status_BadLrc`                               | Error (ASC). Invalid checksum
+ `0x0401` | `1025`   | `Status_BadCrc`                               | Error (RTU). Wrong checksum
+ `0x0501` | `1281`   | `Status_BadTcpCreate`                         | Error. Unable to create a TCP socket
+ `0x0502` | `1282`   | `Status_BadTcpConnect`                        | Error. Unable to create a TCP connection
+ `0x0503` | `1283`   | `Status_BadTcpWrite`                          | Error. Unable to send a TCP packet
+ `0x0504` | `1284`   | `Status_BadTcpRead`                           | Error. Unable to receive a TCP packet
+ `0x0505` | `1285`   | `Status_BadTcpBind`                           | Error. Unable to bind a TCP socket (server side)
+ `0x0506` | `1286`   | `Status_BadTcpListen`                         | Error. Unable to listen a TCP socket (server side)
+ `0x0507` | `1287`   | `Status_BadTcpAccept`                         | Error. Unable accept bind a TCP socket (server side)
+ `0x0508` | `1288`   | `Status_BadTcpDisconnect`                     | Error. Bad disconnection result
+
+
 ### Command line options
 
 To show list of available parameters print:
@@ -247,7 +288,7 @@ Category of the message. Can be:
   `ERR`   - error messages
   `WARN`  - warning messages 
   `INFO`  - information messages
-  `DBG`   - debug messages
+  `DUMP`  - dump command messages
   `CONN`  - connect/disconnect messages
   `TX`    - transmited Modbus messages
   `RX`    - received Modbus messages

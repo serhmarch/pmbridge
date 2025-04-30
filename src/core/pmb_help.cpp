@@ -16,7 +16,7 @@ const char* help_options =
 "                             * server (srv) - enable server part of daemon\n"
 "                             * daemon (dmn) - enable 'daemon'-mode\n";
 
-#define PARAM_BRIDGE_MEMORY_VOLUME " BRIDGE_MEMORY_VOLUME={sz0x,sz1x,sz3x,sz4x}\n"
+#define PARAM_MEMORY " MEMORY={sz0x,sz1x,sz3x,sz4x}\n"
 #define PARAM_SERVER " SERVER={port,max_con}\n"
 #define PARAM_COM " COM[N]={devname,type,mode,baudrate,databits,parity,stopbits[,timeout]}\n"
 #define PARAM_TCP " TCP[N]={host,port[,timeout]}\n"
@@ -26,7 +26,7 @@ const char* help_options =
 #define PARAM_DELAY " DELAY={msec}\n"
 
 const char* help_params =
-PARAM_BRIDGE_MEMORY_VOLUME
+PARAM_MEMORY
 PARAM_SERVER
 PARAM_COM
 PARAM_TCP
@@ -35,7 +35,7 @@ PARAM_COPY
 PARAM_DELAY
 PARAM_DUMP;
 
-const char* help_BRIDGE_MEMORY_VOLUME = PARAM_BRIDGE_MEMORY_VOLUME
+const char* help_MEMORY = PARAM_MEMORY
 "       sz0x - size of coils (0x)-memory\n" 
 "       sz1x - size of input discretes (1x)-memory\n"
 "       sz3x - size of input registers (3x)-memory\n"
@@ -121,8 +121,8 @@ const char* help(int argc, char** argv)
 
     if (strcmp("param", argv[0]) == 0)
     {
-        if (strcmp("BRIDGE_MEMORY_VOLUME", argv[1]) == 0)
-            return help_BRIDGE_MEMORY_VOLUME;
+        if (strcmp("MEMORY", argv[1]) == 0)
+            return help_MEMORY;
         if (strcmp("SERVER", argv[1]) == 0)
             return help_SERVER;
         if (strcmp("COM", argv[1]) == 0)

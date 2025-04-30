@@ -15,4 +15,5 @@ void pmbClient::setSettings(Modbus::ProtocolType type, const void *settings)
     if (m_port)
         delete m_port;
     m_port = Modbus::createClientPort(type, settings, false);
+    m_port->setObjectName(m_name.data());
 }

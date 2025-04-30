@@ -1,9 +1,8 @@
 #ifndef PMB_PROJECT_H
 #define PMB_PROJECT_H
 
-#include "pmb_core.h"
+#include <pmb_core.h>
 
-class pmbMemory;
 class pmbServer;
 class pmbClient;
 class pmbCommand;
@@ -13,9 +12,6 @@ class pmbProject
 public:
 	pmbProject();
 	~pmbProject();
-
-public:
-	inline pmbMemory *memory() const { return m_memory; }
 
 public:
 	inline const pmb::List<pmbServer*> &servers() const { return m_servers; }
@@ -30,9 +26,6 @@ public:
 public:
 	inline const pmb::List<pmbCommand*> &commands() const { return m_commands; }
 	inline void addCommand(pmbCommand *command) { m_commands.push_back(command); }
-
-private:
-	pmbMemory *m_memory;
 
 private:
 	pmb::List<pmbServer*> m_servers;

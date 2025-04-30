@@ -7,31 +7,33 @@ set(PMBRIDGE_APP_NAME ${PROJECT_NAME})
 
 message("PMBRIDGE: Start configure '${PMBRIDGE_APP_NAME}'")
 
-configure_file(${CMAKE_CURRENT_LIST_DIR}/pmb_config.h.in ${CMAKE_CURRENT_LIST_DIR}/pmb_config.h)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/core/pmb_config.h.in ${CMAKE_CURRENT_LIST_DIR}/core/pmb_config.h)
 
 set(MB_HEADERS
-    pmb_config.h
-    pmb_core.h
-    pmb_log.h
-    pmb_print.h
+    core/pmb_config.h
+    core/pmb_core.h
+    core/pmb_print.h
+    log/pmbLogConsole.h
+    log/pmb_log.h
+    ${CMAKE_CURRENT_LIST_DIR}/project/pmbServer.h
+    ${CMAKE_CURRENT_LIST_DIR}/project/pmbClient.h
+    ${CMAKE_CURRENT_LIST_DIR}/project/pmbCommand.h
+    ${CMAKE_CURRENT_LIST_DIR}/project/pmbProject.h
+    ${CMAKE_CURRENT_LIST_DIR}/project/pmbBuilder.h
     pmbMemory.h
-    pmbServer.h
-    pmbClient.h
-    pmbCommand.h
-    pmbProject.h
-    pmbBuilder.h
 )
 
 set(MB_SOURCES
-    pmb_core.cpp
-    pmb_log.cpp
-    pmb_print.cpp
+    core/pmb_core.cpp
+    core/pmb_print.cpp
+    log/pmbLogConsole.cpp
+    log/pmb_log.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/project/pmbServer.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/project/pmbClient.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/project/pmbCommand.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/project/pmbProject.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/project/pmbBuilder.cpp
     pmbMemory.cpp
-    pmbServer.cpp
-    pmbClient.cpp
-    pmbCommand.cpp
-    pmbProject.cpp
-    pmbBuilder.cpp
     pmbridge.cpp
 )     
 
@@ -57,6 +59,8 @@ add_executable(${PMBRIDGE_APP_NAME} ${MB_HEADERS} ${MB_SOURCES} ${MB_RESOURCES})
 include_directories(.
                     ..
                     ../modbus/src
+                    core
+                    log
 )
 
 set_target_properties(

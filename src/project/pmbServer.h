@@ -1,9 +1,8 @@
 #ifndef PMB_SERVER_H
 #define PMB_SERVER_H
 
-#include "pmb_core.h"
-
 #include <ModbusServerPort.h>
+#include <pmb_core.h>
 
 class pmbMemory;
 

@@ -8,7 +8,7 @@
 #ifndef PMB_PRINT_H
 #define PMB_PRINT_H
 
-#include "pmb_log.h"
+#include <pmb_log.h>
 
 void printTx(const Modbus::Char *source, const uint8_t* buff, uint16_t size);
 void printRx(const Modbus::Char *source, const uint8_t* buff, uint16_t size);

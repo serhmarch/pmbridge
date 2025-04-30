@@ -2,11 +2,12 @@
 #include <csignal>
 #include <vector>
 
-#include "pmb_log.h"
-#include "pmbBuilder.h"
-#include "pmbProject.h"
-#include "pmbServer.h"
-#include "pmbCommand.h"
+#include <pmb_log.h>
+
+#include <project/pmbBuilder.h>
+#include <project/pmbProject.h>
+#include <project/pmbServer.h>
+#include <project/pmbCommand.h>
 
 volatile bool fRun = true;
 
@@ -14,7 +15,7 @@ struct Options
 {
     pmb::String   file      {"pmbridge.conf"};
     pmb::LogFlags log_flags {static_cast<pmb::LogFlags>(pmb::Log_All)};
-    pmb::String   log_format{"[%time] %cat: %text"};
+    pmb::String   log_format{"[%time] %text"};
     pmb::String   log_time  {"%Y-%M-%D %h:%m:%s.%f"};
 };
 
@@ -46,7 +47,7 @@ void parseOptions(int argc, char **argv)
             options.file = argv[i];
             continue;
         }
-        if (!std::strcmp(opt, "--log-flags") || !std::strcmp(opt, "-c"))
+        if (!std::strcmp(opt, "--log-flags") || !std::strcmp(opt, "-lc"))
         {
             if (++i >= argc)
             {
@@ -57,7 +58,7 @@ void parseOptions(int argc, char **argv)
             options.log_flags = pmb::toLogFlags(pmb::String(argv[i]));
             continue;
         }
-        if (!std::strcmp(opt, "--log-time") || !std::strcmp(opt, "-t"))
+        if (!std::strcmp(opt, "--log-time") || !std::strcmp(opt, "-lt"))
         {
             if (++i >= argc)
             {
@@ -67,7 +68,7 @@ void parseOptions(int argc, char **argv)
             options.log_time = argv[i];
             continue;
         }
-        if (!std::strcmp(opt, "--log-format") || !std::strcmp(opt, "-fmt"))
+        if (!std::strcmp(opt, "--log-format") || !std::strcmp(opt, "-lfmt"))
         {
             if (++i >= argc)
             {

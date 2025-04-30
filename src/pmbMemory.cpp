@@ -6,14 +6,14 @@ pmbMemory::Block::Block()
     m_changeCounter = 0;
 }
 
-void pmbMemory::Block::resize(int bytes)
+void pmbMemory::Block::resize(size_t bytes)
 {
     m_data.resize(bytes);
     memset(m_data.data(), 0, m_data.size());
     m_sizeBits = m_data.size() * MB_BYTE_SZ_BITES;
 }
 
-void pmbMemory::Block::resizeBits(int bits)
+void pmbMemory::Block::resizeBits(size_t bits)
 {
     m_data.resize((bits+7)/8);
     memset(m_data.data(), 0, m_data.size());
@@ -95,6 +95,12 @@ Modbus::StatusCode pmbMemory::Block::writeRegs(uint regOffset, uint regCount, co
             *fact /= MB_REGE_SZ_BYTES;
     }
     return r;
+}
+
+pmbMemory *pmbMemory::global()
+{
+    static pmbMemory mem;
+    return &mem;
 }
 
 pmbMemory::pmbMemory()
@@ -181,7 +187,7 @@ Modbus::StatusCode pmbMemory::readWriteMultipleRegisters(uint8_t /*unit*/, uint1
     return this->read_4x(readOffset, readCount, readValues);
 }
 
-void pmbMemory::realloc_0x(int count)
+void pmbMemory::realloc_0x(size_t count)
 {
     if (count_0x() != count)
     {
@@ -189,7 +195,7 @@ void pmbMemory::realloc_0x(int count)
     }
 }
 
-void pmbMemory::realloc_1x(int count)
+void pmbMemory::realloc_1x(size_t count)
 {
     if (count_1x() != count)
     {
@@ -197,7 +203,7 @@ void pmbMemory::realloc_1x(int count)
     }
 }
 
-void pmbMemory::realloc_3x(int count)
+void pmbMemory::realloc_3x(size_t count)
 {
     if (count_3x() != count)
     {
@@ -205,7 +211,7 @@ void pmbMemory::realloc_3x(int count)
     }
 }
 
-void pmbMemory::realloc_4x(int count)
+void pmbMemory::realloc_4x(size_t count)
 {
     if (count_4x() != count)
     {

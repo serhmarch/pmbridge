@@ -8,10 +8,11 @@
 #include <ModbusTcpPort.h>
 #include <ModbusTcpServer.h>
 
-#include "pmb_print.h"
-#include "pmb_log.h"
+#include <pmb_print.h>
+#include <pmb_log.h>
+#include <pmbMemory.h>
+
 #include "pmbProject.h"
-#include "pmbMemory.h"
 #include "pmbClient.h"
 #include "pmbServer.h"
 #include "pmbCommand.h"
@@ -269,81 +270,34 @@ bool pmbBuilder::parseArgs(std::list<std::string> &args)
 
 pmbCommand* pmbBuilder::parseCommand(const std::string &command, const std::list<std::string> &args)
 {
-    if (command == "LOG")
-    {
-        return parseLog(args);
-    }
-    else if (command == "MEMORY")
+    if (command == pmbSTR("MEMORY"))
     {
         return parseMemory(args);
     }
-    else if (command == "SERVER")
+    else if (command == pmbSTR("SERVER"))
     {
         return parseServer(args);
     }
-    else if (command == "CLIENT")
+    else if (command == pmbSTR("CLIENT"))
     {
         return parseClient(args);
     }
-    else if (command == "QUERY")
+    else if (command == pmbSTR("QUERY"))
     {
         return parseQuery(args);
     }
-    else if (command == "COPY")
+    else if (command == pmbSTR("COPY"))
     {
         return parseCopy(args);
     }
-    else if (command == "DELAY")
+    else if (command == pmbSTR("DELAY"))
     {
         return parseDelay(args);
     }
-    else if (command == "DUMP")
+    else if (command == pmbSTR("DUMP"))
     {
         return parseDump(args);
     }
-    return nullptr;
-}
-
-pmbCommand *pmbBuilder::parseLog(const std::list<std::string> &args)
-{
-    if (args.size() < 2)
-    {
-        m_lastError = "LOG-command must have at least 2 params";
-        return nullptr;
-    }
-    auto it = args.begin();
-    auto end = args.end();
-    const std::string &format = *it; ++it;
-    const std::string &timeformat = *it;
-    pmb::setLogFormat(format);
-    pmb::setLogTimeFormat(timeformat);
-    pmb::LogFlags flags = 0;
-    for (; it != end; ++it)
-    {
-        const std::string &arg = *it;
-        if (arg == "ALL")
-            flags |= (pmb::Log_All);
-        else if (arg == "ERROR")
-            flags |= (pmb::Log_Error);
-        else if (arg == "WARN")
-            flags |= (pmb::Log_Warning);
-        else if (arg == "INFO")
-            flags |= (pmb::Log_Info);
-        else if (arg == "DEBUG")
-            flags |= (pmb::Log_Debug);
-        else if (arg == "CONN")
-            flags |= (pmb::Log_Connection);
-        else if (arg == "RX")
-            flags |= (pmb::Log_Rx);
-        else if (arg == "TX")
-            flags |= (pmb::Log_Tx);
-        else
-        {
-            m_lastError = "Unknown log category: " + arg;
-            return nullptr;
-        }
-    }
-    pmb::setLogFlags(flags);
     return nullptr;
 }
 
@@ -351,21 +305,21 @@ pmbCommand* pmbBuilder::parseMemory(const std::list<std::string> &args)
 {
     if (args.size() != 4)
     {
-        m_lastError = "MEMORY-command must have 4 params";
+        m_lastError = pmbSTR("MEMORY-command must have 4 params");
         return nullptr;
     }
 
     auto it = args.begin();
-    int sz0x = std::atoi((*it).data()); ++it;
-    int sz1x = std::atoi((*it).data()); ++it;
-    int sz3x = std::atoi((*it).data()); ++it;
-    int sz4x = std::atoi((*it).data());
+    size_t size0x = std::atoi((*it).data()); ++it;
+    size_t size1x = std::atoi((*it).data()); ++it;
+    size_t size3x = std::atoi((*it).data()); ++it;
+    size_t size4x = std::atoi((*it).data());
 
-    auto memory = m_project->memory();
-    memory->realloc_0x(sz0x);
-    memory->realloc_1x(sz1x);
-    memory->realloc_3x(sz3x);
-    memory->realloc_4x(sz4x);
+    pmbMemory *mem = pmbMemory::global();
+    mem->realloc_0x(size0x);
+    mem->realloc_1x(size1x);
+    mem->realloc_3x(size3x);
+    mem->realloc_4x(size4x);
 
     return nullptr;
 }
@@ -374,7 +328,7 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
 {
     if (args.size() < 2)
     {
-        m_lastError = "SERVER-command must have at least 2 params";
+        m_lastError = pmbSTR("SERVER-command must have at least 2 params");
         return nullptr;
     }
 
@@ -387,7 +341,7 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
     Modbus::ProtocolType type = pmb::toProtocolType(stype, &ok);
     if (!ok)
     {
-        m_lastError = "Unknown port type for SERVER-port: " + stype;
+        m_lastError = pmbSTR("Unknown port type for SERVER-port: ") + stype;
         return nullptr;
     }
 
@@ -396,10 +350,10 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
     ++it;
     if (m_project->server(name))
     {
-        m_lastError = "Server with this name already exists: " + name;
+        m_lastError = pmbSTR("Server with this name already exists: ") + name;
         return nullptr;
     }
-    pmbServer *server = new pmbServer(m_project->memory());
+    pmbServer *server = new pmbServer(pmbMemory::global());
     server->setName(name);
     m_project->addServer(server);
     ModbusServerPort *srv;
@@ -410,11 +364,12 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
     {
         if (args.size() < 3)
         {
-            m_lastError = "SERVER-command for RTU and ASCII must have at least 3 params";
+            m_lastError = pmbSTR("SERVER-command for RTU and ASCII must have at least 3 params");
             return nullptr;
         }
+        pmb::String portName;
         Modbus::SerialSettings settings;
-        if (parseSerialSettings(it, end, settings))
+        if (!parseSerialSettings(it, end, portName, settings))
             server->setSettings(type, &settings);
         srv = server->port();
         srv->connect(&ModbusServerPort::signalError, printErrorSerialServer);
@@ -469,7 +424,7 @@ pmbCommand *pmbBuilder::parseClient(const std::list<std::string> &args)
 {
     if (args.size() < 3)
     {
-        m_lastError = "CLIENT-command must have at least 3 params";
+        m_lastError = pmbSTR("CLIENT-command must have at least 3 params");
         return nullptr;
     }
 
@@ -482,7 +437,7 @@ pmbCommand *pmbBuilder::parseClient(const std::list<std::string> &args)
     Modbus::ProtocolType type = pmb::toProtocolType(stype, &ok);
     if (!ok)
     {
-        m_lastError = "Unknown port type for CLIENT-port: " + stype;
+        m_lastError = pmbSTR("Unknown port type for CLIENT-port: ") + stype;
         return nullptr;
     }
 
@@ -491,7 +446,7 @@ pmbCommand *pmbBuilder::parseClient(const std::list<std::string> &args)
     ++it;
     if (m_project->client(name))
     {
-        m_lastError = "Client with this name already exists: " + name;
+        m_lastError = pmbSTR("Client with this name already exists: ") + name;
         return nullptr;
     }
     pmbClient *client = new pmbClient();
@@ -503,8 +458,9 @@ pmbCommand *pmbBuilder::parseClient(const std::list<std::string> &args)
     case Modbus::RTU:
     case Modbus::ASC:
     {
+        pmb::String portName;
         Modbus::SerialSettings settings;
-        if (!parseSerialSettings(it, end, settings))
+        if (!parseSerialSettings(it, end, portName, settings))
             return nullptr;
         client->setSettings(type, &settings);
         cli = client->port();
@@ -553,19 +509,19 @@ pmbCommand* pmbBuilder::parseQuery(const std::list<std::string> &args)
 {
     if (args.size() != 10)
     {
-        m_lastError = "QUERY-command must have 10 params";
+        m_lastError = pmbSTR("QUERY-command must have 10 params");
         return nullptr;
     }
 
     auto it = args.begin();
     const std::string &clientName = *it; ++it;
     
-    auto memory = m_project->memory();
+    auto memory = pmbMemory::global();
     // Create and configure the query command
     auto client = m_project->client(clientName);
     if (!client)
     {
-        std::cerr << "Client not found: " + clientName;
+        m_lastError = pmbSTR("Client not found: ") + clientName;
         return nullptr;
     }
 
@@ -580,7 +536,7 @@ pmbCommand* pmbBuilder::parseQuery(const std::list<std::string> &args)
     Modbus::Address errvAdr  = Modbus::Address::fromString(*it);          
 
     mbCommandQueryBase *cmd = nullptr;
-    if (func == "RD")
+    if (func == pmbSTR("RD"))
     {
         switch (devAdr.type())
         {
@@ -597,11 +553,11 @@ pmbCommand* pmbBuilder::parseQuery(const std::list<std::string> &args)
             cmd = new mbCommandQueryReadHoldingRegisters(memory, client);
             break;
         default:
-            m_lastError = "Unknown memory type for RD function";
+            m_lastError = pmbSTR("Unknown memory type for RD function");
             return nullptr;
         }
     }
-    else if (func == "WR")
+    else if (func == pmbSTR("WR"))
     {
         switch (devAdr.type())
         {
@@ -612,13 +568,13 @@ pmbCommand* pmbBuilder::parseQuery(const std::list<std::string> &args)
             cmd = new mbCommandQueryWriteMultipleRegisters(memory, client);
             break;
         default:
-            m_lastError = "Unknown memory type for WR function";
+            m_lastError = pmbSTR("Unknown memory type for WR function");
             return nullptr;
         }
     }
     else
     {
-        m_lastError = "Unknown function: " + func;
+        m_lastError = pmbSTR("Unknown function: ") + func;
         return nullptr;
     }
     cmd->setUnit(unit);
@@ -636,7 +592,7 @@ pmbCommand* pmbBuilder::parseCopy(const std::list<std::string> &args)
 {
     if (args.size() != 3)
     {
-        m_lastError = "COPY-command must have 3 params";
+        m_lastError = pmbSTR("COPY-command must have 3 params");
         return nullptr;
     }
 
@@ -645,7 +601,7 @@ pmbCommand* pmbBuilder::parseCopy(const std::list<std::string> &args)
     uint16_t     count   = static_cast<uint16_t>(std::atoi((*it).data())); ++it;
     Modbus::Address destAdr = Modbus::Address::fromString(*it);
 
-    mbCommandCopy *cmd = new mbCommandCopy(m_project->memory());
+    mbCommandCopy *cmd = new mbCommandCopy(pmbMemory::global());
     cmd->setParams(srcAdr, destAdr, count);
     return cmd;
 }
@@ -654,7 +610,7 @@ pmbCommand* pmbBuilder::parseDelay(const std::list<std::string> &args)
 {
     if (args.size() != 1)
     {
-        m_lastError = "DELAY-command must have 1 param";
+        m_lastError = pmbSTR("DELAY-command must have 1 param");
         return nullptr;
     }
 
@@ -670,7 +626,7 @@ pmbCommand* pmbBuilder::parseDump(const std::list<std::string> &args)
 {
     if (args.size() != 3)
     {
-        m_lastError = "DUMP-command must have 3 params";
+        m_lastError = pmbSTR("DUMP-command must have 3 params");
         return nullptr;
     }
 
@@ -681,16 +637,16 @@ pmbCommand* pmbBuilder::parseDump(const std::list<std::string> &args)
 
     if (format == pmb::Format_Unknown)
     {
-        m_lastError = "Unknown format: " + *it;
+        m_lastError = pmbSTR("Unknown format: ") + *it;
         return nullptr;
     }
 
-    mbCommandDump *cmd = new mbCommandDump(m_project->memory());
+    mbCommandDump *cmd = new mbCommandDump(pmbMemory::global());
     cmd->setParams(srcAdr, format, count);  
     return cmd;
 }
 
-bool pmbBuilder::parseSerialSettings(std::list<std::string>::const_iterator &it, const std::list<std::string>::const_iterator &end, Modbus::SerialSettings &settings)
+bool pmbBuilder::parseSerialSettings(std::list<std::string>::const_iterator &it, const std::list<std::string>::const_iterator &end, pmb::String &portName, Modbus::SerialSettings &settings)
 {
     const ModbusSerialPort::Defaults &d = ModbusSerialPort::Defaults::instance();
 
@@ -702,7 +658,7 @@ bool pmbBuilder::parseSerialSettings(std::list<std::string>::const_iterator &it,
     settings.timeoutFirstByte = d.timeoutFirstByte;
     settings.timeoutInterByte = d.timeoutInterByte;
 
-    std::string portName = *it;
+    portName = *it;
     settings.portName = portName.data();
     ++it;
     if (it != end)

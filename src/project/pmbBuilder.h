@@ -4,7 +4,7 @@
 #include <string>
 #include <fstream>
 
-#include "pmb_core.h"
+#include <pmb_core.h>
 
 #define mbEMPTY_CHAR -2 // because -1 is EOF
 
@@ -36,7 +36,6 @@ private:
 private:
     // Helper methods for parsing specific commands    // Parses the configuration file and builds the pmbProject
     pmbCommand *parseCommand(const std::string &command, const std::list<std::string> &args);
-    pmbCommand *parseLog(const std::list<std::string> &args);
     pmbCommand *parseMemory(const std::list<std::string> &args);
     pmbCommand *parseServer(const std::list<std::string> &args);
     pmbCommand *parseClient(const std::list<std::string> &args);
@@ -44,7 +43,7 @@ private:
     pmbCommand *parseCopy(const std::list<std::string> &args);
     pmbCommand *parseDelay(const std::list<std::string> &args);
     pmbCommand *parseDump(const std::list<std::string> &args);
-    bool parseSerialSettings(std::list<std::string>::const_iterator &it, const std::list<std::string>::const_iterator &end, Modbus::SerialSettings &settings);
+    bool parseSerialSettings(std::list<std::string>::const_iterator &it, const std::list<std::string>::const_iterator &end, pmb::String &portName, Modbus::SerialSettings &settings);
 
 private:
     std::ifstream m_file;

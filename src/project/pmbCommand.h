@@ -1,8 +1,7 @@
 #ifndef PMB_COMMAND_H
 #define PMB_COMMAND_H
 
-#include "pmb_core.h"
-#include "pmbMemory.h"
+#include <pmbMemory.h>
 
 class pmbMemory;
 class pmbClient;
@@ -202,6 +201,7 @@ protected:
     void calcregs();
     void printbits();
     void printregs();
+    void printformat(pmb::Format fmt, const void *mem, uint16_t count);
 
 protected:
     pmbMemory *m_memory;
@@ -215,6 +215,8 @@ protected:
     typedef void (mbCommandDump::*pprintmethod)();
     pprintmethod m_printmethod;
     std::string m_prefix;
+    std::vector<char> m_printbuff;
+    int m_printindex;
 };
 
 

@@ -1,6 +1,6 @@
 #include "pmbServer.h"
 
-#include "pmbMemory.h"
+#include <pmbMemory.h>
 
 pmbServer::pmbServer(pmbMemory *memory) : 
     m_memory(memory),
@@ -18,6 +18,7 @@ void pmbServer::setSettings(Modbus::ProtocolType type, const void *settings)
     if (m_port)
         delete m_port;
     m_port = Modbus::createServerPort(m_memory, type, settings, false);
+    m_port->setObjectName(m_name.data());
 }
 
 void pmbServer::run()

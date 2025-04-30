@@ -222,12 +222,12 @@ $ pmbridge --help
 Usage: pmbridge [options]
 
 Options:
-  --version (-v)      - show program version.
-  --help (-?)         - show this help.
-  --file (-f)         - path to *.conf file (pmbridge.conf by default)
-  --log-flags (-c)    - list of log flags (categories); `,`, `;` or `|` separated
-  --log-format (-fmt) - format of each message to output
-  --log-time (-t)     - format of time of each message to output
+  --version (-v)       - show program version.
+  --help (-?)          - show this help.
+  --file (-f)          - path to *.conf file (pmbridge.conf by default)
+  --log-flags (-lc)    - list of log flags (categories); `,`, `;` or `|` separated
+  --log-format (-lfmt) - format of each message to output
+  --log-time (-lt)     - format of time of each message to output
 
 Format can contain following special symbols:
   `%time` - timestamp of the message, for which the format is also specified (`--log-time`)

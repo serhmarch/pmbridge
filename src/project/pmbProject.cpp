@@ -1,18 +1,15 @@
 #include "pmbProject.h"
 
-#include "pmbMemory.h"
 #include "pmbClient.h"
 #include "pmbServer.h"
 #include "pmbCommand.h"
 
 pmbProject::pmbProject()
 {
-    m_memory = new pmbMemory();
 }
 
 pmbProject::~pmbProject()
 {
-    delete m_memory;
     for (auto server : m_servers)
         delete server;
     for (auto client : m_clients)

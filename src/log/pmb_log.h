@@ -8,7 +8,7 @@
 #ifndef PMB_LOG_H
 #define PMB_LOG_H
 
-#include "pmb_core.h"
+#include <pmb_core.h>
 
 namespace pmb {
 
@@ -21,6 +21,7 @@ enum LogFlag
     Log_Connection      = 0x0000000000000010,
     Log_Tx              = 0x0000000000000020,
     Log_Rx              = 0x0000000000000040,
+    Log_Dump            = 0x0000000000000080,
     Log_All             = 0xFFFFFFFFFFFFFFFF
 };
 
@@ -74,6 +75,7 @@ void logMessage(LogFlag category, const Char *format, ...);
 #define mbLogConnection(_MESSAGE, ...) __LOG_MESSAGE(pmb::Log_Connection, _MESSAGE , ##__VA_ARGS__ )
 #define mbLogTx(_MESSAGE, ...)         __LOG_MESSAGE(pmb::Log_Tx        , _MESSAGE , ##__VA_ARGS__ )
 #define mbLogRx(_MESSAGE, ...)         __LOG_MESSAGE(pmb::Log_Rx        , _MESSAGE , ##__VA_ARGS__ )
+#define mbLogDump(_MESSAGE, ...)       __LOG_MESSAGE(pmb::Log_Dump      , _MESSAGE , ##__VA_ARGS__ )
 
 #else // __GNUC__
 
@@ -86,6 +88,7 @@ void logMessage(LogFlag category, const Char *format, ...);
 #define mbLogConnection(_MESSAGE, ...) __LOG_MESSAGE(pmb::Log_Connection, _MESSAGE , __VA_ARGS__ )
 #define mbLogTx(_MESSAGE, ...)         __LOG_MESSAGE(pmb::Log_Tx        , _MESSAGE , __VA_ARGS__ )
 #define mbLogRx(_MESSAGE, ...)         __LOG_MESSAGE(pmb::Log_Rx        , _MESSAGE , __VA_ARGS__ )
+#define mbLogDump(_MESSAGE, ...)       __LOG_MESSAGE(pmb::Log_Dump      , _MESSAGE , __VA_ARGS__ )
 
 #endif // __GNUC__
 

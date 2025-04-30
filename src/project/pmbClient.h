@@ -1,9 +1,8 @@
 #ifndef PMB_CLIENT_H
 #define PMB_CLIENT_H
 
-#include "pmb_core.h"
-
 #include <ModbusClientPort.h>
+#include <pmb_core.h>
 
 class pmbClient
 {

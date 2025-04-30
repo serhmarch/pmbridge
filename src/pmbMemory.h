@@ -5,7 +5,7 @@
 #ifndef PMB_MEMORY_H
 #define PMB_MEMORY_H
 
-#include "pmb_core.h"
+#include <pmb_core.h>
 
 class pmbMemory : public ModbusInterface
 {
@@ -20,10 +20,10 @@ public:
         inline size_t sizeBits() const { return m_sizeBits; }
         inline size_t sizeBytes() const { return size(); }
         inline size_t sizeRegs() const { return m_data.size() / MB_REGE_SZ_BYTES; }
-        void resize(int bytes);
-        void resizeBits(int bits);
-        inline void resizeBytes(int bytes) { resize(bytes); }
-        inline void resizeRegs(int regs) { resize(regs*MB_REGE_SZ_BYTES); }
+        void resize(size_t bytes);
+        void resizeBits(size_t bits);
+        inline void resizeBytes(size_t bytes) { resize(bytes); }
+        inline void resizeRegs(size_t regs) { resize(regs*MB_REGE_SZ_BYTES); }
         inline const void *data() const { return m_data.data(); }
 
     public:
@@ -43,10 +43,11 @@ public:
     };
 
 public:
-    pmbMemory();
-    ~pmbMemory();
+    static pmbMemory* global();
 
 public:
+    pmbMemory();
+    ~pmbMemory();
 
 public: // 'ModbusInterface'
     Modbus::StatusCode readCoils                 (uint8_t unit, uint16_t offset, uint16_t count, void *values) override;
@@ -63,7 +64,7 @@ public: // 'ModbusInterface'
     Modbus::StatusCode readWriteMultipleRegisters(uint8_t unit, uint16_t readOffset, uint16_t readCount, uint16_t *readValues, uint16_t writeOffset, uint16_t writeCount, const uint16_t *writeValues) override;
 
 public: // memory-0x management functions
-    void realloc_0x(int count);
+    void realloc_0x(size_t count);
     inline uint changeCounter_0x() const { return m_mem_0x.changeCounter(); }
     inline size_t count_0x() const { return m_mem_0x.sizeBits(); }
     inline size_t count_0x_bites() const { return m_mem_0x.sizeBits(); }
@@ -107,7 +108,7 @@ public: // memory-0x management functions
     const void *memptr_0x() const { return m_mem_0x.data(); }
 
 public: // memory-1x management functions
-    void realloc_1x(int count);
+    void realloc_1x(size_t count);
     inline uint changeCounter_1x() const { return m_mem_1x.changeCounter(); }
     inline size_t count_1x() const { return m_mem_1x.sizeBits(); }
     inline size_t count_1x_bites() const { return m_mem_1x.sizeBits(); }
@@ -151,7 +152,7 @@ public: // memory-1x management functions
     const void *memptr_1x() const { return m_mem_1x.data(); }
 
 public: // memory-3x management functions
-    void realloc_3x(int count);
+    void realloc_3x(size_t count);
     inline uint changeCounter_3x() const { return m_mem_3x.changeCounter(); }
     inline size_t count_3x() const { return m_mem_3x.sizeRegs(); }
     inline size_t count_3x_bites() const { return m_mem_3x.sizeBits(); }
@@ -193,7 +194,7 @@ public: // memory-3x management functions
     const void *memptr_3x() const { return m_mem_3x.data(); }
 
 public: // memory-4x management functions
-    void realloc_4x(int count);
+    void realloc_4x(size_t count);
     inline uint changeCounter_4x() const { return m_mem_4x.changeCounter(); }
     inline size_t count_4x() const { return m_mem_4x.sizeRegs(); }
     inline size_t count_4x_bites() const { return m_mem_4x.sizeBits(); }

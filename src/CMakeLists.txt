@@ -26,6 +26,7 @@ set(MB_HEADERS
 set(MB_SOURCES
     core/pmb_core.cpp
     core/pmb_print.cpp
+    core/pmb_help.cpp
     log/pmbLogConsole.cpp
     log/pmb_log.cpp
     ${CMAKE_CURRENT_LIST_DIR}/project/pmbServer.cpp

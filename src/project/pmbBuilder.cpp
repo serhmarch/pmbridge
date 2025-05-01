@@ -197,7 +197,11 @@ bool pmbBuilder::parseString(std::string &buffer, const char *endchars, bool mul
                     continue;
                 }
                 else
+                {
+                    if (containsChar(endchars, m_ch))
+                        notfound = false;
                     break;
+                }
             }
             if (endchars && containsChar(endchars, m_ch))
             {

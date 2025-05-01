@@ -2,7 +2,7 @@
 
 ## Overview
 
-`pmbridge` (Programmable Modbus Bridge) is a simple cross-platform (Windows, Linux) Modbus converter application.
+`pmbridge` (Programmable Modbus Bridge) is a cross-platform (Windows, Linux) Modbus gateway application.
 It supports different types of Modbus protocol: `TCP`, `RTU`, `ASC`.
 
 'Programmable' means user can configure every Modbus function to read/write from remote device(s)
@@ -49,6 +49,17 @@ There is a program (configuration) defined in this file.
 
 Configuration file contains list of commands (program).
 There can be declaration and execution commands.
+
+Command can be singleline or multiline.
+Singleline command can be defined without `{}`-brackets unlike multiline command:
+
+```conf
+<SINGLELINE_COMMAND>=<arg1>,<arg2>,...,<argN>
+<MULTILINE_COMMAND>={<arg1>,
+                     <arg2>,
+                     ...,
+                     <argN>}
+```
 
 #### Declaration commands
 

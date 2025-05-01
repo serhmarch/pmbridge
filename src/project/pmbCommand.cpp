@@ -17,11 +17,12 @@ pmbCommand::~pmbCommand()
     m_memory(memory),
     m_client(client),
     m_unit(0),
-    m_exec(0),
+    m_execPattern(1),
     m_succAdr(),
     m_errcAdr(),
     m_errvAdr(),
-    m_isBegin(true)
+    m_isBegin(true),
+    m_exec(-1)
 {
     m_buffer.resize(MB_MAX_BYTES);
 }
@@ -30,10 +31,21 @@ mbCommandQuery::~mbCommandQuery()
 {
 }
 
+void mbCommandQuery::setExecPattern(uint16_t exec)
+{
+    if (exec > 0)
+        m_execPattern = exec;
+    else
+        m_execPattern = 1;
+}
+
 bool mbCommandQuery::run()
 {
     if (m_isBegin)
     {
+        ++m_exec;
+        if (m_exec % m_execPattern)
+            return true;
         Modbus::StatusCode status = beginQuery();
         if (Modbus::StatusIsBad(status))
         {

@@ -31,8 +31,8 @@ public:
     inline uint8_t unit() const { return m_unit; }
     inline void setUnit(uint8_t unit) { m_unit = unit; }
 
-    inline uint16_t exec() const { return m_exec; }
-    inline void setExec(uint16_t exec) { m_exec = exec; }
+    inline uint16_t execPattern() const { return m_execPattern; }
+    void setExecPattern(uint16_t exec);
 
     inline Modbus::Address succAddress() const { return m_succAdr; }
     inline void setSuccAddress(Modbus::Address adr) { m_succAdr = adr; }
@@ -54,12 +54,13 @@ protected:
     pmbMemory *m_memory;
     pmbClient *m_client;
     uint8_t m_unit;
-    uint16_t m_exec;
+    uint16_t m_execPattern;
     Modbus::Address m_succAdr;
     Modbus::Address m_errcAdr;
     Modbus::Address m_errvAdr;
     pmb::ByteArray m_buffer;
     bool m_isBegin;
+    uint16_t m_exec;
 };
 
 class mbCommandQueryBase : public mbCommandQuery

@@ -1,10 +1,14 @@
-/*!
- * \file   pmb_print.h
- * \brief  
- * 
- * \author serhmarch
- * \date   April 2025
- */
+/*
+    pmbridge
+    
+    Created: 2025    
+    Author: Serhii Marchuk, https://github.com/serhmarch
+    
+    Copyright (C) 2025  Serhii Marchuk
+
+    Distributed under the MIT License (http://opensource.org/licenses/MIT)
+    
+*/
 #ifndef PMB_PRINT_H
 #define PMB_PRINT_H
 

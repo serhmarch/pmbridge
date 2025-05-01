@@ -1,3 +1,14 @@
+/*
+    pmbridge
+    
+    Created: 2025    
+    Author: Serhii Marchuk, https://github.com/serhmarch
+    
+    Copyright (C) 2025  Serhii Marchuk
+
+    Distributed under the MIT License (http://opensource.org/licenses/MIT)
+    
+*/
 #ifndef PMB_GLOBAL_H
 #define PMB_GLOBAL_H
 

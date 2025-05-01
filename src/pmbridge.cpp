@@ -1,5 +1,17 @@
+/*
+    pmbridge
+    
+    Created: 2025    
+    Author: Serhii Marchuk, https://github.com/serhmarch
+    
+    Copyright (C) 2025  Serhii Marchuk
+
+    Distributed under the MIT License (http://opensource.org/licenses/MIT)
+    
+*/
 #include <iostream>
 #include <csignal>
+#include <cstring>
 #include <vector>
 
 #include <pmb_log.h>
@@ -70,7 +82,7 @@ void parseOptions(int argc, char **argv)
             options.log_time = argv[i];
             continue;
         }
-        if (!std::strcmp(opt, "--log-format") || !std::strcmp(opt, "-lfmt"))
+        if (!std::strcmp(opt, "--log-format") || !std::strcmp(opt, "-lf"))
         {
             if (++i >= argc)
             {

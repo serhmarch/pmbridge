@@ -181,6 +181,7 @@ bool pmbBuilder::parseString(std::string &buffer, const char *endchars, bool mul
                 if (multiline)
                 {
                     passLine();
+                    passSpace();
                     continue;
                 }
                 else
@@ -194,10 +195,10 @@ bool pmbBuilder::parseString(std::string &buffer, const char *endchars, bool mul
             if (isComment())
             {
                 // Comment line, skip it
-                passSpace();
                 if (multiline)
                 {
                     passLine();
+                    passSpace();
                     continue;
                 }
                 else
@@ -225,6 +226,11 @@ bool pmbBuilder::parseArgs(std::list<std::string> &args)
         while (m_ch != '}')
         {
             passSpace();
+            while (isComment())
+            {
+                passLine();
+                passSpace();
+            }
             std::string arg;
             if (!parseString(arg, ",}", true))
             {
@@ -581,7 +587,7 @@ pmbCommand* pmbBuilder::parseQuery(const std::list<std::string> &args)
     cmd->setOffset(devAdr.offset());
     cmd->setCount(count);
     cmd->setMemAddress(memAdr);
-    cmd->setExec(execPatt);
+    cmd->setExecPattern(execPatt);
     cmd->setSuccAddress(succAdr);
     cmd->setErrcAddress(errcAdr);
     cmd->setErrvAddress(errvAdr);

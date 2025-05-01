@@ -9,6 +9,8 @@
 #include <project/pmbServer.h>
 #include <project/pmbCommand.h>
 
+const char* help(int argc, char** argv);
+
 volatile bool fRun = true;
 
 struct Options
@@ -34,7 +36,7 @@ void parseOptions(int argc, char **argv)
         }
         if (!strcmp(opt, "--help") || !strcmp(opt, "-?"))
         {
-            //puts(help_options);
+            std::cout << (help(argc-i-1, &argv[i+1])) << std::endl;
             exit(0);
         }
         if (!std::strcmp(opt, "--file") || !std::strcmp(opt, "-f"))
@@ -88,18 +90,18 @@ void signal_handler(int /*signal*/)
 
 int main(int argc, char **argv)
 {
-    std::cout << "pmbridge starts ..." << std::endl;
     parseOptions(argc, argv);
     pmb::setLogFlags(options.log_flags);
     pmb::setLogFormat(options.log_format);
     pmb::setLogTimeFormat(options.log_time);
+    std::cout << "pmbridge starts ..." << std::endl;
     pmbProject *project;
     {
         pmbBuilder builder;
         project = builder.load(options.file);
         if (builder.hasError())
         {
-            mbLogError("%s", builder.lastError().data());
+            mbLogError("Error processing '%s': %s", options.file.data(), builder.lastError().data());
             return 1;
         }
         if (project == nullptr)

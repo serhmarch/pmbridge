@@ -20,7 +20,7 @@ Modbus::Color toColor(LogFlag flag)
     {
     case Log_Error  : return Modbus::Color_Red    ;
     case Log_Warning: return Modbus::Color_Yellow ;
-    case Log_Dump   : return Modbus::Color_Magenta;
+    case Log_Dump   : return Modbus::Color_Green  ;
     default:
         return Modbus::Color_Default;
     }

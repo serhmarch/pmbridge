@@ -280,31 +280,31 @@ Options:
   --log-flags (-lc)    - list of log flags (categories); `,`, `;` or `|` separated
   --log-format (-lfmt) - format of each message to output
   --log-time (-lt)     - format of time of each message to output
+```
 
 Format can contain following special symbols:
-  `%time` - timestamp of the message, for which the format is also specified (`--log-time`)
-  `%cat`  - text representation of the message category
-  `%text` - text of the message
+* `%time` - timestamp of the message, for which the format is also specified (`--log-time`)
+* `%cat`  - text representation of the message category
+* `%text` - text of the message
   
 Time format of the message (`%time`) has the following special symbols:          
-  `%Y` - year (4 characters)
-  `%M` - month (2 characters `01`-`12`)
-  `%D` - day (2 characters `01`-`31`)
-  `%h` - hour (2 characters `00`-`23`)
-  `%m` - minute (2 characters `00`-`59`)
-  `%s` - second (2 characters `00`-`59`)
-  `%f` - millisecond (3 characters `000`-`999`)
+* `%Y` - year (4 characters)
+* `%M` - month (2 characters `01`-`12`)
+* `%D` - day (2 characters `01`-`31`)
+* `%h` - hour (2 characters `00`-`23`)
+* `%m` - minute (2 characters `00`-`59`)
+* `%s` - second (2 characters `00`-`59`)
+* `%f` - millisecond (3 characters `000`-`999`)
 
 Category of the message. Can be:
-  `ERR`   - error messages
-  `WARN`  - warning messages 
-  `INFO`  - information messages
-  `DUMP`  - dump command messages
-  `CONN`  - connect/disconnect messages
-  `TX`    - transmited Modbus messages
-  `RX`    - received Modbus messages
-  `ALL`   - all categories included
-```
+* `ERR`   - error messages
+* `WARN`  - warning messages 
+* `INFO`  - information messages
+* `DUMP`  - dump command messages
+* `CONN`  - connect/disconnect messages
+* `TX`    - transmited Modbus messages
+* `RX`    - received Modbus messages
+* `ALL`   - all categories included
 
 ## Build using CMake
 

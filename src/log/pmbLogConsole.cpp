@@ -125,7 +125,7 @@ pmb::List<pmbLogConsole::TimeToken> pmbLogConsole::parseTimeformat(const pmb::St
         }
         ++pos;
     }
-    if (token.type == Token::Literal) 
+    if (token.type == TimeToken::Literal) 
         res.push_back(token);
     return res;
 }

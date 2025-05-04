@@ -14,6 +14,7 @@
 
 #include <pmb_log.h>
 
+
 void printTx(const Modbus::Char *source, const uint8_t* buff, uint16_t size);
 void printRx(const Modbus::Char *source, const uint8_t* buff, uint16_t size);
 void printTxAsc(const Modbus::Char *source, const uint8_t* buff, uint16_t size);

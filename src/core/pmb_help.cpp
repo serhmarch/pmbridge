@@ -16,10 +16,10 @@ const char* help_options =
 "\n"
 "Options:\n"
 "  --version (-v)         - show program version.\n"
-"  --help (-?)[all|<cmd>] - show this help, 'all' commands or specific command help.\n"
+"  --help (-?)[all|<CMD>] - show this help, 'all' commands or specific command help.\n"
 "  --file (-f)            - path to *.conf file (pmbridge.conf by default)\n"
 "  --log-flags (-lc)      - list of log flags (categories); `,`, `;` or `|` separated\n"
-"  --log-format (-lf)   - format of each message to output\n"
+"  --log-format (-lf)     - format of each message to output\n"
 "  --log-time (-lt)       - format of time of each message to output\n";
 
 

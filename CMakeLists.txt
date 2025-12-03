@@ -25,7 +25,15 @@ endif()
 set(BUILD_SHARED_LIBS OFF)
 set(MB_QT_ENABLED OFF)
 set(MB_C_SUPPORT_DISABLE ON)
+set(MB_NO_INSTALL ON)
 add_subdirectory(modbus/src)
 
 add_subdirectory(src)
 
+option(PMB_TESTS_ENABLED "Enable unit tests" OFF)
+
+# Keep CTest's BUILD_TESTING consistent with our tests option
+if (PMB_TESTS_ENABLED)
+    include(CTest)
+    add_subdirectory(tests)
+endif()

@@ -3,13 +3,13 @@ cmake_minimum_required(VERSION 3.13) # 2.2 - case insensitive syntax
 
 project(pmbridge VERSION ${PROJECT_VERSION} LANGUAGES CXX)
 
-set(PMBRIDGE_APP_NAME ${PROJECT_NAME})
+set(PMB_APP_NAME ${PROJECT_NAME})
 
-message("PMBRIDGE: Start configure '${PMBRIDGE_APP_NAME}'")
+message(STATUS "PMBRIDGE: Start configure '${PMB_APP_NAME}'")
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/core/pmb_config.h.in ${CMAKE_CURRENT_LIST_DIR}/core/pmb_config.h)
 
-set(MB_HEADERS
+set(PMB_HEADERS
     core/pmb_config.h
     core/pmb_core.h
     core/pmb_print.h
@@ -23,7 +23,7 @@ set(MB_HEADERS
     pmbMemory.h
 )
 
-set(MB_SOURCES
+set(PMB_SOURCES
     core/pmb_core.cpp
     core/pmb_print.cpp
     core/pmb_help.cpp
@@ -42,20 +42,20 @@ set(MB_RESOURCES
 )     
 
 if (WIN32)
-    set(PMBRIDGE_WIN_RESOURCE_FILE win_resource.rc)
-        message("PMBRIDGE: ${PROJECT_NAME} resource file for Windows: '${PMBRIDGE_WIN_RESOURCE_FILE}'")
+    set(PMB_WIN_RESOURCE_FILE win_resource.rc)
+        message(STATUS "PMBRIDGE: ${PROJECT_NAME} resource file for Windows: '${PMB_WIN_RESOURCE_FILE}'")
 
-    set(PMBRIDGE_WIN_FILE "${PROJECT_NAME}")
-    set(PMBRIDGE_WIN_OUTFILE "${PMBRIDGE_APP_NAME}.exe")
-    configure_file(${CMAKE_CURRENT_LIST_DIR}/${PMBRIDGE_WIN_RESOURCE_FILE}.in 
-                   ${CMAKE_CURRENT_LIST_DIR}/${PMBRIDGE_WIN_RESOURCE_FILE})
+    set(PMB_WIN_FILE "${PROJECT_NAME}")
+    set(PMB_WIN_OUTFILE "${PMB_APP_NAME}.exe")
+    configure_file(${CMAKE_CURRENT_LIST_DIR}/${PMB_WIN_RESOURCE_FILE}.in 
+                   ${CMAKE_CURRENT_LIST_DIR}/${PMB_WIN_RESOURCE_FILE})
 
-    set(MB_RESOURCES ${MB_RESOURCES}
-        ${CMAKE_CURRENT_LIST_DIR}/${PMBRIDGE_WIN_RESOURCE_FILE}           
+    set(PMB_RESOURCES ${PMB_RESOURCES}
+        ${CMAKE_CURRENT_LIST_DIR}/${PMB_WIN_RESOURCE_FILE}           
     )     
 endif()
 
-add_executable(${PMBRIDGE_APP_NAME} ${MB_HEADERS} ${MB_SOURCES} ${MB_RESOURCES})
+add_executable(${PMB_APP_NAME} ${PMB_HEADERS} ${PMB_SOURCES} ${PMB_RESOURCES})
 
 include_directories(.
                     ..
@@ -65,14 +65,14 @@ include_directories(.
 )
 
 set_target_properties(
-    ${PMBRIDGE_APP_NAME}
+    ${PMB_APP_NAME}
     PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR}
     #WIN32_EXECUTABLE true
 )
 
-target_link_libraries(${PMBRIDGE_APP_NAME} PRIVATE 
+target_link_libraries(${PMB_APP_NAME} PRIVATE 
                       modbus
 )
 

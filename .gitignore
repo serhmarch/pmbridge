@@ -2,8 +2,12 @@
 *.user
 .vscode/
 modbus/**
-tests/
+#ignore external
+external/
+
+# 
 doc/output/
+
 TODO
 
 #ignore only cmake presets in root folder

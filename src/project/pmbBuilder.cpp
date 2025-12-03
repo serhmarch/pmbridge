@@ -412,6 +412,7 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
     {
         const ModbusTcpServer::Defaults &d = ModbusTcpServer::Defaults::instance();
         Modbus::TcpSettings settings;
+        settings.host    = "";
         settings.port    = d.port;
         settings.timeout = d.timeout;
         settings.maxconn = d.maxconn;

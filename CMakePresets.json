@@ -8,7 +8,6 @@
         },
         {
             "name": "Win-Base",
-            "displayName": "Base Configuration for Windows",
             "inherits": "Config-Base",
             "hidden": true,
             "binaryDir": "$env{USERPROFILE}/tmp/cmake/pmbridge/bin",
@@ -20,7 +19,6 @@
         },
         {
             "name": "Win64-MSVC",
-            "displayName": "Win64 Config Default MSVC",
             "description": "Using compilers for Visual Studio 17 2022 (x64 architecture)",
             "inherits": "Win-Base",
             "generator": "Visual Studio 17 2022",
@@ -30,12 +28,12 @@
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "C:/Qt/5.15.2/msvc2019_64",
                 "CMAKE_C_COMPILER": "cl.exe",
-                "CMAKE_CXX_COMPILER": "cl.exe"
+                "CMAKE_CXX_COMPILER": "cl.exe",
+                "PMB_TESTS_ENABLED": "ON"
             }
         },
         {
             "name": "Win32-MSVC",
-            "displayName": "Win32 Config Default MSVC",
             "description": "Using compilers for Visual Studio 17 2022 (x64_x86 architecture)",
             "inherits": "Win-Base",
             "generator": "Visual Studio 17 2022",
@@ -50,7 +48,6 @@
         },
         {
             "name": "Linux-Base",
-            "displayName": "GCC Linux-gnu Default",
             "description": "Using compilers: C = /usr/bin/gcc, CXX = /usr/bin/g++",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "/usr/bin/gcc",
@@ -64,7 +61,6 @@
         },
         {
             "name": "Linux-Debug",
-            "displayName": "Linux GCC Config Debug",
             "inherits": "Linux-Base",
             "binaryDir": "$env{HOME}/tmp/cmake/pmbridge/Linux/Debug",
             "cacheVariables": {
@@ -73,7 +69,6 @@
         },
         {
             "name": "Linux-Release",
-            "displayName": "Linux GCC Config Release",
             "inherits": "Linux-Base",
             "binaryDir": "$env{HOME}/tmp/cmake/pmbridge/Linux/Release",
             "cacheVariables": {
@@ -123,6 +118,43 @@
             "inherits": "Build-Base",
             "configurePreset": "Linux-Release",
             "configuration": "Release"
+        }
+    ],
+     "testPresets": [
+        {
+            "name": "Win64-Tests-Debug",
+            "configurePreset": "Win64-MSVC",
+            "configuration": "Debug",
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": false
+            }
+        },
+        {
+            "name": "Win32-Tests-Debug",
+            "configurePreset": "Win32-MSVC",
+            "configuration": "Debug",
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": false
+            }
+        },
+        {
+            "name": "Linux-Tests-Debug",
+            "configurePreset": "Linux-Debug",
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": false
+            }
         }
     ]
 }

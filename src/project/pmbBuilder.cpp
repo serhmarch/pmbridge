@@ -392,7 +392,8 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
         pmb::String portName;
         Modbus::SerialSettings settings;
         if (!parseSerialSettings(it, end, portName, settings))
-            server->setSettings(type, &settings);
+            return nullptr;
+        server->setSettings(type, &settings);
         srv = server->port();
         srv->connect(&ModbusServerPort::signalError, printErrorSerialServer);
         if (type == Modbus::RTU)

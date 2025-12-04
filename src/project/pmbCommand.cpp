@@ -24,7 +24,7 @@ pmbCommand::~pmbCommand()
  ********************************* QUERY ********************************
  ************************************************************************/
 
- mbCommandQuery::mbCommandQuery(pmbMemory *memory, pmbClient *client) :
+ pmbCommandQuery::pmbCommandQuery(pmbMemory *memory, pmbClient *client) :
     m_memory(memory),
     m_client(client),
     m_unit(0),
@@ -38,11 +38,11 @@ pmbCommand::~pmbCommand()
     m_buffer.resize(MB_MAX_BYTES);
 }
 
-mbCommandQuery::~mbCommandQuery()
+pmbCommandQuery::~pmbCommandQuery()
 {
 }
 
-void mbCommandQuery::setExecPattern(uint16_t exec)
+void pmbCommandQuery::setExecPattern(uint16_t exec)
 {
     if (exec > 0)
         m_execPattern = exec;
@@ -50,7 +50,7 @@ void mbCommandQuery::setExecPattern(uint16_t exec)
         m_execPattern = 1;
 }
 
-bool mbCommandQuery::run()
+bool pmbCommandQuery::run()
 {
     if (m_isBegin)
     {
@@ -82,12 +82,12 @@ bool mbCommandQuery::run()
     return true;
 }
 
-Modbus::StatusCode mbCommandQuery::beginQuery()
+Modbus::StatusCode pmbCommandQuery::beginQuery()
 {
     return Modbus::Status_Good;
 }
 
-Modbus::StatusCode mbCommandQueryReadCoils::runQuery()
+Modbus::StatusCode pmbCommandQueryReadCoils::runQuery()
 {
     Modbus::StatusCode status = m_client->readCoils(m_unit, m_offset, m_count, m_buffer.data());
     if (Modbus::StatusIsGood(status))
@@ -97,7 +97,7 @@ Modbus::StatusCode mbCommandQueryReadCoils::runQuery()
     return status;
 }
 
-Modbus::StatusCode mbCommandQueryReadDiscreteInputs::runQuery()
+Modbus::StatusCode pmbCommandQueryReadDiscreteInputs::runQuery()
 {
     Modbus::StatusCode status = m_client->readDiscreteInputs(m_unit, m_offset, m_count, m_buffer.data());
     if (Modbus::StatusIsGood(status))
@@ -107,7 +107,7 @@ Modbus::StatusCode mbCommandQueryReadDiscreteInputs::runQuery()
     return status;
 }
 
-Modbus::StatusCode mbCommandQueryReadHoldingRegisters::runQuery()
+Modbus::StatusCode pmbCommandQueryReadHoldingRegisters::runQuery()
 {
     Modbus::StatusCode status = m_client->readHoldingRegisters(m_unit, m_offset, m_count, reinterpret_cast<uint16_t*>(m_buffer.data()));
     if (Modbus::StatusIsGood(status))
@@ -117,7 +117,7 @@ Modbus::StatusCode mbCommandQueryReadHoldingRegisters::runQuery()
     return status;
 }
 
-Modbus::StatusCode mbCommandQueryReadInputRegisters::runQuery()
+Modbus::StatusCode pmbCommandQueryReadInputRegisters::runQuery()
 {
     Modbus::StatusCode status = m_client->readHoldingRegisters(m_unit, m_offset, m_count, reinterpret_cast<uint16_t*>(m_buffer.data()));
     if (Modbus::StatusIsGood(status))
@@ -127,22 +127,22 @@ Modbus::StatusCode mbCommandQueryReadInputRegisters::runQuery()
     return status;
 }
 
-Modbus::StatusCode mbCommandQueryWriteMultipleCoils::beginQuery()
+Modbus::StatusCode pmbCommandQueryWriteMultipleCoils::beginQuery()
 {
     return m_memory->read(m_memAdr, m_count, m_buffer.data());
 }
 
-Modbus::StatusCode mbCommandQueryWriteMultipleCoils::runQuery()
+Modbus::StatusCode pmbCommandQueryWriteMultipleCoils::runQuery()
 {
     return m_client->writeMultipleCoils(m_unit, m_offset, m_count, m_buffer.data());;
 }
 
-Modbus::StatusCode mbCommandQueryWriteMultipleRegisters::beginQuery()
+Modbus::StatusCode pmbCommandQueryWriteMultipleRegisters::beginQuery()
 {
     return m_memory->read(m_memAdr, m_count, m_buffer.data());
 }
 
-Modbus::StatusCode mbCommandQueryWriteMultipleRegisters::runQuery()
+Modbus::StatusCode pmbCommandQueryWriteMultipleRegisters::runQuery()
 {
     return m_client->writeMultipleCoils(m_unit, m_offset, m_count, m_buffer.data());;
 }
@@ -152,7 +152,7 @@ Modbus::StatusCode mbCommandQueryWriteMultipleRegisters::runQuery()
  ********************************* COPY *********************************
  ************************************************************************/
 
- mbCommandCopy::mbCommandCopy(pmbMemory *memory) :
+ pmbCommandCopy::pmbCommandCopy(pmbMemory *memory) :
     m_memory(memory)
 {
     m_readblock = &m_memory->memBlockRef_4x();
@@ -162,11 +162,11 @@ Modbus::StatusCode mbCommandQueryWriteMultipleRegisters::runQuery()
     m_writeOffset = 0;
     zeroCount();
 
-    m_readmethod = &mbCommandCopy::readBytes;
-    m_writemethod = &mbCommandCopy::writeBytes;
+    m_readmethod = &pmbCommandCopy::readBytes;
+    m_writemethod = &pmbCommandCopy::writeBytes;
 }
 
-void mbCommandCopy::setParams(Modbus::Address srcAddress, Modbus::Address dstAddress, uint16_t count)
+void pmbCommandCopy::setParams(Modbus::Address srcAddress, Modbus::Address dstAddress, uint16_t count)
 {
     m_srcAdr = srcAddress;
     m_dstAdr = dstAddress;
@@ -256,14 +256,14 @@ void mbCommandCopy::setParams(Modbus::Address srcAddress, Modbus::Address dstAdd
         }
 }
 
-bool mbCommandCopy::run()
+bool pmbCommandCopy::run()
 {
     (this->*m_readmethod)();
     (this->*m_writemethod)();
     return true;
 }
 
-void mbCommandCopy::calcreadbits()
+void pmbCommandCopy::calcreadbits()
 {
     switch (m_srcAdr.type())
     {
@@ -280,10 +280,10 @@ void mbCommandCopy::calcreadbits()
     size_t bytecount = (m_readCount + 7) / 8;
     if (bytecount > m_buff.size())
         m_buff.resize(bytecount);
-    m_readmethod = &mbCommandCopy::readBits;
+    m_readmethod = &pmbCommandCopy::readBits;
 }
 
-void mbCommandCopy::calcreadbytes()
+void pmbCommandCopy::calcreadbytes()
 {
     switch (m_srcAdr.type())
     {
@@ -300,10 +300,10 @@ void mbCommandCopy::calcreadbytes()
     size_t bytecount = m_readCount;
     if (bytecount > m_buff.size())
         m_buff.resize(bytecount);
-    m_readmethod = &mbCommandCopy::readBytes;
+    m_readmethod = &pmbCommandCopy::readBytes;
 }
 
-void mbCommandCopy::calcwritebits(bool countIsBits)
+void pmbCommandCopy::calcwritebits(bool countIsBits)
 {
     if (countIsBits)
         m_writeCount = m_count;
@@ -323,10 +323,10 @@ void mbCommandCopy::calcwritebits(bool countIsBits)
     size_t bytecount = (m_writeCount + 7) / 8;
     if (bytecount > m_buff.size())
         m_buff.resize(bytecount);
-    m_writemethod = &mbCommandCopy::writeBits;
+    m_writemethod = &pmbCommandCopy::writeBits;
 }
 
-void mbCommandCopy::calcwritebytes(bool countIsBits)
+void pmbCommandCopy::calcwritebytes(bool countIsBits)
 {
     if (countIsBits)
         m_writeCount = (m_count + 7) / 8;
@@ -345,32 +345,32 @@ void mbCommandCopy::calcwritebytes(bool countIsBits)
     size_t bytecount = m_writeCount;
     if (bytecount > m_buff.size())
         m_buff.resize(bytecount);
-    m_writemethod = &mbCommandCopy::writeBytes;
+    m_writemethod = &pmbCommandCopy::writeBytes;
 }
 
-void mbCommandCopy::zeroCount()
+void pmbCommandCopy::zeroCount()
 {
     m_count = 0;
     m_readCount = 0;
     m_writeCount = 0;
 }
 
-void mbCommandCopy::readBits()
+void pmbCommandCopy::readBits()
 {
     m_readblock->readBits(m_readOffset, m_readCount, m_buff.data());
 }
 
-void mbCommandCopy::readBytes()
+void pmbCommandCopy::readBytes()
 {
     m_readblock->read(m_readOffset, m_readCount, m_buff.data());
 }
 
-void mbCommandCopy::writeBits()
+void pmbCommandCopy::writeBits()
 {
     m_writeblock->writeBits(m_writeOffset, m_writeCount, m_buff.data());
 }
 
-void mbCommandCopy::writeBytes()
+void pmbCommandCopy::writeBytes()
 {
     m_writeblock->write(m_writeOffset, m_writeCount, m_buff.data());
 }
@@ -381,17 +381,17 @@ void mbCommandCopy::writeBytes()
  ************************************************************************/
 #define PMB_DUMP_PRINTBUFF_SZ 1024
 
-mbCommandDump::mbCommandDump(pmbMemory *memory) :
+pmbCommandDump::pmbCommandDump(pmbMemory *memory) :
     m_memory(memory),
     m_format(pmb::Format_Hex16),
     m_count(0),
     m_elemCount(0)
 {
-    m_printmethod = &mbCommandDump::printregs;
+    m_printmethod = &pmbCommandDump::printregs;
     m_printbuff.resize(PMB_DUMP_PRINTBUFF_SZ);
 }
 
-void mbCommandDump::setParams(Modbus::Address memAddress, pmb::Format fmt, uint16_t count)
+void pmbCommandDump::setParams(Modbus::Address memAddress, pmb::Format fmt, uint16_t count)
 {
     m_memAdr = memAddress;
     m_format = fmt;
@@ -427,7 +427,7 @@ void mbCommandDump::setParams(Modbus::Address memAddress, pmb::Format fmt, uint1
     m_prefix = buff;
 }
 
-bool mbCommandDump::run()
+bool pmbCommandDump::run()
 {
     m_printindex = snprintf(m_printbuff.data(), m_printbuff.size(), "%s", m_prefix.data());
     (this->*m_printmethod)();
@@ -435,7 +435,7 @@ bool mbCommandDump::run()
     return true;
 }
 
-void mbCommandDump::calcbits()
+void pmbCommandDump::calcbits()
 {
     size_t bytesz = pmb::sizeofFormat(m_format);
     size_t bitsz = bytesz * MB_BYTE_SZ_BITES;
@@ -444,10 +444,10 @@ void mbCommandDump::calcbits()
     if (bytecount != m_buff.size())
         m_buff.resize(bytecount);
     m_elemCount = static_cast<decltype(m_elemCount)>(bitcount);
-    m_printmethod = &mbCommandDump::printbits;
+    m_printmethod = &pmbCommandDump::printbits;
 }
 
-void mbCommandDump::calcregs()
+void pmbCommandDump::calcregs()
 {
     size_t bytesz = pmb::sizeofFormat(m_format);
     size_t regsz = bytesz / MB_REGE_SZ_BYTES;
@@ -456,10 +456,10 @@ void mbCommandDump::calcregs()
     if (bytecount != m_buff.size())
         m_buff.resize(bytecount);
     m_elemCount = static_cast<decltype(m_elemCount)>(regcount);
-    m_printmethod = &mbCommandDump::printregs;
+    m_printmethod = &pmbCommandDump::printregs;
 }
 
-void mbCommandDump::printbits()
+void pmbCommandDump::printbits()
 {
     auto s = m_block->readBits(m_memAdr.offset(), m_elemCount, m_buff.data());
     if (Modbus::StatusIsGood(s))
@@ -468,7 +468,7 @@ void mbCommandDump::printbits()
     }
 }
 
-void mbCommandDump::printregs()
+void pmbCommandDump::printregs()
 {
     auto s = m_block->readRegs(m_memAdr.offset(), m_elemCount, reinterpret_cast<uint16_t*>(m_buff.data()));
     if (Modbus::StatusIsGood(s))
@@ -477,7 +477,7 @@ void mbCommandDump::printregs()
     }
 }
 
-void mbCommandDump::printformat(pmb::Format fmt, const void *mem, uint16_t count)
+void pmbCommandDump::printformat(pmb::Format fmt, const void *mem, uint16_t count)
 {
     const uint8_t *bytePtr = static_cast<const uint8_t *>(mem);
     int pi = m_printindex;
@@ -614,14 +614,14 @@ void mbCommandDump::printformat(pmb::Format fmt, const void *mem, uint16_t count
  ********************************* DELAY ********************************
  ************************************************************************/
 
- mbCommandDelay::mbCommandDelay() :
+ pmbCommandDelay::pmbCommandDelay() :
     m_timer(0),
     m_millis(0),
     m_isBegin(true)
 {
 }
 
-bool mbCommandDelay::run()
+bool pmbCommandDelay::run()
 {
     if (m_isBegin)
     {

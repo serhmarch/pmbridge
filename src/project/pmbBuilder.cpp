@@ -559,22 +559,22 @@ pmbCommand* pmbBuilder::parseQuery(const std::list<std::string> &args)
     Modbus::Address errcAdr  = Modbus::Address::fromString(*it);                ++it;
     Modbus::Address errvAdr  = Modbus::Address::fromString(*it);          
 
-    mbCommandQueryBase *cmd = nullptr;
+    pmbCommandQueryBase *cmd = nullptr;
     if (func == pmbSTR("RD"))
     {
         switch (devAdr.type())
         {
         case Modbus::Memory_0x:
-            cmd = new mbCommandQueryReadCoils(memory, client);
+            cmd = new pmbCommandQueryReadCoils(memory, client);
             break;
         case Modbus::Memory_1x:
-            cmd = new mbCommandQueryReadDiscreteInputs(memory, client);
+            cmd = new pmbCommandQueryReadDiscreteInputs(memory, client);
             break;
         case Modbus::Memory_3x:
-            cmd = new mbCommandQueryReadInputRegisters(memory, client);
+            cmd = new pmbCommandQueryReadInputRegisters(memory, client);
             break;
         case Modbus::Memory_4x:
-            cmd = new mbCommandQueryReadHoldingRegisters(memory, client);
+            cmd = new pmbCommandQueryReadHoldingRegisters(memory, client);
             break;
         default:
             m_lastError = pmbSTR("Unknown memory type for RD function");
@@ -586,10 +586,10 @@ pmbCommand* pmbBuilder::parseQuery(const std::list<std::string> &args)
         switch (devAdr.type())
         {
         case Modbus::Memory_0x:
-            cmd = new mbCommandQueryWriteMultipleCoils(memory, client);
+            cmd = new pmbCommandQueryWriteMultipleCoils(memory, client);
             break;
         case Modbus::Memory_4x:
-            cmd = new mbCommandQueryWriteMultipleRegisters(memory, client);
+            cmd = new pmbCommandQueryWriteMultipleRegisters(memory, client);
             break;
         default:
             m_lastError = pmbSTR("Unknown memory type for WR function");
@@ -625,7 +625,7 @@ pmbCommand* pmbBuilder::parseCopy(const std::list<std::string> &args)
     uint16_t     count   = static_cast<uint16_t>(std::atoi((*it).data())); ++it;
     Modbus::Address destAdr = Modbus::Address::fromString(*it);
 
-    mbCommandCopy *cmd = new mbCommandCopy(pmbMemory::global());
+    pmbCommandCopy *cmd = new pmbCommandCopy(pmbMemory::global());
     cmd->setParams(srcAdr, destAdr, count);
     return cmd;
 }
@@ -641,7 +641,7 @@ pmbCommand* pmbBuilder::parseDelay(const std::list<std::string> &args)
     auto it = args.begin();
     uint32_t msec = static_cast<uint32_t>(std::atoi((*it).data()));
 
-    mbCommandDelay *cmd = new mbCommandDelay();
+    pmbCommandDelay *cmd = new pmbCommandDelay();
     cmd->setMilliseconds(msec);
     return cmd;
 }
@@ -665,7 +665,7 @@ pmbCommand* pmbBuilder::parseDump(const std::list<std::string> &args)
         return nullptr;
     }
 
-    mbCommandDump *cmd = new mbCommandDump(pmbMemory::global());
+    pmbCommandDump *cmd = new pmbCommandDump(pmbMemory::global());
     cmd->setParams(srcAdr, format, count);  
     return cmd;
 }

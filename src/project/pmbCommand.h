@@ -29,11 +29,11 @@ public:
  ********************************* QUERY ********************************
  ************************************************************************/
 
-class mbCommandQuery : public pmbCommand
+class pmbCommandQuery : public pmbCommand
 {
 public:
-    mbCommandQuery(pmbMemory *memory, pmbClient *client);
-    ~mbCommandQuery() override;
+    pmbCommandQuery(pmbMemory *memory, pmbClient *client);
+    ~pmbCommandQuery() override;
 
 public:
     inline pmbMemory *memory() const { return m_memory; }
@@ -74,10 +74,10 @@ protected:
     uint16_t m_exec;
 };
 
-class mbCommandQueryBase : public mbCommandQuery
+class pmbCommandQueryBase : public pmbCommandQuery
 {
 public:
-    using mbCommandQuery::mbCommandQuery;
+    using pmbCommandQuery::pmbCommandQuery;
 
 public:
     inline uint16_t offset() const { return m_offset; }
@@ -95,46 +95,46 @@ protected:
     Modbus::Address m_memAdr;
 };
 
-class mbCommandQueryReadCoils : public mbCommandQueryBase
+class pmbCommandQueryReadCoils : public pmbCommandQueryBase
 {   
 public:
-    using mbCommandQueryBase::mbCommandQueryBase;
+    using pmbCommandQueryBase::pmbCommandQueryBase;
     Modbus::StatusCode runQuery() override;
 };
 
-class mbCommandQueryReadDiscreteInputs : public mbCommandQueryBase
+class pmbCommandQueryReadDiscreteInputs : public pmbCommandQueryBase
 {   
 public:
-    using mbCommandQueryBase::mbCommandQueryBase;
+    using pmbCommandQueryBase::pmbCommandQueryBase;
     Modbus::StatusCode runQuery() override;
 };
 
-class mbCommandQueryReadHoldingRegisters : public mbCommandQueryBase
+class pmbCommandQueryReadHoldingRegisters : public pmbCommandQueryBase
 {   
 public:
-    using mbCommandQueryBase::mbCommandQueryBase;
+    using pmbCommandQueryBase::pmbCommandQueryBase;
     Modbus::StatusCode runQuery() override;
 };
 
-class mbCommandQueryReadInputRegisters : public mbCommandQueryBase
+class pmbCommandQueryReadInputRegisters : public pmbCommandQueryBase
 {   
 public:
-    using mbCommandQueryBase::mbCommandQueryBase;
+    using pmbCommandQueryBase::pmbCommandQueryBase;
     Modbus::StatusCode runQuery() override;
 };
 
-class mbCommandQueryWriteMultipleCoils : public mbCommandQueryBase
+class pmbCommandQueryWriteMultipleCoils : public pmbCommandQueryBase
 {   
 public:
-    using mbCommandQueryBase::mbCommandQueryBase;
+    using pmbCommandQueryBase::pmbCommandQueryBase;
     Modbus::StatusCode beginQuery() override;
     Modbus::StatusCode runQuery() override;
 };
 
-class mbCommandQueryWriteMultipleRegisters : public mbCommandQueryBase
+class pmbCommandQueryWriteMultipleRegisters : public pmbCommandQueryBase
 {   
 public:
-    using mbCommandQueryBase::mbCommandQueryBase;
+    using pmbCommandQueryBase::pmbCommandQueryBase;
     Modbus::StatusCode beginQuery() override;
     Modbus::StatusCode runQuery() override;
 };
@@ -144,10 +144,10 @@ public:
  ********************************* COPY *********************************
  ************************************************************************/
 
-class mbCommandCopy : public pmbCommand
+class pmbCommandCopy : public pmbCommand
 {
 public:
-    mbCommandCopy(pmbMemory *memory);
+    pmbCommandCopy(pmbMemory *memory);
 
 public:
     inline Modbus::Address srcAddress() const { return m_srcAdr; }
@@ -184,7 +184,7 @@ protected:
     uint16_t m_writeOffset;
     uint16_t m_writeCount;
 
-    typedef void (mbCommandCopy::*pmethod)();
+    typedef void (pmbCommandCopy::*pmethod)();
     pmethod m_readmethod;
     pmethod m_writemethod;
 };
@@ -194,10 +194,10 @@ protected:
  ********************************* DUMP *********************************
  ************************************************************************/
 
-class mbCommandDump : public pmbCommand
+class pmbCommandDump : public pmbCommand
 {
 public:
-    mbCommandDump(pmbMemory *memory);
+    pmbCommandDump(pmbMemory *memory);
 
 public:
     inline Modbus::Address memAddress() const { return m_memAdr; }
@@ -224,7 +224,7 @@ protected:
     uint16_t m_elemCount;
     pmb::ByteArray m_buff;
 
-    typedef void (mbCommandDump::*pprintmethod)();
+    typedef void (pmbCommandDump::*pprintmethod)();
     pprintmethod m_printmethod;
     std::string m_prefix;
     std::vector<char> m_printbuff;
@@ -236,10 +236,10 @@ protected:
  ********************************* DELAY ********************************
  ************************************************************************/
 
-class mbCommandDelay : public pmbCommand
+class pmbCommandDelay : public pmbCommand
 {
 public:
-    mbCommandDelay();
+    pmbCommandDelay();
     bool run() override;
 
 public:

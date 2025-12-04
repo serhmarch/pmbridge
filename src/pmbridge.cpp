@@ -113,12 +113,12 @@ int main(int argc, char **argv)
         project = builder.load(options.file);
         if (builder.hasError())
         {
-            mbLogError("Error processing '%s': %s", options.file.data(), builder.lastError().data());
+            pmbLogError("Error processing '%s': %s", options.file.data(), builder.lastError().data());
             return 1;
         }
         if (project == nullptr)
         {
-            mbLogError("Project is null");
+            pmbLogError("Project is null");
             return 1;
         }
     }

@@ -13,51 +13,51 @@
 
 void printTx(const Modbus::Char *source, const uint8_t* buff, uint16_t size)
 {
-    mbLogTx("'%s' Tx: %s", source, Modbus::bytesToString(buff, size).data());
+    pmbLogTx("'%s' Tx: %s", source, Modbus::bytesToString(buff, size).data());
 }
 
 void printRx(const Modbus::Char *source, const uint8_t* buff, uint16_t size)
 {
-    mbLogRx("'%s' Rx: %s", source, Modbus::bytesToString(buff, size).data());
+    pmbLogRx("'%s' Rx: %s", source, Modbus::bytesToString(buff, size).data());
 }
 
 void printTxAsc(const Modbus::Char *source, const uint8_t* buff, uint16_t size)
 {
-    mbLogTx("'%s' Tx: %s", source, Modbus::asciiToString(buff, size).data());
+    pmbLogTx("'%s' Tx: %s", source, Modbus::asciiToString(buff, size).data());
 }
 
 void printRxAsc(const Modbus::Char *source, const uint8_t* buff, uint16_t size)
 {
-    mbLogRx("'%s' Rx: %s", source, Modbus::asciiToString(buff, size).data());
+    pmbLogRx("'%s' Rx: %s", source, Modbus::asciiToString(buff, size).data());
 }
 
 void printOpened(const Modbus::Char *source)
 {
-    mbLogConnection("'%s' opened", source);
+    pmbLogConnection("'%s' opened", source);
 }
 
 void printClosed(const Modbus::Char *source)
 {
-    mbLogConnection("'%s' closed", source);
+    pmbLogConnection("'%s' closed", source);
 }
 
 void printError(const Modbus::Char *source, Modbus::StatusCode status, const Modbus::Char *text)
 {
-    mbLogWarning("Error (0x%X): %s", status, text);
+    pmbLogWarning("Error (0x%X): %s", status, text);
 }
 
 void printErrorSerialServer(const Modbus::Char *source, Modbus::StatusCode status, const Modbus::Char *text)
 {
     if (status != Modbus::Status_BadSerialReadTimeout)
-        mbLogWarning("Error (0x%X): %s", status, text);
+        pmbLogWarning("Error (0x%X): %s", status, text);
 }
 
 void printNewConnection(const Modbus::Char *source)
 {
-    mbLogConnection("New connection: '%s'", source);
+    pmbLogConnection("New connection: '%s'", source);
 }
 
 void printCloseConnection(const Modbus::Char *source)
 {
-    mbLogConnection("Close connection: '%s'", source);
+    pmbLogConnection("Close connection: '%s'", source);
 }

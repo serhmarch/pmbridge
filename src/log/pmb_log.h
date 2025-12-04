@@ -71,25 +71,25 @@ void logMessage(LogFlag category, const Char *format, ...);
 
 #define __LOG_MESSAGE(category, _MESSAGE, ...) if (pmb::logFlags() & category) pmb::logMessage(category, _MESSAGE, ##__VA_ARGS__ ); 
 
-#define mbLogError(_MESSAGE, ...)      __LOG_MESSAGE(pmb::Log_Error     , _MESSAGE , ##__VA_ARGS__ )
-#define mbLogWarning(_MESSAGE, ...)    __LOG_MESSAGE(pmb::Log_Warning   , _MESSAGE , ##__VA_ARGS__ )
-#define mbLogInfo(_MESSAGE, ...)       __LOG_MESSAGE(pmb::Log_Info      , _MESSAGE , ##__VA_ARGS__ )
-#define mbLogDump(_MESSAGE, ...)       __LOG_MESSAGE(pmb::Log_Dump      , _MESSAGE , ##__VA_ARGS__ )
-#define mbLogConnection(_MESSAGE, ...) __LOG_MESSAGE(pmb::Log_Connection, _MESSAGE , ##__VA_ARGS__ )
-#define mbLogTx(_MESSAGE, ...)         __LOG_MESSAGE(pmb::Log_Tx        , _MESSAGE , ##__VA_ARGS__ )
-#define mbLogRx(_MESSAGE, ...)         __LOG_MESSAGE(pmb::Log_Rx        , _MESSAGE , ##__VA_ARGS__ )
+#define pmbLogError(_MESSAGE, ...)      __LOG_MESSAGE(pmb::Log_Error     , _MESSAGE , ##__VA_ARGS__ )
+#define pmbLogWarning(_MESSAGE, ...)    __LOG_MESSAGE(pmb::Log_Warning   , _MESSAGE , ##__VA_ARGS__ )
+#define pmbLogInfo(_MESSAGE, ...)       __LOG_MESSAGE(pmb::Log_Info      , _MESSAGE , ##__VA_ARGS__ )
+#define pmbLogDump(_MESSAGE, ...)       __LOG_MESSAGE(pmb::Log_Dump      , _MESSAGE , ##__VA_ARGS__ )
+#define pmbLogConnection(_MESSAGE, ...) __LOG_MESSAGE(pmb::Log_Connection, _MESSAGE , ##__VA_ARGS__ )
+#define pmbLogTx(_MESSAGE, ...)         __LOG_MESSAGE(pmb::Log_Tx        , _MESSAGE , ##__VA_ARGS__ )
+#define pmbLogRx(_MESSAGE, ...)         __LOG_MESSAGE(pmb::Log_Rx        , _MESSAGE , ##__VA_ARGS__ )
 
 #else // __GNUC__
 
 #define __LOG_MESSAGE(category, _MESSAGE, ...) if (pmb::logFlags() & category) pmb::logMessage(category, _MESSAGE, __VA_ARGS__ ); 
 
-#define mbLogError(_MESSAGE, ...)      __LOG_MESSAGE(pmb::Log_Error     , _MESSAGE , __VA_ARGS__ )
-#define mbLogWarning(_MESSAGE, ...)    __LOG_MESSAGE(pmb::Log_Warning   , _MESSAGE , __VA_ARGS__ )
-#define mbLogInfo(_MESSAGE, ...)       __LOG_MESSAGE(pmb::Log_Info      , _MESSAGE , __VA_ARGS__ )
-#define mbLogDump(_MESSAGE, ...)       __LOG_MESSAGE(pmb::Log_Dump      , _MESSAGE , __VA_ARGS__ )
-#define mbLogConnection(_MESSAGE, ...) __LOG_MESSAGE(pmb::Log_Connection, _MESSAGE , __VA_ARGS__ )
-#define mbLogTx(_MESSAGE, ...)         __LOG_MESSAGE(pmb::Log_Tx        , _MESSAGE , __VA_ARGS__ )
-#define mbLogRx(_MESSAGE, ...)         __LOG_MESSAGE(pmb::Log_Rx        , _MESSAGE , __VA_ARGS__ )
+#define pmbLogError(_MESSAGE, ...)      __LOG_MESSAGE(pmb::Log_Error     , _MESSAGE , __VA_ARGS__ )
+#define pmbLogWarning(_MESSAGE, ...)    __LOG_MESSAGE(pmb::Log_Warning   , _MESSAGE , __VA_ARGS__ )
+#define pmbLogInfo(_MESSAGE, ...)       __LOG_MESSAGE(pmb::Log_Info      , _MESSAGE , __VA_ARGS__ )
+#define pmbLogDump(_MESSAGE, ...)       __LOG_MESSAGE(pmb::Log_Dump      , _MESSAGE , __VA_ARGS__ )
+#define pmbLogConnection(_MESSAGE, ...) __LOG_MESSAGE(pmb::Log_Connection, _MESSAGE , __VA_ARGS__ )
+#define pmbLogTx(_MESSAGE, ...)         __LOG_MESSAGE(pmb::Log_Tx        , _MESSAGE , __VA_ARGS__ )
+#define pmbLogRx(_MESSAGE, ...)         __LOG_MESSAGE(pmb::Log_Rx        , _MESSAGE , __VA_ARGS__ )
 
 #endif // __GNUC__
 

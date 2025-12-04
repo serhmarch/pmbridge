@@ -431,7 +431,7 @@ bool pmbCommandDump::run()
 {
     m_printindex = snprintf(m_printbuff.data(), m_printbuff.size(), "%s", m_prefix.data());
     (this->*m_printmethod)();
-    mbLogDump("%s", m_printbuff.data());
+    pmbLogDump("%s", m_printbuff.data());
     return true;
 }
 

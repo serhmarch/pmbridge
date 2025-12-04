@@ -44,6 +44,7 @@ set(PMB_TESTS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/project/pmbServer_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/pmbCommand_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/pmbProject_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/pmbMemory_test.cpp
     main.cpp
     )
 

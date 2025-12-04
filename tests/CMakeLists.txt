@@ -37,6 +37,7 @@ set(PMB_TESTS_HEADERS
 
 set(PMB_TESTS_SOURCES 
     ${CMAKE_CURRENT_SOURCE_DIR}/project/pmbBuilder_test.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/pmb_core_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/pmbClient_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/pmbServer_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/project/pmbCommand_test.cpp

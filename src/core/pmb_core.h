@@ -97,6 +97,8 @@ inline String toDecString(T value, int c, char fillChar = '0') { return Modbus::
 /// \details Converts string into string list. String elements separated by: ';', ',' або ' '. 
 StringList toStringList(const String &s);
 
+bool fillUnitMap(const Modbus::Char *s, void *unitmap);
+
 } // namespace pmb
 
 #endif // PMB_GLOBAL_H

@@ -167,6 +167,97 @@ TEST_F(pmbBuilderTest, Load_SERVER_TCP_5Params_AllOverrides)
 	EXPECT_EQ(tcpServer->maxConnections(), 20);
 }
 
+TEST_F(pmbBuilderTest, Load_SERVER_TCP_6Params_AddIPAddr)
+{
+	const std::string cfg = "SERVER = TCP, srv1, 1567, 3333, 15, '127.0.0.1'\n"; // + ipaddr
+	const std::string path = uniqueFile("pmb_builder_server_6params");
+	ASSERT_TRUE(writeTextFile(path, cfg)) << "Failed to write test config file";
+	pmbBuilder builder;
+	pmbProject* project = builder.load(path);
+	ASSERT_NE(project, nullptr) << builder.lastError();
+	EXPECT_FALSE(builder.hasError()) << builder.lastError();
+	EXPECT_EQ(project->servers().size(), static_cast<size_t>(1));
+	auto* server = project->server("srv1");
+	ASSERT_NE(server, nullptr);
+	auto* serverPort = server->port();
+	ASSERT_NE(serverPort, nullptr);
+	ASSERT_EQ(serverPort->type(), Modbus::TCP);
+	auto *tcpServer = static_cast<ModbusTcpServer*>(serverPort);
+	const auto& d = ModbusTcpServer::Defaults::instance();
+	EXPECT_EQ(tcpServer->port(), 1567);
+	EXPECT_EQ(tcpServer->timeout(), 3333);
+	EXPECT_EQ(tcpServer->maxConnections(), 15); // default retained
+    EXPECT_STREQ(tcpServer->ipaddr(), "127.0.0.1");
+}
+
+TEST_F(pmbBuilderTest, Load_SERVER_TCP_7Params_AddUnits)
+{
+	const std::string cfg = "SERVER = TCP, srv1, 1567, 3333, 15, '0.0.0.0', '1-3,5,7,8,9'\n"; // + units
+	const std::string path = uniqueFile("pmb_builder_server_7params");
+	ASSERT_TRUE(writeTextFile(path, cfg)) << "Failed to write test config file";
+	pmbBuilder builder;
+	pmbProject* project = builder.load(path);
+	ASSERT_NE(project, nullptr) << builder.lastError();
+	EXPECT_FALSE(builder.hasError()) << builder.lastError();
+	EXPECT_EQ(project->servers().size(), static_cast<size_t>(1));
+	auto* server = project->server("srv1");
+	ASSERT_NE(server, nullptr);
+	auto* serverPort = server->port();
+	ASSERT_NE(serverPort, nullptr);
+	ASSERT_EQ(serverPort->type(), Modbus::TCP);
+	auto *tcpServer = static_cast<ModbusTcpServer*>(serverPort);
+	const auto& d = ModbusTcpServer::Defaults::instance();
+	EXPECT_EQ(tcpServer->port(), 1567);
+	EXPECT_EQ(tcpServer->timeout(), 3333);
+	EXPECT_EQ(tcpServer->maxConnections(), 15); // default retained
+    EXPECT_STREQ(tcpServer->ipaddr(), "0.0.0.0");
+    const uint8_t* unitmap = static_cast<const uint8_t*>(tcpServer->unitMap());
+    ASSERT_NE(unitmap, nullptr);
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 1));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 2));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 3));
+    EXPECT_FALSE(MB_UNITMAP_GET_BIT(unitmap, 4));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 5));
+    EXPECT_FALSE(MB_UNITMAP_GET_BIT(unitmap, 6));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 7));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 8));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 9));
+}
+
+TEST_F(pmbBuilderTest, Load_SERVER_TCP_8Params_AddBroadcast)
+{
+	const std::string cfg = "SERVER = TCP, srv1, 1567, 3333, 15, '192.168.1.1', '1-3,7', 0\n"; // disable broadcast
+	const std::string path = uniqueFile("pmb_builder_server_8params");
+	ASSERT_TRUE(writeTextFile(path, cfg)) << "Failed to write test config file";
+	pmbBuilder builder;
+	pmbProject* project = builder.load(path);
+	ASSERT_NE(project, nullptr) << builder.lastError();
+	EXPECT_FALSE(builder.hasError()) << builder.lastError();
+	EXPECT_EQ(project->servers().size(), static_cast<size_t>(1));
+	auto* server = project->server("srv1");
+	ASSERT_NE(server, nullptr);
+	auto* serverPort = server->port();
+	ASSERT_NE(serverPort, nullptr);
+	ASSERT_EQ(serverPort->type(), Modbus::TCP);
+	auto *tcpServer = static_cast<ModbusTcpServer*>(serverPort);
+	const auto& d = ModbusTcpServer::Defaults::instance();
+	EXPECT_EQ(tcpServer->port(), 1567);
+	EXPECT_EQ(tcpServer->timeout(), 3333);
+	EXPECT_EQ(tcpServer->maxConnections(), 15); // default retained
+    EXPECT_STREQ(tcpServer->ipaddr(), "192.168.1.1");
+    const uint8_t* unitmap = static_cast<const uint8_t*>(tcpServer->unitMap());
+    ASSERT_NE(unitmap, nullptr);
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 1));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 2));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 3));
+    EXPECT_FALSE(MB_UNITMAP_GET_BIT(unitmap, 4));
+    EXPECT_FALSE(MB_UNITMAP_GET_BIT(unitmap, 5));
+    EXPECT_FALSE(MB_UNITMAP_GET_BIT(unitmap, 6));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 7));
+
+    EXPECT_FALSE(tcpServer->isBroadcastEnabled());
+}
+
 // ---- RTU serial server tests: args count from 3 (minimum) up to 10 (all optional provided)
 
 TEST_F(pmbBuilderTest, Load_SERVER_RTU_3Params_Defaults)
@@ -362,6 +453,74 @@ TEST_F(pmbBuilderTest, Load_SERVER_RTU_10Params_AddTimeoutInterByte)
 	EXPECT_EQ(rtu->timeoutInterByte(), 100);
 }
 
+TEST_F(pmbBuilderTest, Load_SERVER_RTU_11Params_AddUnits)
+{
+	const std::string cfg = "SERVER = RTU, srv_rtu, /dev/ttyS0, 2400, 8, Even, 1, No, 3000, 100, '1,2-4,7'\n"; // +units
+	const std::string path = uniqueFile("pmb_builder_server_rtu_11params");
+	ASSERT_TRUE(writeTextFile(path, cfg));
+	pmbBuilder builder;
+	pmbProject* project = builder.load(path);
+	ASSERT_NE(project, nullptr) << builder.lastError();
+	EXPECT_FALSE(builder.hasError()) << builder.lastError();
+	auto* serverPort = project->server("srv_rtu")->port();
+	ASSERT_NE(serverPort, nullptr);
+	EXPECT_EQ(serverPort->type(), Modbus::RTU);
+	auto *rtu = static_cast<ModbusRtuPort*>(static_cast<ModbusServerResource*>(serverPort)->port());
+	EXPECT_STREQ(rtu->portName(), "/dev/ttyS0");
+	EXPECT_EQ(rtu->baudRate(), 2400);
+	EXPECT_EQ(rtu->dataBits(), 8);
+	EXPECT_EQ(rtu->parity(), Modbus::EvenParity);
+	EXPECT_EQ(rtu->stopBits(), Modbus::OneStop);
+	EXPECT_EQ(rtu->flowControl(), Modbus::NoFlowControl);
+	EXPECT_EQ(rtu->timeoutFirstByte(), 3000);
+	EXPECT_EQ(rtu->timeoutInterByte(), 100);
+
+    const uint8_t* unitmap = static_cast<const uint8_t*>(serverPort->unitMap());
+    ASSERT_NE(unitmap, nullptr);
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 1));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 2));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 3));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 4));
+    EXPECT_FALSE(MB_UNITMAP_GET_BIT(unitmap, 5));
+    EXPECT_FALSE(MB_UNITMAP_GET_BIT(unitmap, 6));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 7));
+}
+
+TEST_F(pmbBuilderTest, Load_SERVER_RTU_12Params_AddBroadcast)
+{
+	const std::string cfg = "SERVER = RTU, srv_rtu, /dev/ttyS0, 2400, 8, Even, 1, No, 3000, 100, '1,2-4,7',1\n"; // +broadcast
+	const std::string path = uniqueFile("pmb_builder_server_rtu_12params");
+	ASSERT_TRUE(writeTextFile(path, cfg));
+	pmbBuilder builder;
+	pmbProject* project = builder.load(path);
+	ASSERT_NE(project, nullptr) << builder.lastError();
+	EXPECT_FALSE(builder.hasError()) << builder.lastError();
+	auto* serverPort = project->server("srv_rtu")->port();
+	ASSERT_NE(serverPort, nullptr);
+	EXPECT_EQ(serverPort->type(), Modbus::RTU);
+	auto *rtu = static_cast<ModbusRtuPort*>(static_cast<ModbusServerResource*>(serverPort)->port());
+	EXPECT_STREQ(rtu->portName(), "/dev/ttyS0");
+	EXPECT_EQ(rtu->baudRate(), 2400);
+	EXPECT_EQ(rtu->dataBits(), 8);
+	EXPECT_EQ(rtu->parity(), Modbus::EvenParity);
+	EXPECT_EQ(rtu->stopBits(), Modbus::OneStop);
+	EXPECT_EQ(rtu->flowControl(), Modbus::NoFlowControl);
+	EXPECT_EQ(rtu->timeoutFirstByte(), 3000);
+	EXPECT_EQ(rtu->timeoutInterByte(), 100);
+
+    const uint8_t* unitmap = static_cast<const uint8_t*>(serverPort->unitMap());
+    ASSERT_NE(unitmap, nullptr);
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 1));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 2));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 3));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 4));
+    EXPECT_FALSE(MB_UNITMAP_GET_BIT(unitmap, 5));
+    EXPECT_FALSE(MB_UNITMAP_GET_BIT(unitmap, 6));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 7));
+
+    EXPECT_TRUE(serverPort->isBroadcastEnabled());
+}
+
 // ---- ASC serial server tests: same param progression
 
 TEST_F(pmbBuilderTest, Load_SERVER_ASC_3Params_Defaults)
@@ -553,6 +712,74 @@ TEST_F(pmbBuilderTest, Load_SERVER_ASC_10Params_AddTimeoutInterByte)
 	EXPECT_EQ(asc->flowControl(), Modbus::HardwareControl);
 	EXPECT_EQ(asc->timeoutFirstByte(), 4000);
 	EXPECT_EQ(asc->timeoutInterByte(), 200);
+}
+
+TEST_F(pmbBuilderTest, Load_SERVER_ASC_11Params_AddUnits)
+{
+	const std::string cfg = "SERVER = ASC, srv_asc, /dev/ttyS0, 2400, 8, Even, 1, No, 3000, 100, '1,2-4,7'\n"; // +units
+	const std::string path = uniqueFile("pmb_builder_server_asc_11params");
+	ASSERT_TRUE(writeTextFile(path, cfg));
+	pmbBuilder builder;
+	pmbProject* project = builder.load(path);
+	ASSERT_NE(project, nullptr) << builder.lastError();
+	EXPECT_FALSE(builder.hasError()) << builder.lastError();
+	auto* serverPort = project->server("srv_asc")->port();
+	ASSERT_NE(serverPort, nullptr);
+	EXPECT_EQ(serverPort->type(), Modbus::ASC);
+	auto *asc = static_cast<ModbusAscPort*>(static_cast<ModbusServerResource*>(serverPort)->port());
+	EXPECT_STREQ(asc->portName(), "/dev/ttyS0");
+	EXPECT_EQ(asc->baudRate(), 2400);
+	EXPECT_EQ(asc->dataBits(), 8);
+	EXPECT_EQ(asc->parity(), Modbus::EvenParity);
+	EXPECT_EQ(asc->stopBits(), Modbus::OneStop);
+	EXPECT_EQ(asc->flowControl(), Modbus::NoFlowControl);
+	EXPECT_EQ(asc->timeoutFirstByte(), 3000);
+	EXPECT_EQ(asc->timeoutInterByte(), 100);
+
+    const uint8_t* unitmap = static_cast<const uint8_t*>(serverPort->unitMap());
+    ASSERT_NE(unitmap, nullptr);
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 1));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 2));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 3));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 4));
+    EXPECT_FALSE(MB_UNITMAP_GET_BIT(unitmap, 5));
+    EXPECT_FALSE(MB_UNITMAP_GET_BIT(unitmap, 6));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 7));
+}
+
+TEST_F(pmbBuilderTest, Load_SERVER_ASC_12Params_AddBroadcast)
+{
+	const std::string cfg = "SERVER = ASC, srv_asc, /dev/ttyS0, 2400, 8, Even, 1, No, 3000, 100, '1,2-4,7',1\n"; // +broadcast
+	const std::string path = uniqueFile("pmb_builder_server_asc_12params");
+	ASSERT_TRUE(writeTextFile(path, cfg));
+	pmbBuilder builder;
+	pmbProject* project = builder.load(path);
+	ASSERT_NE(project, nullptr) << builder.lastError();
+	EXPECT_FALSE(builder.hasError()) << builder.lastError();
+	auto* serverPort = project->server("srv_asc")->port();
+	ASSERT_NE(serverPort, nullptr);
+	EXPECT_EQ(serverPort->type(), Modbus::ASC);
+	auto *asc = static_cast<ModbusAscPort*>(static_cast<ModbusServerResource*>(serverPort)->port());
+	EXPECT_STREQ(asc->portName(), "/dev/ttyS0");
+	EXPECT_EQ(asc->baudRate(), 2400);
+	EXPECT_EQ(asc->dataBits(), 8);
+	EXPECT_EQ(asc->parity(), Modbus::EvenParity);
+	EXPECT_EQ(asc->stopBits(), Modbus::OneStop);
+	EXPECT_EQ(asc->flowControl(), Modbus::NoFlowControl);
+	EXPECT_EQ(asc->timeoutFirstByte(), 3000);
+	EXPECT_EQ(asc->timeoutInterByte(), 100);
+
+    const uint8_t* unitmap = static_cast<const uint8_t*>(serverPort->unitMap());
+    ASSERT_NE(unitmap, nullptr);
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 1));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 2));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 3));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 4));
+    EXPECT_FALSE(MB_UNITMAP_GET_BIT(unitmap, 5));
+    EXPECT_FALSE(MB_UNITMAP_GET_BIT(unitmap, 6));
+    EXPECT_TRUE (MB_UNITMAP_GET_BIT(unitmap, 7));
+
+    EXPECT_TRUE(serverPort->isBroadcastEnabled());
 }
 
 // ---- CLIENT TCP tests

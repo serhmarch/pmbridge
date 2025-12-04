@@ -120,4 +120,50 @@ StringList toStringList(const String &s)
     return outputs;
 }
 
+bool fillUnitMap(const Modbus::Char *s, void *unitmap)
+{
+    std::istringstream ss(s);
+    std::string token;
+    bool res = false;
+    while (std::getline(ss, token, ','))
+    {
+        // Remove whitespace
+        token.erase(std::remove_if(token.begin(), token.end(), ::isspace), token.end());
+
+        if (token.empty())
+            continue;
+
+        auto dashPos = token.find('-');
+        if (dashPos != std::string::npos)
+        {
+            // It's a range: e.g., "5-10"
+            std::string startStr = token.substr(0, dashPos);
+            std::string endStr = token.substr(dashPos + 1);
+
+            int start = std::stoi(startStr);
+            int end = std::stoi(endStr);
+
+            if (start > end || start < 0 || end > 255)
+                continue; // optionally handle invalid input
+
+            for (int unit = start; unit <= end; ++unit)
+            {
+                MB_UNITMAP_SET_BIT(unitmap, unit, 1);
+                res = true;
+            }
+        }
+        else
+        {
+            // Single number
+            int unit = std::stoi(token);
+            if (unit < 0 || unit > 255)
+                continue; // optionally handle invalid input
+
+            MB_UNITMAP_SET_BIT(unitmap, unit, 1);
+            res = true;
+        }
+    }
+    return res;
+}
+
 } // namespace pmb

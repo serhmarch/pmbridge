@@ -379,6 +379,9 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
     server->setName(name);
     m_project->addServer(server);
     ModbusServerPort *srv;
+    uint8_t unitmap[MB_UNITMAP_SIZE] = {0};
+    bool isUnitMapSet = false;
+    bool broadcast = true;
     switch (type)
     {
     case Modbus::RTU:
@@ -395,6 +398,22 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
             return nullptr;
         server->setSettings(type, &settings);
         srv = server->port();
+        if (it != end)
+        {
+            // parse allowed units
+            std::string unitsStr = *it;
+            isUnitMapSet = pmb::fillUnitMap(unitsStr.c_str(), unitmap);
+            ++it;
+            if (it != end)
+            {
+                // parse broadcast option
+                std::string broadcastStr = *it;
+                bool broadcast = (broadcastStr == "1" || broadcastStr == "true" || broadcastStr == "yes");
+                srv->setBroadcastEnabled(broadcast);
+                ++it;
+            }
+        }
+
         srv->connect(&ModbusServerPort::signalError, printErrorSerialServer);
         if (type == Modbus::RTU)
         {
@@ -412,6 +431,7 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
     {
         const ModbusTcpServer::Defaults &d = ModbusTcpServer::Defaults::instance();
         Modbus::TcpSettings settings;
+        pmb::String ipaddr;
         settings.host    = "";
         settings.port    = d.port;
         settings.timeout = d.timeout;
@@ -425,9 +445,32 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
                 settings.timeout = static_cast<uint16_t>(std::atoi((*it).data()));
                 ++it;
                 if (it != end)
+                {
                     settings.maxconn = static_cast<uint16_t>(std::atoi((*it).data()));
+                    ++it;
+                    if (it != end)
+                    {
+                        ipaddr = *it;
+                        ++it;
+                        if (it != end)
+                        {
+                            // parse allowed units
+                            std::string unitsStr = *it;
+                            isUnitMapSet = pmb::fillUnitMap(unitsStr.c_str(), unitmap);
+                            ++it;
+                            if (it != end)
+                            {
+                                // parse broadcast option
+                                std::string broadcastStr = *it;
+                                broadcast = (broadcastStr == "1" || broadcastStr == "true" || broadcastStr == "yes");
+                                ++it;
+                            }
+                        }
+                    };
+                }
             }
         }
+        settings.ipaddr = ipaddr.data();
         server->setSettings(type, &settings);
         ModbusTcpServer *tcpsrv = static_cast<ModbusTcpServer*>(server->port());
         tcpsrv->connect(&ModbusServerPort::signalTx, printTx);
@@ -439,6 +482,9 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
     }
         break;
     }
+    if (isUnitMapSet)
+        srv->setUnitMap(unitmap);
+    srv->setBroadcastEnabled(broadcast);
     srv->connect(&ModbusServerPort::signalOpened, printOpened);
     srv->connect(&ModbusServerPort::signalClosed, printClosed);
     return nullptr;
@@ -720,7 +766,10 @@ bool pmbBuilder::parseSerialSettings(std::list<std::string>::const_iterator &it,
                             settings.timeoutFirstByte = static_cast<uint32_t>(std::atoi((*it).data()));
                             ++it;
                             if (it != end)
+                            {
                                 settings.timeoutInterByte = static_cast<uint32_t>(std::atoi((*it).data()));
+                                ++it;
+                            }
                         }
                     }
                 }

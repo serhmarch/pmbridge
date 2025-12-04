@@ -124,8 +124,12 @@ int main(int argc, char **argv)
     }
     const pmb::List<pmbServer*> &servers = project->servers();
     const pmb::List<pmbCommand*> &commands = project->commands();
+    if(std::signal(SIGINT, signal_handler) == SIG_ERR)
+        pmbLogWarning("Unable to set SIGINT handler");
+    if(std::signal(SIGTERM, signal_handler) == SIG_ERR)
+        pmbLogWarning("Unable to set SIGTERM handler");
+    auto serverit = servers.begin();
     auto cmdit = commands.begin();
-    std::signal(SIGINT, signal_handler);
     while (fRun)
     {
         if (cmdit != commands.end())

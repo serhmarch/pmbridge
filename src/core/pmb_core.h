@@ -99,6 +99,8 @@ StringList toStringList(const String &s);
 
 bool fillUnitMap(const Modbus::Char *s, void *unitmap);
 
+String unitMapToString(const void *unitmap);
+
 } // namespace pmb
 
 #endif // PMB_GLOBAL_H

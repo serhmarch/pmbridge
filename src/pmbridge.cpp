@@ -27,10 +27,12 @@ volatile bool fRun = true;
 
 struct Options
 {
-    pmb::String   file      {"pmbridge.conf"};
-    pmb::LogFlags log_flags {static_cast<pmb::LogFlags>(pmb::Log_All)};
-    pmb::String   log_format{"[%time] %text"};
-    pmb::String   log_time  {"%Y-%M-%D %h:%m:%s.%f"};
+    pmb::String   file            {"pmbridge.conf"};
+    pmb::LogFlags log_flags       {static_cast<pmb::LogFlags>(pmb::Log_All)};
+    pmb::String   log_format      {"[%time] %text"};
+    pmb::String   log_time        {"%Y-%M-%D %h:%m:%s.%f"};
+    bool          print_config    {false};
+    bool          exit_after_load {false};
 };
 
 Options options;
@@ -92,6 +94,17 @@ void parseOptions(int argc, char **argv)
             options.log_format = argv[i];
             continue;
         }
+        if (!std::strcmp(opt, "--print-config"))
+        {
+            options.print_config = true;
+            continue;
+        }
+        if (!std::strcmp(opt, "--print-config-only"))
+        {
+            options.print_config = true;
+            options.exit_after_load = true;
+            continue;
+        }
     }
 }
 
@@ -106,7 +119,8 @@ int main(int argc, char **argv)
     pmb::setLogFlags(options.log_flags);
     pmb::setLogFormat(options.log_format);
     pmb::setLogTimeFormat(options.log_time);
-    std::cout << "pmbridge starts ..." << std::endl;
+    if (!options.exit_after_load)
+        std::cout << "pmbridge starts ..." << std::endl;
     pmbProject *project;
     {
         pmbBuilder builder;
@@ -121,6 +135,13 @@ int main(int argc, char **argv)
             pmbLogError("Project is null");
             return 1;
         }
+    }
+    if (options.print_config)
+        pmbBuilder::printConfig(project);
+    if (options.exit_after_load)
+    {
+        delete project;
+        return 0;
     }
     const pmb::List<pmbServer*> &servers = project->servers();
     const pmb::List<pmbCommand*> &commands = project->commands();

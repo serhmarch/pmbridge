@@ -18,6 +18,7 @@
 
 #include <ModbusSerialPort.h>
 #include <ModbusTcpPort.h>
+#include <ModbusServerResource.h>
 #include <ModbusTcpServer.h>
 
 #include <pmb_print.h>
@@ -36,9 +37,208 @@ static inline bool containsChar(const char* str, char ch)
     return std::strchr(str, ch) != nullptr;
 }
 
-pmbBuilder::pmbBuilder() :
-    m_project(nullptr),
-    m_ch(mbEMPTY_CHAR)
+void pmbBuilder::printConfig(const pmbProject *project)
+{
+    pmbMemory* mem = pmbMemory::global();
+
+    printf("MEMORY={%hu, # coils\n"
+           "        %hu, # discrete inputs\n"
+           "        %hu, # input registers\n"
+           "        %hu  # holding registers\n"
+           "}\n\n",
+           static_cast<uint16_t>(mem->count_0x()),
+           static_cast<uint16_t>(mem->count_1x()),
+           static_cast<uint16_t>(mem->count_3x()),
+           static_cast<uint16_t>(mem->count_4x()));
+
+    const pmb::List<pmbServer*> &servers = project->servers();
+    for (const pmbServer* srv : servers)
+    {
+        pmb::String unitmapStr = pmb::unitMapToString(srv->port()->unitMap());
+        switch(srv->port()->type())
+        {
+        case Modbus::RTU:
+        case Modbus::ASC:
+        {
+            const ModbusServerResource *serverPort = static_cast<ModbusServerResource*>(srv->port());
+            const ModbusSerialPort *serialPort = static_cast<ModbusSerialPort*>(serverPort->port());
+            printf("SERVER={%s, # type\n"
+                   "        '%s', # name\n"
+                   "        '%s', # devname\n"
+                   "        %d, # baudrate\n"
+                   "        %hhu, # databits\n"
+                   "        %s, # parity\n"
+                   "        %s, # stopbits\n"
+                   "        %s, # flowcontrol\n"
+                   "        %u, # timeoutfb\n"
+                   "        %u, # timeoutib\n"
+                   "        '%s', # units\n"
+                   "        %d  # broadcast\n"
+                   "}\n\n",
+                Modbus::sprotocolType(srv->port()->type()),
+                srv->name().data(),
+                serialPort->portName(),
+                serialPort->baudRate(),
+                serialPort->dataBits(),
+                Modbus::sparity(serialPort->parity()),
+                Modbus::sstopBits(serialPort->stopBits()),
+                Modbus::sflowControl(serialPort->flowControl()),
+                serialPort->timeoutFirstByte(),
+                serialPort->timeoutInterByte(),
+                unitmapStr.data(), 
+                static_cast<int>(serverPort->isBroadcastEnabled())
+            );
+        }
+            break;
+        case Modbus::TCP:
+        {
+            const ModbusTcpServer *serverPort = static_cast<ModbusTcpServer*>(srv->port());
+            printf("SERVER={TCP, # type\n"
+                   "        '%s', # name\n"
+                   "        %hu, # tcpport\n"
+                   "        %u, # timeout\n"
+                   "        %u, # maxconn\n"
+                   "        '%s', # ipaddr\n"
+                   "        '%s', # units\n"
+                   "        %d  # broadcast\n"
+                   "}\n\n",
+                srv->name().data(),
+                serverPort->port(),
+                serverPort->timeout(),
+                serverPort->maxConnections(),
+                serverPort->ipaddr(),
+                unitmapStr.data(), 
+                static_cast<int>(serverPort->isBroadcastEnabled())
+            );
+        }
+            break;
+        }
+    }
+
+    const pmb::List<pmbClient*> &clients = project->clients();
+    for (const pmbClient* cli : clients)
+    {
+        const ModbusClientPort *clientPort = cli->port();
+        switch(cli->port()->type())
+        {
+        case Modbus::RTU:
+        case Modbus::ASC:
+        {
+            const ModbusSerialPort *serialPort = static_cast<ModbusSerialPort*>(clientPort->port());
+            printf("CLIENT={%s, # type\n"
+                   "        '%s', # name\n"
+                   "        '%s', # devname\n"
+                   "        %d, # baudrate\n"
+                   "        %hhu, # databits\n"
+                   "        %s, # parity\n"
+                   "        %s, # stopbits\n"
+                   "        %s, # flowcontrol\n"
+                   "        %u, # timeoutfb\n"
+                   "        %u  # timeoutib\n"
+                   "}\n\n",
+                Modbus::sprotocolType(cli->port()->type()),
+                cli->name().data(),
+                serialPort->portName(),
+                serialPort->baudRate(),
+                serialPort->dataBits(),
+                Modbus::sparity(serialPort->parity()),
+                Modbus::sstopBits(serialPort->stopBits()),
+                Modbus::sflowControl(serialPort->flowControl()),
+                serialPort->timeoutFirstByte(),
+                serialPort->timeoutInterByte()
+            );
+        }
+            break;
+        case Modbus::TCP:
+        {
+            const ModbusTcpPort *tcpPort = static_cast<ModbusTcpPort*>(clientPort->port());
+            printf("CLIENT={TCP, # type\n"
+                   "        '%s', # name\n"
+                   "        '%s', # host\n"
+                   "        %hu, # tcpport\n"
+                   "        %u  # timeout\n"
+                   "}\n\n",
+                cli->name().data(),
+                tcpPort->host(),
+                tcpPort->port(),
+                tcpPort->timeout()
+            );
+        }
+            break;
+        }
+    }
+
+    const pmb::List<pmbCommand*> &commands = project->commands();
+    for (const pmbCommand* cmd : commands)
+    {
+        switch (cmd->type())
+        {
+        case pmbCommand::Command_QUERY:
+        {
+            const pmbCommandQuery* q = static_cast<const pmbCommandQuery*>(cmd);
+            const char* qfunc = (q->queryType() == pmbCommandQuery::Query_Read) ? "RD" : "WR";
+            printf("QUERY={'%s', # client\n"
+                    "       %hhu, # unit\n"
+                    "       %s , # func\n"
+                    "       %s, # devadr\n"
+                    "       %hu, # count\n"
+                    "       %s, # memadr\n"
+                    "       %hu, # execpatt\n"
+                    "       %s, # succadr\n"
+                    "       %s, # errcadr\n"
+                    "       %s  # errvadr\n"
+                    "}\n\n",
+                q->client()->name().data(),
+                q->unit(),
+                qfunc,
+                q->devAddress().toString<Modbus::String>(Modbus::Address::Notation_Modbus).data(),
+                q->count(),
+                q->memAddress().toString<Modbus::String>(Modbus::Address::Notation_Modbus).data(),
+                q->execPattern(),
+                q->succAddress().toString<Modbus::String>(Modbus::Address::Notation_Modbus).data(),
+                q->errcAddress().toString<Modbus::String>(Modbus::Address::Notation_Modbus).data(),
+                q->errvAddress().toString<Modbus::String>(Modbus::Address::Notation_Modbus).data()
+            );
+        }
+            break;
+        case pmbCommand::Command_COPY:
+        {
+            const pmbCommandCopy* c = static_cast<const pmbCommandCopy*>(cmd);
+            printf("COPY={%s, # srcadr\n"
+                    "      %hu, # count\n"
+                    "      %s  # destadr\n"
+                    "}\n\n",
+                c->srcAddress().toString<Modbus::String>(Modbus::Address::Notation_Modbus).data(),
+                c->count(),
+                c->dstAddress().toString<Modbus::String>(Modbus::Address::Notation_Modbus).data()
+            );
+        }
+            break;
+        case pmbCommand::Command_DUMP:
+        {
+            const pmbCommandDump* d = static_cast<const pmbCommandDump*>(cmd);
+            printf("DUMP={%s , # memadr\n"
+                    "      %hu , # count\n"
+                    "      %s   # format\n"
+                    "}\n\n",
+                d->memAddress().toString<Modbus::String>(Modbus::Address::Notation_Modbus).data(),
+                d->count(),
+                pmb::toConstCharPtr(d->format())
+            );
+        }
+            break;
+        case pmbCommand::Command_DELAY:
+        {
+            const pmbCommandDelay* dl = static_cast<const pmbCommandDelay*>(cmd);
+            printf("DELAY={%u} # msec\n\n", dl->milliseconds());
+        }
+            break;
+        }
+    }
+}
+
+pmbBuilder::pmbBuilder() : m_project(nullptr),
+                           m_ch(mbEMPTY_CHAR)
 {
 
 }
@@ -605,7 +805,7 @@ pmbCommand* pmbBuilder::parseQuery(const std::list<std::string> &args)
     Modbus::Address errcAdr  = Modbus::Address::fromString(*it);                ++it;
     Modbus::Address errvAdr  = Modbus::Address::fromString(*it);          
 
-    pmbCommandQueryBase *cmd = nullptr;
+    pmbCommandQuery *cmd = nullptr;
     if (func == pmbSTR("RD"))
     {
         switch (devAdr.type())
@@ -648,7 +848,7 @@ pmbCommand* pmbBuilder::parseQuery(const std::list<std::string> &args)
         return nullptr;
     }
     cmd->setUnit(unit);
-    cmd->setOffset(devAdr.offset());
+    cmd->setDevAddress(devAdr);
     cmd->setCount(count);
     cmd->setMemAddress(memAdr);
     cmd->setExecPattern(execPatt);

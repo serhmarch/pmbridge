@@ -166,4 +166,30 @@ bool fillUnitMap(const Modbus::Char *s, void *unitmap)
     return res;
 }
 
+String unitMapToString(const void *unitmap)
+{
+    String res;
+    if (unitmap == nullptr)
+        return res;
+    bool printed = false;
+    for (int unit = 0; unit <= 255; ++unit)
+    {
+        if (MB_UNITMAP_GET_BIT(unitmap, unit))
+        {
+            int start = unit;
+            int end = unit;
+            for (++unit; MB_UNITMAP_GET_BIT(unitmap, unit) && (unit <= 255); ++unit)
+                end = unit;
+            if (printed)
+                res += ",";
+            if (start < end)
+                res += std::to_string(start) + '-' + std::to_string(end);
+            else
+                res += std::to_string(start);
+            printed = true;
+        }
+    }
+    return res;
+}
+
 } // namespace pmb

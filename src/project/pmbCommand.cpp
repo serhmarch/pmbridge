@@ -89,7 +89,7 @@ Modbus::StatusCode pmbCommandQuery::beginQuery()
 
 Modbus::StatusCode pmbCommandQueryReadCoils::runQuery()
 {
-    Modbus::StatusCode status = m_client->readCoils(m_unit, m_offset, m_count, m_buffer.data());
+    Modbus::StatusCode status = m_client->readCoils(m_unit, offset(), m_count, m_buffer.data());
     if (Modbus::StatusIsGood(status))
     {
         m_memory->write(m_memAdr, m_count, m_buffer.data());
@@ -99,7 +99,7 @@ Modbus::StatusCode pmbCommandQueryReadCoils::runQuery()
 
 Modbus::StatusCode pmbCommandQueryReadDiscreteInputs::runQuery()
 {
-    Modbus::StatusCode status = m_client->readDiscreteInputs(m_unit, m_offset, m_count, m_buffer.data());
+    Modbus::StatusCode status = m_client->readDiscreteInputs(m_unit, offset(), m_count, m_buffer.data());
     if (Modbus::StatusIsGood(status))
     {
         m_memory->write(m_memAdr, m_count, m_buffer.data());
@@ -109,7 +109,7 @@ Modbus::StatusCode pmbCommandQueryReadDiscreteInputs::runQuery()
 
 Modbus::StatusCode pmbCommandQueryReadHoldingRegisters::runQuery()
 {
-    Modbus::StatusCode status = m_client->readHoldingRegisters(m_unit, m_offset, m_count, reinterpret_cast<uint16_t*>(m_buffer.data()));
+    Modbus::StatusCode status = m_client->readHoldingRegisters(m_unit, offset(), m_count, reinterpret_cast<uint16_t*>(m_buffer.data()));
     if (Modbus::StatusIsGood(status))
     {
         m_memory->write(m_memAdr, m_count, m_buffer.data());
@@ -119,7 +119,7 @@ Modbus::StatusCode pmbCommandQueryReadHoldingRegisters::runQuery()
 
 Modbus::StatusCode pmbCommandQueryReadInputRegisters::runQuery()
 {
-    Modbus::StatusCode status = m_client->readHoldingRegisters(m_unit, m_offset, m_count, reinterpret_cast<uint16_t*>(m_buffer.data()));
+    Modbus::StatusCode status = m_client->readHoldingRegisters(m_unit, offset(), m_count, reinterpret_cast<uint16_t*>(m_buffer.data()));
     if (Modbus::StatusIsGood(status))
     {
         m_memory->write(m_memAdr, m_count, m_buffer.data());
@@ -134,7 +134,7 @@ Modbus::StatusCode pmbCommandQueryWriteMultipleCoils::beginQuery()
 
 Modbus::StatusCode pmbCommandQueryWriteMultipleCoils::runQuery()
 {
-    return m_client->writeMultipleCoils(m_unit, m_offset, m_count, m_buffer.data());;
+    return m_client->writeMultipleCoils(m_unit, offset(), m_count, m_buffer.data());;
 }
 
 Modbus::StatusCode pmbCommandQueryWriteMultipleRegisters::beginQuery()
@@ -144,7 +144,7 @@ Modbus::StatusCode pmbCommandQueryWriteMultipleRegisters::beginQuery()
 
 Modbus::StatusCode pmbCommandQueryWriteMultipleRegisters::runQuery()
 {
-    return m_client->writeMultipleCoils(m_unit, m_offset, m_count, m_buffer.data());;
+    return m_client->writeMultipleCoils(m_unit, offset(), m_count, m_buffer.data());;
 }
 
 

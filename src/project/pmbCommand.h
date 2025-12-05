@@ -20,7 +20,16 @@ class pmbClient;
 class pmbCommand
 {
 public:
+    enum CommandType
+    {
+        Command_QUERY,
+        Command_COPY,
+        Command_DELAY,
+        Command_DUMP
+    };
+public:
     virtual ~pmbCommand();
+    virtual CommandType type() const = 0;
     virtual bool run() = 0;
 };
 
@@ -32,15 +41,36 @@ public:
 class pmbCommandQuery : public pmbCommand
 {
 public:
+    enum QueryType
+    {
+        Query_Read,
+        Query_Write
+    };
+
+public:
     pmbCommandQuery(pmbMemory *memory, pmbClient *client);
     ~pmbCommandQuery() override;
 
 public:
+    CommandType type() const override { return Command_QUERY; }
+    virtual QueryType queryType() const = 0;
+
     inline pmbMemory *memory() const { return m_memory; }
     inline pmbClient *client() const { return m_client; }
 
     inline uint8_t unit() const { return m_unit; }
     inline void setUnit(uint8_t unit) { m_unit = unit; }
+
+    inline Modbus::Address devAddress() const { return m_devAdr; }
+    inline void setDevAddress(Modbus::Address adr) { m_devAdr = adr; }
+    inline uint16_t offset() const { return m_devAdr.offset(); }
+    inline void setOffset(uint16_t offset) { m_devAdr.setOffset(offset); }
+
+    inline Modbus::Address memAddress() const { return m_memAdr; }
+    inline void setMemAddress(Modbus::Address adr) { m_memAdr = adr; }
+
+    inline uint16_t count() const { return m_count; }
+    inline void setCount(uint16_t c) { m_count = c; }
 
     inline uint16_t execPattern() const { return m_execPattern; }
     void setExecPattern(uint16_t exec);
@@ -65,6 +95,9 @@ protected:
     pmbMemory *m_memory;
     pmbClient *m_client;
     uint8_t m_unit;
+    Modbus::Address m_devAdr;
+    Modbus::Address m_memAdr;
+    uint16_t m_count;
     uint16_t m_execPattern;
     Modbus::Address m_succAdr;
     Modbus::Address m_errcAdr;
@@ -74,67 +107,52 @@ protected:
     uint16_t m_exec;
 };
 
-class pmbCommandQueryBase : public pmbCommandQuery
-{
+class pmbCommandQueryReadCoils : public pmbCommandQuery
+{   
 public:
     using pmbCommandQuery::pmbCommandQuery;
-
-public:
-    inline uint16_t offset() const { return m_offset; }
-    inline void setOffset(uint16_t offset) { m_offset = offset; }
-
-    inline uint16_t count() const { return m_count; }
-    inline void setCount(uint16_t c) { m_count = c; }
-
-    inline Modbus::Address memAddress() const { return m_memAdr; }
-    inline void setMemAddress(Modbus::Address adr) { m_memAdr = adr; }
-
-protected:
-    uint16_t m_offset;
-    uint16_t m_count;
-    Modbus::Address m_memAdr;
-};
-
-class pmbCommandQueryReadCoils : public pmbCommandQueryBase
-{   
-public:
-    using pmbCommandQueryBase::pmbCommandQueryBase;
+    QueryType queryType() const override { return Query_Read; }
     Modbus::StatusCode runQuery() override;
 };
 
-class pmbCommandQueryReadDiscreteInputs : public pmbCommandQueryBase
+class pmbCommandQueryReadDiscreteInputs : public pmbCommandQuery
 {   
 public:
-    using pmbCommandQueryBase::pmbCommandQueryBase;
+    using pmbCommandQuery::pmbCommandQuery;
+    QueryType queryType() const override { return Query_Read; }
     Modbus::StatusCode runQuery() override;
 };
 
-class pmbCommandQueryReadHoldingRegisters : public pmbCommandQueryBase
+class pmbCommandQueryReadHoldingRegisters : public pmbCommandQuery
 {   
 public:
-    using pmbCommandQueryBase::pmbCommandQueryBase;
+    using pmbCommandQuery::pmbCommandQuery;
+    QueryType queryType() const override { return Query_Read; }
     Modbus::StatusCode runQuery() override;
 };
 
-class pmbCommandQueryReadInputRegisters : public pmbCommandQueryBase
+class pmbCommandQueryReadInputRegisters : public pmbCommandQuery
 {   
 public:
-    using pmbCommandQueryBase::pmbCommandQueryBase;
+    using pmbCommandQuery::pmbCommandQuery;
+    QueryType queryType() const override { return Query_Read; }
     Modbus::StatusCode runQuery() override;
 };
 
-class pmbCommandQueryWriteMultipleCoils : public pmbCommandQueryBase
+class pmbCommandQueryWriteMultipleCoils : public pmbCommandQuery
 {   
 public:
-    using pmbCommandQueryBase::pmbCommandQueryBase;
+    using pmbCommandQuery::pmbCommandQuery;
+    QueryType queryType() const override { return Query_Write; }
     Modbus::StatusCode beginQuery() override;
     Modbus::StatusCode runQuery() override;
 };
 
-class pmbCommandQueryWriteMultipleRegisters : public pmbCommandQueryBase
+class pmbCommandQueryWriteMultipleRegisters : public pmbCommandQuery
 {   
 public:
-    using pmbCommandQueryBase::pmbCommandQueryBase;
+    using pmbCommandQuery::pmbCommandQuery;
+    QueryType queryType() const override { return Query_Write; }
     Modbus::StatusCode beginQuery() override;
     Modbus::StatusCode runQuery() override;
 };
@@ -150,6 +168,7 @@ public:
     pmbCommandCopy(pmbMemory *memory);
 
 public:
+    CommandType type() const override { return Command_COPY; }
     inline Modbus::Address srcAddress() const { return m_srcAdr; }
     inline Modbus::Address dstAddress() const { return m_dstAdr; }
     inline uint16_t count() const { return m_count; }
@@ -200,6 +219,7 @@ public:
     pmbCommandDump(pmbMemory *memory);
 
 public:
+    CommandType type() const override { return Command_DUMP; }
     inline Modbus::Address memAddress() const { return m_memAdr; }
     inline pmb::Format format() const { return m_format; }
     inline uint16_t count() const { return m_count; }
@@ -240,6 +260,9 @@ class pmbCommandDelay : public pmbCommand
 {
 public:
     pmbCommandDelay();
+
+public:
+    CommandType type() const override { return Command_DELAY; }
     bool run() override;
 
 public:

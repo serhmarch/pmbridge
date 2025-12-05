@@ -25,6 +25,9 @@ class pmbCommand;
 class pmbBuilder
 {
 public:
+    static void printConfig(const pmbProject *project);
+
+public:
     pmbBuilder();
     ~pmbBuilder();
 

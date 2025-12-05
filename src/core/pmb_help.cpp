@@ -20,7 +20,9 @@ const char* help_options =
 "  --file (-f)            - path to *.conf file (pmbridge.conf by default)\n"
 "  --log-flags (-lc)      - list of log flags (categories); `,`, `;` or `|` separated\n"
 "  --log-format (-lf)     - format of each message to output\n"
-"  --log-time (-lt)       - format of time of each message to output\n";
+"  --log-time (-lt)       - format of time of each message to output\n"
+"  --print-config         - print current configuration before program execution\n"
+"  --print-config-only    - print configuration and exit immediately\n";
 
 
 #define CMD_MEMORY " MEMORY={<0x>,<1x>,<3x>,<4x>}\n"
@@ -58,22 +60,31 @@ CMD_DUMP;
 "    timeoutfb   - unnecessary parameter, timeout for read first byte of the input packet in milliseconds (1000 by default)\n"                   \
 "    timeoutib   - unnecessary parameter, timeout for read next bytes of the input packet in milliseconds (50 by default)\n"
 
-#define CMD_PARAM_SERVER_TCP \
-"    tcpport - unnecessary parameter, server ModbusTCP port (502 by default)\n"              \
-"    timeout - unnecessary parameter, timeout for read in milliseconds (3000 by default)\n"  \
-"    maxconn - unnecessary parameter, maximum TCP connection for server (10 by default)\n"
+#define CMD_SERVER_PARAM_TCP \
+"    tcpport   - unnecessary parameter, server ModbusTCP port (502 by default)\n"                 \
+"    timeout   - unnecessary parameter, timeout for read in milliseconds (3000 by default)\n"     \
+"    maxconn   - unnecessary parameter, maximum TCP connection for server (10 by default)\n"      \
+"    ipaddr    - unnecessary parameter, IP address of the server to bind ('0.0.0.0' by default)\n"\
+"    units     - unnecessary parameter, filter, list of allowed unit/slave addresses separated by `,` or `-` (all units allowed by default)\n" \
+"    broadcast - unnecessary parameter, enable `unit=0` is broadcast (1 (enabled) by default)\n"
 
-#define CMD_PARAM_CLIENT_TCP \
+#define CMD_SERVER_PARAM_SERIAL CMD_PARAM_SERIAL \
+"    units       - unnecessary parameter, filter, list of allowed unit/slave addresses separated by `,` or `-` (all units allowed by default)\n" \
+"    broadcast   - unnecessary parameter, enable `unit=0` is broadcast (1 (enabled) by default)\n"
+
+#define CMD_CLIENT_PARAM_TCP \
 "    host    - remote host to connect\n"                                                     \
 "    tcpport - unnecessary parameter, remote port to connect (502 by default)\n"             \
 "    timeout - unnecessary parameter, timeout for read in milliseconds (3000 by default)\n"
 
+#define CMD_CLIENT_PARAM_SERIAL CMD_PARAM_SERIAL
+
 #define CMD_SERVER_SERIAL \
-" SERVER={RTU,<name>,<devname>,<baudrate>,<databits>,<parity>,<stopbits>,<flowcontrol>,<timeoutfb>,<timeoutib>}\n" \
-" SERVER={ASC,<name>,<devname>,<baudrate>,<databits>,<parity>,<stopbits>,<flowcontrol>,<timeoutfb>,<timeoutib>}\n"
+" SERVER={RTU,<name>,<devname>,<baudrate>,<databits>,<parity>,<stopbits>,<flowcontrol>,<timeoutfb>,<timeoutib>,<units>,<broadcast>}\n" \
+" SERVER={ASC,<name>,<devname>,<baudrate>,<databits>,<parity>,<stopbits>,<flowcontrol>,<timeoutfb>,<timeoutib>,<units>,<broadcast>}\n"
 
 #define CMD_SERVER_TCP \
-" SERVER={TCP,<name>,<tcpport>,<timeout>,<maxconn>}\n"
+" SERVER={TCP,<name>,<tcpport>,<timeout>,<maxconn>,<ipaddr>,<units>,<broadcast>}\n"
 
 #define CMD_CLIENT_SERIAL \
 " CLIENT={RTU,<name>,<devname>,<baudrate>,<databits>,<parity>,<stopbits>,<flowcontrol>,<timeoutfb>,<timeoutib>}\n" \
@@ -92,23 +103,23 @@ CMD_MEMORY_DESCR
 const char* help_CMD_SERVER = CMD_SERVER
 CMD_SERVER_DESCR
 CMD_SERVER_SERIAL
-CMD_PARAM_SERIAL
+CMD_SERVER_PARAM_SERIAL
 CMD_SERVER_TCP
-CMD_PARAM_SERVER_TCP;
+CMD_SERVER_PARAM_TCP;
 
 const char* help_CMD_CLIENT = CMD_CLIENT
 CMD_CLIENT_DESCR
 CMD_CLIENT_SERIAL
-CMD_PARAM_SERIAL
+CMD_CLIENT_PARAM_SERIAL
 CMD_CLIENT_TCP
-CMD_PARAM_CLIENT_TCP;
+CMD_CLIENT_PARAM_TCP;
 
 
 const char* help_CMD_QUERY = CMD_QUERY
 CMD_QUERY_DESCR
 "    client   - name of client port previously defined in `CLIENT` command\n"
 "    unit     - modbus unit/address slave\n"
-"    func     - name of function. Can be {RD,WR}. What to read/write defined in the next `devadr` parameter\n"
+"    func     - name of function. Can be {RD,WR}. What to read/write is defined in the next `devadr` parameter\n"
 "    devadr   - address of first item of the remote device to read/write\n"
 "    count    - count of elements (discrete or register)\n"
 "    memadr   - address within inner memory to get/set\n"

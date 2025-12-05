@@ -78,5 +78,5 @@ if (BUILD_TESTING)
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests
     )
     # Also add a top-level test to run the whole suite if desired
-    add_test(NAME run-all-tests COMMAND ${PMB_TESTS_EXEC_NAME})
+    #add_test(NAME run-all-tests COMMAND ${PMB_TESTS_EXEC_NAME})
 endif()

@@ -107,9 +107,9 @@ Modbus::StatusCode pmbCommandQueryReadDiscreteInputs::runQuery()
     return status;
 }
 
-Modbus::StatusCode pmbCommandQueryReadHoldingRegisters::runQuery()
+Modbus::StatusCode pmbCommandQueryReadInputRegisters::runQuery()
 {
-    Modbus::StatusCode status = m_client->readHoldingRegisters(m_unit, offset(), m_count, reinterpret_cast<uint16_t*>(m_buffer.data()));
+    Modbus::StatusCode status = m_client->readInputRegisters(m_unit, offset(), m_count, reinterpret_cast<uint16_t*>(m_buffer.data()));
     if (Modbus::StatusIsGood(status))
     {
         m_memory->write(m_memAdr, m_count, m_buffer.data());
@@ -117,7 +117,7 @@ Modbus::StatusCode pmbCommandQueryReadHoldingRegisters::runQuery()
     return status;
 }
 
-Modbus::StatusCode pmbCommandQueryReadInputRegisters::runQuery()
+Modbus::StatusCode pmbCommandQueryReadHoldingRegisters::runQuery()
 {
     Modbus::StatusCode status = m_client->readHoldingRegisters(m_unit, offset(), m_count, reinterpret_cast<uint16_t*>(m_buffer.data()));
     if (Modbus::StatusIsGood(status))

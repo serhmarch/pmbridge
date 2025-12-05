@@ -5,16 +5,32 @@
 `pmbridge` (Programmable Modbus Bridge) is a cross-platform (Windows, Linux) Modbus gateway application.
 It supports different types of Modbus protocol: `TCP`, `RTU`, `ASC`.
 
-'Programmable' means user can configure every Modbus function to read/write from remote device(s)
-and where to put/get data within internal Modbus memory and 
+`Programmable` means user can configure every Modbus function to read/write from remote device(s)
+and where to put/get data within internal Modbus memory and
 have some other simple commands described below.
 In this case `pmbridge` acts like a client (master).
 
 At the same time `pmbridge` can acts like a server (slave) and provide access to the internal memory.
 
+Here are some common ways to use `pmbridge`:
+
+* **Modbus data collector** - collect data from remote Modbus devices and
+provide access to this data via inner Modbus server.
+It can collect only necessary data from remote devices
+and sort them in inner memory for easy access by PLC or SCADA system.
+E.g. this can be collecting data from RTU Modbus network and providing
+simplified access to this data via Modbus TCP server or
+collecting data via Modbus TCP from remote devices and providing access
+for PLC that already operates via Modbus RTU network.
+
+* **Active bridge** - read data from one Modbus device and write the data to
+another Modbus device from single network or between different networks.
+In this case PLC programmers need to reserve some memory for exchange data
+and all network operations will be done by `pmbridge`.
+
 It's free and open source software based on `ModbusLib` project:
 
-https://github.com/serhmarch/ModbusLib
+<https://github.com/serhmarch/ModbusLib>
 
 Clients can use next list of functions:
 
@@ -66,11 +82,11 @@ Singleline command can be defined without `{}`-brackets unlike multiline command
 * `MEMORY={<0x>,<1x>,<3x>,<4x>}`
 
   Command for inner memory configuration.
-  * `0x` - quantity of coils (0x)-memory 
-  * `1x` - quantity of input discretes (1x)-memory 
-  * `3x` - quantity of input registers (3x)-memory 
+  * `0x` - quantity of coils (0x)-memory
+  * `1x` - quantity of input discretes (1x)-memory
+  * `3x` - quantity of input registers (3x)-memory
   * `4x` - quantity of holding registers (4x)-memory
- 
+
 * `SERVER={<type>,<name>,...}`
 * `CLIENT={<type>,<name>,...}`
 
@@ -80,34 +96,39 @@ Singleline command can be defined without `{}`-brackets unlike multiline command
 
   Types of port and parameters:
 
-  * `SERVER={TCP,<name>,<tcpport>,<timeout>,<maxconn>}`
+  * `SERVER={TCP,<name>,<tcpport>,<timeout>,<maxconn>,<ipaddr>,<units>,<broadcast>}`
 
-    * `tcpport` - unnecessary parameter, server ModbusTCP port (502 by default)
-    * `timeout` - unnecessary parameter, timeout for read in milliseconds (3000 by default)
-    * `maxconn` - unnecessary parameter, maximum TCP connection for server (10 by default)
+    * `tcpport`   - unnecessary parameter, server ModbusTCP port (502 by default)
+    * `timeout`   - unnecessary parameter, timeout for read in milliseconds (3000 by default)
+    * `maxconn`   - unnecessary parameter, maximum TCP connection for server (10 by default)
+    * `ipaddr`    - unnecessary parameter, IP address of the server to bind ("0.0.0.0" by default)
+    * `units`     - unnecessary parameter, filter, list of allowed unit/slave addresses separated by `,` or `-` (all units allowed by default)
+    * `broadcast` - unnecessary parameter, enable `unit=0` is broadcast (1 (enabled) by default)
 
   * `CLIENT={TCP,<name>,<host>,<tcpport>,<timeout>}`
 
-	  * `host`    - remote host to connect
-	  * `tcpport` - unnecessary parameter, remote port to connect (502 by default)
+    * `host`    - remote host to connect
+    * `tcpport` - unnecessary parameter, remote port to connect (502 by default)
     * `timeout` - unnecessary parameter, timeout for read in milliseconds (3000 by default)
 
-  * `SERVER={RTU,<name>,<devname>,<baudrate>,<databits>,<parity>,<stopbits>,<flowcontrol>,<timeoutfb>,<timeoutib>}`
+  * `SERVER={RTU,<name>,<devname>,<baudrate>,<databits>,<parity>,<stopbits>,<flowcontrol>,<timeoutfb>,<timeoutib>,<units>,<broadcast>}`
 
-    `SERVER={ASC,<name>,<devname>,<baudrate>,<databits>,<parity>,<stopbits>,<flowcontrol>,<timeoutfb>,<timeoutib>}`
+    `SERVER={ASC,<name>,<devname>,<baudrate>,<databits>,<parity>,<stopbits>,<flowcontrol>,<timeoutfb>,<timeoutib>,<units>,<broadcast>}`
 
     `CLIENT={RTU,<name>,<devname>,<baudrate>,<databits>,<parity>,<stopbits>,<flowcontrol>,<timeoutfb>,<timeoutib>}`
 
     `CLIENT={ASC,<name>,<devname>,<baudrate>,<databits>,<parity>,<stopbits>,<flowcontrol>,<timeoutfb>,<timeoutib>}`
 
-	  * `devname`     - device system name or port name. For example: COM13, /dev/ttyM0, /dev/ttyUSB0 etc
-	  * `baudrate`    - unnecessary parameter, baud rate, use from serie: 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200 (9600 by default)
-	  * `databits`    - unnecessary parameter, number of databits, use from serie: 5, 6, 7, 8  (8 by default)
-	  * `parity`      - unnecessary parameter, parity: None,N - none; Even,E - even; Odd,O - odd (None by default)
-	  * `stopbits`    - unnecessary parameter, stop bits: may be 1, 1.5 or 2 (1 by default)
-	  * `flowcontrol` - unnecessary parameter, flow control: No, Hard, Soft (No by default)
+    * `devname`     - device system name or port name. For example: COM13, /dev/ttyM0, /dev/ttyUSB0 etc
+    * `baudrate`    - unnecessary parameter, baud rate, use from serie: 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200 (9600 by default)
+    * `databits`    - unnecessary parameter, number of databits, use from serie: 5, 6, 7, 8  (8 by default)
+    * `parity`      - unnecessary parameter, parity: None,N - none; Even,E - even; Odd,O - odd (None by default)
+    * `stopbits`    - unnecessary parameter, stop bits: may be 1, 1.5 or 2 (1 by default)
+    * `flowcontrol` - unnecessary parameter, flow control: No, Hard, Soft (No by default)
     * `timeoutfb`   - unnecessary parameter, timeout for read first byte of the input packet in milliseconds (1000 by default)
     * `timeoutib`   - unnecessary parameter, timeout for read next bytes of the input packet in milliseconds (50 by default)
+    * `units`       - unnecessary parameter (server only), filter, list of allowed unit/slave addresses separated by `,` or `-` (all units allowed by default)
+    * `broadcast`   - unnecessary parameter (server only), enable `unit=0` is broadcast (1 (enabled) by default)
 
 #### Execution commands
 
@@ -146,23 +167,31 @@ Singleline command can be defined without `{}`-brackets unlike multiline command
   * `memadr`  - memory address to print
   * `count`   - count of elements to print (discret or register)
   * `format`  - format of element. Must be:
-    * `Bin16` 
-    * `Oct16` 
-    * `Dec16` 
+    * `Bin16`
+    * `Oct16`
+    * `Dec16`
     * `UDec16`
-    * `Hex16` 
-    * `Bin32` 
-    * `Oct32` 
-    * `Dec32` 
+    * `Hex16`
+    * `Bin32`
+    * `Oct32`
+    * `Dec32`
     * `UDec32`
-    * `Hex32` 
-    * `Bin64` 
-    * `Oct64` 
-    * `Dec64` 
+    * `Hex32`
+    * `Bin64`
+    * `Oct64`
+    * `Dec64`
     * `UDec64`
-    * `Hex64` 
-    * `Float` 
+    * `Hex64`
+    * `Float`
     * `Double`
+
+#### units-parameter for SERVER
+
+This parameter allows to filter incoming requests by unit/slave address.
+User can specify list of allowed unit/slave addresses separated by `,` or `-`.
+For example:
+`units=1,3-5,10` means that only requests with unit/slave address
+`1`, `3`, `4`, `5` and `10` will be processed by server.
 
 #### Memory addressing
 
@@ -170,9 +199,9 @@ Singleline command can be defined without `{}`-brackets unlike multiline command
 
 | Memory type       | Standard (1 based) | IEC 61131-3 (0 based)| IEC 61131-3 Hex (0 based)
 |-------------------|--------------------|----------------------|---------------------------
-| Coils             | `000001`           | `%Q0`                | `%Q0000h`                 
-| Discrete inputs   | `100016`           | `%I15`               | `%I000Fh`                
-| Input registers   | `300017`           | `%IW16`              | `%IW0010h`               
+| Coils             | `000001`           | `%Q0`                | `%Q0000h`
+| Discrete inputs   | `100016`           | `%I15`               | `%I000Fh`
+| Input registers   | `300017`           | `%IW16`              | `%IW0010h`
 | Holding registers | `406658`           | `%MW6657`            | `%MW1A01h`
 
 #### Example of the program
@@ -229,46 +258,47 @@ DELAY={2000}
 
 Table of error codes:
 
- Hex code | Dec code | Name                                          | Description
- ---------|----------|-----------------------------------------------|------------------------------------------------
- `0x0001` | `   1`   | `Status_BadIllegalFunction`                   | Standard error. The feature is not supported
- `0x0002` | `   2`   | `Status_BadIllegalDataAddress`                | Standard error. Invalid data address
- `0x0003` | `   3`   | `Status_BadIllegalDataValue`                  | Standard error. Invalid data value
- `0x0004` | `   4`   | `Status_BadServerDeviceFailure`               | Standard error. Failure during a specified operation
- `0x0005` | `   5`   | `Status_BadAcknowledge`                       | Standard error. The server has accepted the request and is processing it, but it will take a long time
- `0x0006` | `   6`   | `Status_BadServerDeviceBusy`                  | Standard error. The server is busy processing a long command. The request must be repeated later
- `0x0007` | `   7`   | `Status_BadNegativeAcknowledge`               | Standard error. The programming function cannot be performed
- `0x0008` | `   8`   | `Status_BadMemoryParityError`                 | Standard error. The server attempted to read a record file but detected a parity error in memory
- `0x000A` | `  10`   | `Status_BadGatewayPathUnavailable`            | Standard error. Indicates that the gateway was unable to allocate an internal communication path from the input port o the output port for processing the request. Usually means that the gateway is misconfigured or overloaded
- `0x000B` | `  11`   | `Status_BadGatewayTargetDeviceFailedToRespond`| Standard error. Indicates that no response was obtained from the target device. Usually means that the device is not present on the network
- `0x0101` | ` 257`   | `Status_BadEmptyResponse`                     | Error. Empty request/response body
- `0x0102` | ` 258`   | `Status_BadNotCorrectRequest`                 | Error. Invalid request
- `0x0103` | ` 259`   | `Status_BadNotCorrectResponse`                | Error. Invalid response
- `0x0104` | ` 260`   | `Status_BadWriteBufferOverflow`               | Error. Write buffer overflow
- `0x0105` | ` 261`   | `Status_BadReadBufferOverflow`                | Error. Request receive buffer overflow
- `0x0201` | ` 513`   | `Status_BadSerialOpen`                        | Error. Serial port cannot be opened
- `0x0202` | ` 514`   | `Status_BadSerialWrite`                       | Error. Cannot send a parcel to the serial port
- `0x0203` | ` 515`   | `Status_BadSerialRead`                        | Error. Reading the serial port
- `0x0204` | ` 516`   | `Status_BadSerialReadTimeout`                 | Error. Reading the serial port (timeout)
- `0x0205` | ` 517`   | `Status_BadSerialWriteTimeout`                | Error. Writing the serial port (timeout)
- `0x0301` | ` 769`   | `Status_BadAscMissColon`                      | Error (ASC). Missing packet start character ':'
- `0x0302` | ` 770`   | `Status_BadAscMissCrLf`                       | Error (ASC). '\\r\\n' end of packet character missing
- `0x0303` | ` 771`   | `Status_BadAscChar`                           | Error (ASC). Invalid ASCII character
- `0x0304` | ` 772`   | `Status_BadLrc`                               | Error (ASC). Invalid checksum
- `0x0401` | `1025`   | `Status_BadCrc`                               | Error (RTU). Wrong checksum
- `0x0501` | `1281`   | `Status_BadTcpCreate`                         | Error. Unable to create a TCP socket
- `0x0502` | `1282`   | `Status_BadTcpConnect`                        | Error. Unable to create a TCP connection
- `0x0503` | `1283`   | `Status_BadTcpWrite`                          | Error. Unable to send a TCP packet
- `0x0504` | `1284`   | `Status_BadTcpRead`                           | Error. Unable to receive a TCP packet
- `0x0505` | `1285`   | `Status_BadTcpBind`                           | Error. Unable to bind a TCP socket (server side)
- `0x0506` | `1286`   | `Status_BadTcpListen`                         | Error. Unable to listen a TCP socket (server side)
- `0x0507` | `1287`   | `Status_BadTcpAccept`                         | Error. Unable accept bind a TCP socket (server side)
- `0x0508` | `1288`   | `Status_BadTcpDisconnect`                     | Error. Bad disconnection result
-
+| Hex code | Dec code | Name                                          | Description
+|----------|----------|-----------------------------------------------|------------------------------------------------
+| `0x0001` | `1`   | `Status_BadIllegalFunction`                   | Standard error. The feature is not supported
+| `0x0002` | `2`   | `Status_BadIllegalDataAddress`                | Standard error. Invalid data address
+| `0x0003` | `3`   | `Status_BadIllegalDataValue`                  | Standard error. Invalid data value
+| `0x0004` | `4`   | `Status_BadServerDeviceFailure`               | Standard error. Failure during a specified operation
+| `0x0005` | `5`   | `Status_BadAcknowledge`                       | Standard error. The server has accepted the request and is processing it, but it will take a long time
+| `0x0006` | `6`   | `Status_BadServerDeviceBusy`                  | Standard error. The server is busy processing a long command. The request must be repeated later
+| `0x0007` | `7`   | `Status_BadNegativeAcknowledge`               | Standard error. The programming function cannot be performed
+| `0x0008` | `8`   | `Status_BadMemoryParityError`                 | Standard error. The server attempted to read a record file but detected a parity error in memory
+| `0x000A` | `10`   | `Status_BadGatewayPathUnavailable`            | Standard error. Indicates that the gateway was unable to allocate an internal communication path from the input port o the output port for processing the request. Usually means that the gateway is misconfigured or overloaded
+| `0x000B` | `11`   | `Status_BadGatewayTargetDeviceFailedToRespond`| Standard error. Indicates that no response was obtained from the target device. Usually means that the device is not present on the network
+| `0x0101` | `257`   | `Status_BadEmptyResponse`                     | Error. Empty request/response body
+| `0x0102` | `258`   | `Status_BadNotCorrectRequest`                 | Error. Invalid request
+| `0x0103` | `259`   | `Status_BadNotCorrectResponse`                | Error. Invalid response
+| `0x0104` | `260`   | `Status_BadWriteBufferOverflow`               | Error. Write buffer overflow
+| `0x0105` | `261`   | `Status_BadReadBufferOverflow`                | Error. Request receive buffer overflow
+| `0x0106` | `262`   | `Status_BadPortClosed`                        | Error. Port is closed when trying to read/write data
+| `0x0201` | `513`   | `Status_BadSerialOpen`                        | Error. Serial port cannot be opened
+| `0x0202` | `514`   | `Status_BadSerialWrite`                       | Error. Cannot send a parcel to the serial port
+| `0x0203` | `515`   | `Status_BadSerialRead`                        | Error. Reading the serial port
+| `0x0204` | `516`   | `Status_BadSerialReadTimeout`                 | Error. Reading the serial port (timeout)
+| `0x0205` | `517`   | `Status_BadSerialWriteTimeout`                | Error. Writing the serial port (timeout)
+| `0x0301` | `769`   | `Status_BadAscMissColon`                      | Error (ASC). Missing packet start character ':'
+| `0x0302` | `770`   | `Status_BadAscMissCrLf`                       | Error (ASC). '\\r\\n' end of packet character missing
+| `0x0303` | `771`   | `Status_BadAscChar`                           | Error (ASC). Invalid ASCII character
+| `0x0304` | `772`   | `Status_BadLrc`                               | Error (ASC). Invalid checksum
+| `0x0401` | `1025`   | `Status_BadCrc`                               | Error (RTU). Wrong checksum
+| `0x0501` | `1281`   | `Status_BadTcpCreate`                         | Error. Unable to create a TCP socket
+| `0x0502` | `1282`   | `Status_BadTcpConnect`                        | Error. Unable to create a TCP connection
+| `0x0503` | `1283`   | `Status_BadTcpWrite`                          | Error. Unable to send a TCP packet
+| `0x0504` | `1284`   | `Status_BadTcpRead`                           | Error. Unable to receive a TCP packet
+| `0x0505` | `1285`   | `Status_BadTcpBind`                           | Error. Unable to bind a TCP socket (server side)
+| `0x0506` | `1286`   | `Status_BadTcpListen`                         | Error. Unable to listen a TCP socket (server side)
+| `0x0507` | `1287`   | `Status_BadTcpAccept`                         | Error. Unable accept bind a TCP socket (server side)
+| `0x0508` | `1288`   | `Status_BadTcpDisconnect`                     | Error. Bad disconnection result
 
 ### Command line options
 
 To show list of available parameters print:
+
 ```console
 $ pmbridge --help
 Usage: pmbridge [options]
@@ -280,14 +310,18 @@ Options:
   --log-flags (-lc)    - list of log flags (categories); `,`, `;` or `|` separated
   --log-format (-lfmt) - format of each message to output
   --log-time (-lt)     - format of time of each message to output
+  --print-config       - print current configuration before program execution
+  --print-config-only  - print configuration and exit immediately
 ```
 
 Format can contain following special symbols:
+
 * `%time` - timestamp of the message, for which the format is also specified (`--log-time`)
 * `%cat`  - text representation of the message category
 * `%text` - text of the message
   
-Time format of the message (`%time`) has the following special symbols:          
+Time format of the message (`%time`) has the following special symbols:
+
 * `%Y` - year (4 characters)
 * `%M` - month (2 characters `01`-`12`)
 * `%D` - day (2 characters `01`-`31`)
@@ -297,8 +331,9 @@ Time format of the message (`%time`) has the following special symbols:
 * `%f` - millisecond (3 characters `000`-`999`)
 
 Category of the message. Can be:
+
 * `ERR`   - error messages
-* `WARN`  - warning messages 
+* `WARN`  - warning messages
 * `INFO`  - information messages
 * `DUMP`  - dump command messages
 * `CONN`  - connect/disconnect messages
@@ -308,36 +343,40 @@ Category of the message. Can be:
 
 ## Build using CMake
 
-1.  Build Tools
+1. Build Tools
 
     Previously you need to install c++ compiler kit, git and cmake itself.
     Then set PATH env variable to find compliler, cmake, git etc.
 
-2.  Create project directory, move to it and clone repository:
+2. Create project directory, move to it and clone repository:
+
     ```console
-    $ cd ~
-    $ mkdir src
-    $ cd src
-    $ git clone --recursive https://github.com/serhmarch/pmbridge.git
+    cd ~
+    mkdir src
+    cd src
+    git clone --recursive https://github.com/serhmarch/pmbridge.git
     ```
 
-3.  Create and/or move to directory for build output, e.g. `~/bin/pmbridge`:
+3. Create and/or move to directory for build output, e.g. `~/bin/pmbridge`:
+
     ```console
-    $ cd ~
-    $ mkdir -p bin/pmbridge
-    $ cd bin/pmbridge
+    cd ~
+    mkdir -p bin/pmbridge
+    cd bin/pmbridge
     ```
 
-4.  Run cmake to generate project (make) files.
+4. Run cmake to generate project (make) files.
+  
     ```console
-    $ cmake -S ~/src/pmbridge -B .
+    cmake -S ~/src/pmbridge -B .
     ```
 
-5.  Make binaries (+ debug|release config):
+5. Make binaries (+ debug|release config):
+
     ```console
-    $ cmake --build .
-    $ cmake --build . --config Debug
-    $ cmake --build . --config Release
-    ```    
-    
-6.  Resulting bin files is located in `./bin` directory.
+    cmake --build .
+    cmake --build . --config Debug
+    cmake --build . --config Release
+    ```
+
+6. Resulting bin files is located in `./bin` directory.

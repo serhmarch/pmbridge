@@ -145,7 +145,7 @@ Modbus::StatusCode pmbCommandQueryWriteMultipleRegisters::beginQuery()
 
 Modbus::StatusCode pmbCommandQueryWriteMultipleRegisters::runQuery()
 {
-    return m_client->writeMultipleCoils(m_unit, offset(), m_count, m_buffer.data());;
+    return m_client->writeMultipleRegisters(m_unit, offset(), m_count, reinterpret_cast<uint16_t*>(m_buffer.data()));;
 }
 
 

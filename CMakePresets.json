@@ -64,7 +64,9 @@
             "inherits": "Linux-Base",
             "binaryDir": "$env{HOME}/tmp/cmake/pmbridge/Linux/Debug",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "PMB_TESTS_ENABLED": "ON"
+
             }
         },
         {

@@ -54,7 +54,7 @@ void pmbBuilder::printConfig(const pmbProject *project)
     const pmb::List<pmbServer*> &servers = project->servers();
     for (const pmbServer* srv : servers)
     {
-        pmb::String unitmapStr = pmb::unitMapToString(srv->port()->unitMap());
+        pmb::String unitmapStr = Modbus::unitMapToString(srv->port()->unitMap());
         switch(srv->port()->type())
         {
         case Modbus::RTU:
@@ -602,7 +602,7 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
         {
             // parse allowed units
             std::string unitsStr = *it;
-            isUnitMapSet = pmb::fillUnitMap(unitsStr.c_str(), unitmap);
+            isUnitMapSet = Modbus::fillUnitMap(unitsStr.c_str(), unitmap);
             ++it;
             if (it != end)
             {
@@ -656,7 +656,7 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
                         {
                             // parse allowed units
                             std::string unitsStr = *it;
-                            isUnitMapSet = pmb::fillUnitMap(unitsStr.c_str(), unitmap);
+                            isUnitMapSet = Modbus::fillUnitMap(unitsStr.c_str(), unitmap);
                             ++it;
                             if (it != end)
                             {

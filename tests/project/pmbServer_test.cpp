@@ -14,15 +14,15 @@
 TEST(pmbServerTest, Create_TCP_Server_Defaults)
 {
     pmbMemory mem;
-    pmbServer srv(&mem);
-    srv.setName("srv_tcp");
 
     Modbus::TcpSettings ts{};
     ts.ipaddr = ModbusTcpServer::Defaults::instance().ipaddr;
     ts.port = ModbusTcpServer::Defaults::instance().port;
     ts.timeout = ModbusTcpServer::Defaults::instance().timeout;
     ts.maxconn = ModbusTcpServer::Defaults::instance().maxconn;
-    srv.setSettings(Modbus::TCP, &ts);
+    auto *serverPort = Modbus::createServerPort(&mem, Modbus::TCP, &ts, false);
+    pmbServer srv(serverPort, &mem);
+    srv.setName("srv_tcp");
 
     ASSERT_NE(srv.port(), nullptr);
     EXPECT_EQ(srv.port()->type(), Modbus::TCP);
@@ -36,15 +36,15 @@ TEST(pmbServerTest, Create_TCP_Server_Defaults)
 TEST(pmbServerTest, Apply_TCP_Server_Settings)
 {
     pmbMemory mem;
-    pmbServer srv(&mem);
-    srv.setName("srv_tcp");
 
     Modbus::TcpSettings ts{};
     ts.ipaddr = "0.0.0.0";
     ts.port = 1502;
     ts.timeout = 3000;
     ts.maxconn = 20;
-    srv.setSettings(Modbus::TCP, &ts);
+    auto *serverPort = Modbus::createServerPort(&mem, Modbus::TCP, &ts, false);
+    pmbServer srv(serverPort, &mem);
+    srv.setName("srv_tcp");
 
     auto *tcp = static_cast<ModbusTcpServer*>(srv.port());
     ASSERT_NE(tcp, nullptr);
@@ -56,8 +56,7 @@ TEST(pmbServerTest, Apply_TCP_Server_Settings)
 TEST(pmbServerTest, Create_RTU_Server_Defaults)
 {
     pmbMemory mem;
-    pmbServer srv(&mem);
-    srv.setName("srv_rtu");
+
     Modbus::SerialSettings ss{};
     ss.portName = "COM1";
     ss.baudRate = ModbusSerialPort::Defaults::instance().baudRate;
@@ -67,7 +66,9 @@ TEST(pmbServerTest, Create_RTU_Server_Defaults)
     ss.flowControl = ModbusSerialPort::Defaults::instance().flowControl;
     ss.timeoutFirstByte = ModbusSerialPort::Defaults::instance().timeoutFirstByte;
     ss.timeoutInterByte = ModbusSerialPort::Defaults::instance().timeoutInterByte;
-    srv.setSettings(Modbus::RTU, &ss);
+    auto *serverPort = Modbus::createServerPort(&mem, Modbus::RTU, &ss, false);
+    pmbServer srv(serverPort, &mem);
+    srv.setName("srv_rtu");
 
     ASSERT_EQ(srv.port()->type(), Modbus::RTU);
     auto *rtu = static_cast<ModbusRtuPort*>(static_cast<ModbusServerResource*>(srv.port())->port());
@@ -83,8 +84,7 @@ TEST(pmbServerTest, Create_RTU_Server_Defaults)
 TEST(pmbServerTest, Create_ASC_Server_Custom)
 {
     pmbMemory mem;
-    pmbServer srv(&mem);
-    srv.setName("srv_asc");
+
     Modbus::SerialSettings ss{};
     ss.portName = "COM2";
     ss.baudRate = 19200;
@@ -94,7 +94,9 @@ TEST(pmbServerTest, Create_ASC_Server_Custom)
     ss.flowControl = Modbus::HardwareControl;
     ss.timeoutFirstByte = 4000;
     ss.timeoutInterByte = 150;
-    srv.setSettings(Modbus::ASC, &ss);
+    auto *serverPort = Modbus::createServerPort(&mem, Modbus::ASC, &ss, false);
+    pmbServer srv(serverPort, &mem);
+    srv.setName("srv_asc");
 
     ASSERT_EQ(srv.port()->type(), Modbus::ASC);
     auto *asc = static_cast<ModbusAscPort*>(static_cast<ModbusServerResource*>(srv.port())->port());

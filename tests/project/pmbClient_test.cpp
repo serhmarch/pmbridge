@@ -12,14 +12,14 @@
 
 TEST(pmbClientTest, Create_TCP_Client_WithDefaults)
 {
-    pmbClient cli;
-    cli.setName("cli_tcp");
 
     Modbus::TcpSettings ts{};
     ts.host = ModbusTcpPort::Defaults::instance().host;
     ts.port = ModbusTcpPort::Defaults::instance().port;
     ts.timeout = ModbusTcpPort::Defaults::instance().timeout;
-    cli.setSettings(Modbus::TCP, &ts);
+    auto *clientPort = Modbus::createClientPort(Modbus::TCP, &ts, false);
+    pmbClient cli(clientPort);
+    cli.setName("cli_tcp");
 
     ASSERT_NE(cli.port(), nullptr);
     EXPECT_EQ(cli.port()->type(), Modbus::TCP);
@@ -32,14 +32,13 @@ TEST(pmbClientTest, Create_TCP_Client_WithDefaults)
 
 TEST(pmbClientTest, Apply_TCP_Settings)
 {
-    pmbClient cli;
-    cli.setName("cli_tcp");
-
     Modbus::TcpSettings ts{};
     ts.host = "127.0.0.1";
     ts.port = 1502;
     ts.timeout = 2500;
-    cli.setSettings(Modbus::TCP, &ts);
+    auto *clientPort = Modbus::createClientPort(Modbus::TCP, &ts, false);
+    pmbClient cli(clientPort);
+    cli.setName("cli_tcp");
 
     auto *tcp = static_cast<ModbusTcpPort*>(cli.port()->port());
     ASSERT_NE(tcp, nullptr);
@@ -51,8 +50,6 @@ TEST(pmbClientTest, Apply_TCP_Settings)
 TEST(pmbClientTest, Create_RTU_Client_WithDefaults)
 {
     const auto &d = ModbusSerialPort::Defaults::instance();
-    pmbClient cli;
-    cli.setName("cli_rtu");
     Modbus::SerialSettings ss{};
     ss.portName = "COM1";
     ss.baudRate = d.baudRate;
@@ -62,7 +59,9 @@ TEST(pmbClientTest, Create_RTU_Client_WithDefaults)
     ss.flowControl = d.flowControl;
     ss.timeoutFirstByte = d.timeoutFirstByte;
     ss.timeoutInterByte = d.timeoutInterByte;
-    cli.setSettings(Modbus::RTU, &ss);
+    auto *clientPort = Modbus::createClientPort(Modbus::RTU, &ss, false);
+    pmbClient cli(clientPort);
+    cli.setName("cli_rtu");
 
     auto *rtu = static_cast<ModbusRtuPort*>(cli.port()->port());
     ASSERT_NE(rtu, nullptr);
@@ -77,8 +76,6 @@ TEST(pmbClientTest, Create_RTU_Client_WithDefaults)
 
 TEST(pmbClientTest, Create_ASC_Client_WithCustom)
 {
-    pmbClient cli;
-    cli.setName("cli_asc");
     Modbus::SerialSettings ss{};
     ss.portName = "COM2";
     ss.baudRate = 19200;
@@ -88,7 +85,9 @@ TEST(pmbClientTest, Create_ASC_Client_WithCustom)
     ss.flowControl = Modbus::HardwareControl;
     ss.timeoutFirstByte = 3000;
     ss.timeoutInterByte = 100;
-    cli.setSettings(Modbus::ASC, &ss);
+    auto *clientPort = Modbus::createClientPort(Modbus::ASC, &ss, false);
+    pmbClient cli(clientPort);
+    cli.setName("cli_asc");
 
     auto *asc = static_cast<ModbusAscPort*>(cli.port()->port());
     ASSERT_NE(asc, nullptr);

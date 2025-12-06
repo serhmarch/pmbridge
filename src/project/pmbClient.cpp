@@ -11,9 +11,9 @@
 */
 #include "pmbClient.h"
 
-pmbClient::pmbClient()
+pmbClient::pmbClient(ModbusClientPort *port) :
+    m_port(port)
 {
-    m_port = nullptr;
 }
 
 pmbClient::~pmbClient()
@@ -21,10 +21,8 @@ pmbClient::~pmbClient()
     delete m_port;
 }
 
-void pmbClient::setSettings(Modbus::ProtocolType type, const void *settings)
+void pmbClient::setName(const pmb::String &name)
 {
-    if (m_port)
-        delete m_port;
-    m_port = Modbus::createClientPort(type, settings, false);
+    m_name = name;
     m_port->setObjectName(m_name.data());
 }

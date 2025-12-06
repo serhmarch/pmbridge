@@ -13,9 +13,9 @@
 
 #include <pmbMemory.h>
 
-pmbServer::pmbServer(pmbMemory *memory) : 
-    m_memory(memory),
-    m_port(nullptr)
+pmbServer::pmbServer(ModbusServerPort *port, pmbMemory *memory) : 
+    m_port(port),
+    m_memory(memory)
 {
 }
 
@@ -24,11 +24,9 @@ pmbServer::~pmbServer()
     delete m_port;
 }
 
-void pmbServer::setSettings(Modbus::ProtocolType type, const void *settings)
+void pmbServer::setName(const pmb::String &name)
 {
-    if (m_port)
-        delete m_port;
-    m_port = Modbus::createServerPort(m_memory, type, settings, false);
+    m_name = name;
     m_port->setObjectName(m_name.data());
 }
 

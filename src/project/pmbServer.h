@@ -20,14 +20,13 @@ class pmbMemory;
 class pmbServer
 {
 public:
-    pmbServer(pmbMemory *memory);
+    pmbServer(ModbusServerPort *port, pmbMemory *memory);
     ~pmbServer();
 
 public:
     inline ModbusServerPort *port() const { return m_port; }
     inline const pmb::String &name() const { return m_name; }
-    inline void setName(const pmb::String &name) { m_name = name; } 
-    void setSettings(Modbus::ProtocolType type, const void *settings);
+    void setName(const pmb::String &name);
     
 public:
     void run();

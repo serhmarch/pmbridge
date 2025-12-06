@@ -15,24 +15,24 @@ TEST(pmbProjectTest, AddAndLookupServerClient)
 
     // Add server
     auto *mem = new pmbMemory();
-    auto *srv = new pmbServer(mem);
-    srv->setName("srv_tcp");
     Modbus::TcpSettings ss{};
     ss.ipaddr = "0.0.0.0";
     ss.port = 1502;
     ss.timeout = 3000;
     ss.maxconn = 10;
-    srv->setSettings(Modbus::TCP, &ss);
+    auto *serverPort = Modbus::createServerPort(mem, Modbus::TCP, &ss, false);
+    auto *srv = new pmbServer(serverPort, mem);
+    srv->setName("srv_tcp");
     prj.addServer(srv);
 
     // Add client
-    auto *cli = new pmbClient();
-    cli->setName("cli_tcp");
     Modbus::TcpSettings cs{};
     cs.host = "127.0.0.1";
     cs.port = 1502;
     cs.timeout = 2500;
-    cli->setSettings(Modbus::TCP, &cs);
+    auto *clientPort = Modbus::createClientPort(Modbus::TCP, &cs, false);
+    auto *cli = new pmbClient(clientPort);
+    cli->setName("cli_tcp");
     prj.addClient(cli);
 
     // Lookup

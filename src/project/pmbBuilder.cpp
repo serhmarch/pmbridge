@@ -575,9 +575,6 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
         m_lastError = pmbSTR("Server with this name already exists: ") + name;
         return nullptr;
     }
-    pmbServer *server = new pmbServer(pmbMemory::global());
-    server->setName(name);
-    m_project->addServer(server);
     ModbusServerPort *srv;
     uint8_t unitmap[MB_UNITMAP_SIZE] = {0};
     bool isUnitMapSet = false;
@@ -596,8 +593,7 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
         Modbus::SerialSettings settings;
         if (!parseSerialSettings(it, end, portName, settings))
             return nullptr;
-        server->setSettings(type, &settings);
-        srv = server->port();
+        srv = Modbus::createServerPort(pmbMemory::global(), type, &settings, false);
         if (it != end)
         {
             // parse allowed units
@@ -671,8 +667,7 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
             }
         }
         settings.ipaddr = ipaddr.data();
-        server->setSettings(type, &settings);
-        ModbusTcpServer *tcpsrv = static_cast<ModbusTcpServer*>(server->port());
+        ModbusTcpServer *tcpsrv = static_cast<ModbusTcpServer*>(Modbus::createServerPort(pmbMemory::global(), Modbus::TCP, &settings, false));
         tcpsrv->connect(&ModbusServerPort::signalTx, printTx);
         tcpsrv->connect(&ModbusServerPort::signalRx, printRx);
         tcpsrv->connect(&ModbusTcpServer::signalNewConnection, printNewConnection);
@@ -687,6 +682,9 @@ pmbCommand *pmbBuilder::parseServer(const std::list<std::string> &args)
     srv->setBroadcastEnabled(broadcast);
     srv->connect(&ModbusServerPort::signalOpened, printOpened);
     srv->connect(&ModbusServerPort::signalClosed, printClosed);
+    pmbServer *server = new pmbServer(srv, pmbMemory::global());
+    server->setName(name);
+    m_project->addServer(server);
     return nullptr;
 }
 
@@ -719,9 +717,6 @@ pmbCommand *pmbBuilder::parseClient(const std::list<std::string> &args)
         m_lastError = pmbSTR("Client with this name already exists: ") + name;
         return nullptr;
     }
-    pmbClient *client = new pmbClient();
-    client->setName(name);
-    m_project->addClient(client);
     ModbusClientPort *cli;
     switch (type)
     {
@@ -732,8 +727,7 @@ pmbCommand *pmbBuilder::parseClient(const std::list<std::string> &args)
         Modbus::SerialSettings settings;
         if (!parseSerialSettings(it, end, portName, settings))
             return nullptr;
-        client->setSettings(type, &settings);
-        cli = client->port();
+        cli = Modbus::createClientPort(type, &settings, false);
         if (type == Modbus::RTU)
         {
             cli->connect(&ModbusClientPort::signalTx, printTx);
@@ -762,8 +756,7 @@ pmbCommand *pmbBuilder::parseClient(const std::list<std::string> &args)
             if (it != end)
                 settings.timeout = static_cast<uint16_t>(std::atoi((*it).data()));
         }
-        client->setSettings(Modbus::TCP, &settings);
-        cli = client->port();
+        cli = Modbus::createClientPort(Modbus::TCP, &settings, false);
         cli->connect(&ModbusClientPort::signalTx, printTx);
         cli->connect(&ModbusClientPort::signalRx, printRx);
     }
@@ -772,6 +765,9 @@ pmbCommand *pmbBuilder::parseClient(const std::list<std::string> &args)
     cli->connect(&ModbusClientPort::signalOpened, printOpened);
     cli->connect(&ModbusClientPort::signalClosed, printClosed);
     cli->connect(&ModbusClientPort::signalError , printError );
+    pmbClient *client = new pmbClient(cli);
+    client->setName(name);
+    m_project->addClient(client);
     return nullptr;
 }
 

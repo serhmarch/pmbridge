@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.13) # 2.2 - case insensitive syntax
 project(pmbridge VERSION ${PROJECT_VERSION} LANGUAGES CXX)
 
 set(PMB_APP_NAME ${PROJECT_NAME})
+set(PMB_CONF_FILE "${CMAKE_CURRENT_LIST_DIR}/../examples/${PMB_APP_NAME}.conf")
 
 message(STATUS "PMBRIDGE: Start configure '${PMB_APP_NAME}'")
 
@@ -76,3 +77,16 @@ target_link_libraries(${PMB_APP_NAME} PRIVATE
                       modbus
 )
 
+if (WIN32)
+	message(STATUS "PMBRIDGE: Generate install-data for Windows")
+
+	install(TARGETS ${PMB_APP_NAME}  DESTINATION ".")
+	install(FILES   ${PMB_CONF_FILE} DESTINATION ".")
+else()
+	# Example of starting install process:
+	# `$ sudo cmake --install ~/tmp/cmake/pmbridge/Linux/Debug --prefix /`
+	message(STATUS "PMBRIDGE: Generate install-data for Linux")
+
+	install(TARGETS ${PMB_APP_NAME}  DESTINATION "./usr/bin")
+	install(FILES   ${PMB_CONF_FILE} DESTINATION "./etc")
+endif()

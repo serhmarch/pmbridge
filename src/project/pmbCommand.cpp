@@ -12,6 +12,7 @@
 #include "pmbCommand.h"
 
 #include <iostream>
+#include <inttypes.h>
 
 #include <pmb_log.h>
 #include "pmbClient.h"
@@ -494,28 +495,28 @@ void pmbCommandDump::printformat(pmb::Format fmt, const void *mem, uint16_t coun
     case pmb::Format_Oct16:
         for (uint16_t i = 0; i < count; ++i)
         {
-            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%06o ", *reinterpret_cast<const uint16_t *>(bytePtr));
+            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%06" PRIo16 " ", *reinterpret_cast<const uint16_t *>(bytePtr));
             bytePtr += sizeof(uint16_t);
         }
         break;
     case pmb::Format_Dec16:
         for (uint16_t i = 0; i < count; ++i)
         {
-            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%d ", *reinterpret_cast<const int16_t *>(bytePtr));
+            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%" PRIi16 " ", *reinterpret_cast<const int16_t *>(bytePtr));
             bytePtr += sizeof(uint16_t);
         }
         break;
     case pmb::Format_UDec16:
         for (uint16_t i = 0; i < count; ++i)
         {
-            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%u ", *reinterpret_cast<const uint16_t *>(bytePtr));
+            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%" PRIu16 " ", *reinterpret_cast<const uint16_t *>(bytePtr));
             bytePtr += sizeof(uint16_t);
         }
         break;
     case pmb::Format_Hex16:
         for (uint16_t i = 0; i < count; ++i)
         {
-            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%04X ", *reinterpret_cast<const uint16_t *>(bytePtr));
+            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%04" PRIX16 " ", *reinterpret_cast<const uint16_t *>(bytePtr));
             bytePtr += sizeof(uint16_t);
         }
         break;
@@ -529,28 +530,28 @@ void pmbCommandDump::printformat(pmb::Format fmt, const void *mem, uint16_t coun
     case pmb::Format_Oct32:
         for (uint16_t i = 0; i < count; ++i)
         {
-            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%011o ", *reinterpret_cast<const uint32_t *>(bytePtr));
+            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%011" PRIo32 " ", *reinterpret_cast<const uint32_t *>(bytePtr));
             bytePtr += sizeof(uint32_t);
         }
         break;
     case pmb::Format_Dec32:
         for (uint16_t i = 0; i < count; ++i)
         {
-            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%d ", *reinterpret_cast<const int32_t *>(bytePtr));
+            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%" PRIi32 " ", *reinterpret_cast<const int32_t *>(bytePtr));
             bytePtr += sizeof(uint32_t);
         }
         break;
     case pmb::Format_UDec32:
         for (uint16_t i = 0; i < count; ++i)
         {
-            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%u ", *reinterpret_cast<const uint32_t *>(bytePtr));
+            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%" PRIu32 " ", *reinterpret_cast<const uint32_t *>(bytePtr));
             bytePtr += sizeof(uint32_t);
         }
         break;
     case pmb::Format_Hex32:
         for (uint16_t i = 0; i < count; ++i)
         {
-            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%08X ", *reinterpret_cast<const uint32_t *>(bytePtr));
+            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%08" PRIX32 " ", *reinterpret_cast<const uint32_t *>(bytePtr));
             bytePtr += sizeof(uint32_t);
         }
         break;
@@ -564,28 +565,28 @@ void pmbCommandDump::printformat(pmb::Format fmt, const void *mem, uint16_t coun
     case pmb::Format_Oct64:
         for (uint16_t i = 0; i < count; ++i)
         {
-            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%022llo ", *reinterpret_cast<const uint64_t *>(bytePtr));
+            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%022" PRIo64 " ", *reinterpret_cast<const uint64_t *>(bytePtr));
             bytePtr += sizeof(uint64_t);
         }
         break;
     case pmb::Format_Dec64:
         for (uint16_t i = 0; i < count; ++i)
         {
-            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%lld ", *reinterpret_cast<const int64_t *>(bytePtr));
+            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%" PRIi64 " ", *reinterpret_cast<const int64_t *>(bytePtr));
             bytePtr += sizeof(uint64_t);
         }
         break;
     case pmb::Format_UDec64:
         for (uint16_t i = 0; i < count; ++i)
         {
-            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%llu ", *reinterpret_cast<const uint64_t *>(bytePtr));
+            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%" PRIu64 " ", *reinterpret_cast<const uint64_t *>(bytePtr));
             bytePtr += sizeof(uint64_t);
         }
         break;
     case pmb::Format_Hex64:
         for (uint16_t i = 0; i < count; ++i)
         {
-            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%016llX ", *reinterpret_cast<const uint64_t *>(bytePtr));
+            pi += snprintf(&m_printbuff[pi], m_printbuff.size()-pi, "%016" PRIX64 " ", *reinterpret_cast<const uint64_t *>(bytePtr));
             bytePtr += sizeof(uint64_t);
         }
         break;
